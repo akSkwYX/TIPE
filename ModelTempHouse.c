@@ -125,41 +125,21 @@ void updateIntAirs(cell **map, list* intAirs){
 		cell actCell = map[intAirs->t[k].i][intAirs->t[k].j];
 		float total_cond = 0;
         float total_conv = 0;
-		float total_chaleur = 0;
 		for (int l = 0; l < 4; l++){
 			cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
 			total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
         	total_conv += c.T - actCell.T;
-			if (strcmp(c.type, "radiateur")==0){
-				total_chaleur += (2000*1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
-			}
         }
-		map[intAirs->t[k].i][intAirs->t[k].j].T += total_cond + (total_conv/(4*600)) + total_chaleur;
+		map[intAirs->t[k].i][intAirs->t[k].j].T += total_cond + (total_conv/(4*600));
 	}
 }
 
 // Mise à jour de l'air extérieur
 
-void updateExtAirs(cell **map, list *extAirs, int height, int width){
-	int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
+void updateExtAirs(cell **map, list *extAirs, int height, int width, float Text){
 	for (int k = 0; k < extAirs->taille; k++)
 	{
-		cell actCell = map[extAirs->t[k].i][extAirs->t[k].j];
-		float total_conv = 0;
-		int nbrCell = 0;
-		for (int l = 0; l < 4; l++){
-			if (actCell.co.i + toAdd[l][0] > 0 && actCell.co.i + toAdd[l][0] < height && actCell.co.j + toAdd[l][1] > 0 && actCell.co.j + toAdd[l][1] < width){
-		
-				cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
-				if (strcmp(c.type, "airExt") == 0){
-					nbrCell++;
-					total_conv += c.T - actCell.T;
-				}
-			
-			}
-		}
-		printf("%f\n", total_conv);
-		map[extAirs->t[k].i][extAirs->t[k].j].T += (total_conv/(nbrCell*0.1));
+		map[extAirs->t[k].i][extAirs->t[k].j].T = Text;
 	}
 }
 
@@ -167,20 +147,23 @@ void updateExtAirs(cell **map, list *extAirs, int height, int width){
 
 void updateStructures(cell **map, list *structures)
 {
+	int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
     for (int k = 0; k < structures->taille; k++)
     {
-        for (int x = -1; x < 2; x++)
+		cell actCell = map[structures->t[k].i][structures->t[k].j];
+		float total_cond = 0;
+		float total_conv = 0;
+		float total_chaleur = 0;
+		for (int l=0; l < 4; l++)
         {
-            for (int y = -1; y < 2; y++)
-            {
-            if (strcmp(map[structures->t[k].i + x][structures->t[k].j + y].type, "airExt") == 0)
-                {
-                    map[structures->t[k].i][structures->t[k].j].T = map[structures->t[k].i + x][structures->t[k].j + y].T;
-                    goto end;
-                }
-			}
+				cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
+				if (strcmp(actCell.type, "radiateur") == 0){
+					total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
+					total_conv += c.T - actCell.T;
+					total_chaleur += (2000*1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
+				}
 		}
-    end:;
+		map[structures->t[k].i][structures->t[k].j].T += total_cond + (total_conv/(4*600)) + total_chaleur;
     }
 }
 
@@ -227,12 +210,12 @@ void printMap(cell **map, int height, int width)
 
 /* Appelle toutes les fonctions de mise à jours */
 
-void nextStep(cell **map, list** lists, int height, int width)
+void nextStep(cell **map, list** lists, int height, int width, float Text)
 {
 	updateWalls(map, lists[0]);
 	updateStructures(map, lists[3]);
 	updateIntAirs(map, lists[1]);
-	updateExtAirs(map, lists[2], height, width);
+	updateExtAirs(map, lists[2], height, width, Text);
 }
 
 
@@ -351,8 +334,8 @@ int main()
 	structure radiateur = {
 		.T = 25.0,
 		.type = "radiateur",
-		.begining = {.i = 5, .j = 14},
-		.ending = {.i = 6, .j = 14},
+		.begining = {.i = 8, .j = 14},
+		.ending = {.i = 8, .j = 14},
 		.CTherVol = 3200000,
 		.lambda = 55,
 		.surface = 1,
@@ -381,7 +364,7 @@ int main()
     for (int t = 0; t <= lapsTime; t++)
     {
         fprintf(file, "%f,", map[house[0]+2][house[1]+1].T);
-        nextStep(map, lists, height, width);
+        nextStep(map, lists, height, width, temps[2]);
         if (t % 3600 == 0)
         {
             printf("%dh :\n", t / 3600);
