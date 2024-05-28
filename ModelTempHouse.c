@@ -130,7 +130,7 @@ void updateIntAirs(cell **map, list* intAirs){
 			total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
         	total_conv += c.T - actCell.T;
         }
-		map[intAirs->t[k].i][intAirs->t[k].j].T += total_cond + (total_conv/(4*600));
+		map[intAirs->t[k].i][intAirs->t[k].j].T += total_cond + (total_conv/(4*150));
 	}
 }
 
@@ -151,20 +151,14 @@ void updateStructures(cell **map, list *structures)
     for (int k = 0; k < structures->taille; k++)
     {
 		cell actCell = map[structures->t[k].i][structures->t[k].j];
-		float total_cond = 0;
-		float total_conv = 0;
-		float total_chaleur = 0;
 		for (int l=0; l < 4; l++)
         {
 				cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
-				if (strcmp(actCell.type, "radiateur") == 0){
-					total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
-					total_conv += c.T - actCell.T;
-					total_chaleur += (2000*1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
+				if ((strcmp(actCell.type, "radiateur") == 0) && (strcmp(c.type, "airInt") == 0)){
+					map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]].T += (2000*1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
 				}
 		}
-		map[structures->t[k].i][structures->t[k].j].T += total_cond + (total_conv/(4*600)) + total_chaleur;
-    }
+	}
 }
 
 
@@ -212,9 +206,9 @@ void printMap(cell **map, int height, int width)
 
 void nextStep(cell **map, list** lists, int height, int width, float Text)
 {
-	updateWalls(map, lists[0]);
 	updateStructures(map, lists[3]);
 	updateIntAirs(map, lists[1]);
+	updateWalls(map, lists[0]);
 	updateExtAirs(map, lists[2], height, width, Text);
 }
 
@@ -297,7 +291,6 @@ int main()
    	int height = 18;
    	int width = 18;
 	int house[4] = {/* Corner top i */ 2, /* Corner top j */ 2, /* Corner bot i */ 15, /* Corner bot j */ 15};
-    int nbrStructure = 4;
 	structure window1 = {
 		.T = 15.0,
 		.type = "window",
@@ -342,7 +335,52 @@ int main()
 		.epaisseur = 0.2,
 		.conductivite = 1,
 	};
-	structure init_structure[4] = {window1, window2, door, radiateur};
+	structure wall1 = {
+		.T = 15.0,
+		.type = "wall",
+		.begining = {.i = 10, .j = 6},
+		.ending = {.i = 14, .j = 6},
+		.CTherVol = 2400000,
+		.lambda = 1.4,
+		.surface = 1,
+		.epaisseur = 0.15,
+		.conductivite = 4.4,
+	};
+	structure wall2 = {
+		.T = 15.0,
+		.type = "wall",
+		.begining = {.i = 10, .j = 3},
+		.ending = {.i = 10, .j = 4},
+		.CTherVol = 2400000,
+		.lambda = 1.4,
+		.surface = 1,
+		.epaisseur = 0.15,
+		.conductivite = 4.4,
+	};
+	structure door_bedroom = {
+		.T = 15.0,
+		.type = "door",
+		.begining = {.i = 10, .j = 5},
+		.ending = {.i = 10, .j = 5},
+		.CTherVol = 350000,
+		.lambda = 0.12,
+		.surface = 1,
+		.epaisseur = 0.1,
+		.conductivite = 1.0,
+	};
+	structure radiateur_bedroom = {
+		.T = 25.0,
+		.type = "radiateur",
+		.begining = {.i = 13, .j = 3},
+		.ending = {.i = 13, .j = 3},
+		.CTherVol = 3200000,
+		.lambda = 55,
+		.surface = 1,
+		.epaisseur = 0.2,
+		.conductivite = 1,
+	};
+    int nbrStructure = 8;
+	structure init_structure[8] = {window1, window2, door, radiateur, wall1, wall2, door_bedroom, radiateur_bedroom};
 	int w_top_i = 5;
     int w_bot_i = 7;
     int w_top_j = 2;
