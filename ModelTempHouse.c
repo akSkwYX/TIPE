@@ -108,7 +108,11 @@ void updateWalls(cell **map, list *walls)
 			{
 				flux_tot += c.conductivite * actCell.surface * (actCell.T - c.T);
 				map[walls->t[k].i + toAdd[l][0]][walls->t[k].j + toAdd[l][1]].T += (1/(actCell.conductivite * actCell.surface))*(c.conductivite * actCell.surface * (actCell.T - c.T));
-				
+			}
+			else if (strcmp(c.type, "radiateur") == 0)
+			{
+				//flux_tot += c.conductivite * (actCell.surface) * (actCell.T - c.T);
+				//map[walls->t[k].i + toAdd[l][0]][walls->t[k].j + toAdd[l][1]].T += (1/(actCell.conductivite * actCell.surface))*(c.conductivite * actCell.surface * (actCell.T - c.T));
 			}
         }
 		map[walls->t[k].i][walls->t[k].j].T -= (1/(actCell.conductivite * actCell.surface))*flux_tot;
@@ -154,7 +158,7 @@ void updateStructures(cell **map, list *structures)
 		for (int l=0; l < 4; l++)
         {
 				cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
-				if ((strcmp(actCell.type, "radiateur") == 0) && (strcmp(c.type, "airInt") == 0)){
+				if ((strcmp(actCell.type, "radiateur") == 0) && ((strcmp(c.type, "airInt") == 0) || (strcmp(c.type, "wall") == 0))){
 					map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]].T += (2000*1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
 				}
 		}
@@ -331,9 +335,9 @@ int main()
 		.ending = {.i = 8, .j = 14},
 		.CTherVol = 3200000,
 		.lambda = 55,
-		.surface = 1,
-		.epaisseur = 0.2,
-		.conductivite = 1,
+		.surface = 0.5,
+		.epaisseur = 0.1,
+		.conductivite = 4.4,
 	};
 	structure wall1 = {
 		.T = 15.0,
@@ -341,9 +345,9 @@ int main()
 		.begining = {.i = 10, .j = 6},
 		.ending = {.i = 14, .j = 6},
 		.CTherVol = 2400000,
-		.lambda = 1.4,
+		.lambda = 0.061,
 		.surface = 1,
-		.epaisseur = 0.15,
+		.epaisseur = 0.394,
 		.conductivite = 4.4,
 	};
 	structure wall2 = {
@@ -352,9 +356,9 @@ int main()
 		.begining = {.i = 10, .j = 3},
 		.ending = {.i = 10, .j = 4},
 		.CTherVol = 2400000,
-		.lambda = 1.4,
+		.lambda = 0.061,
 		.surface = 1,
-		.epaisseur = 0.15,
+		.epaisseur = 0.394,
 		.conductivite = 4.4,
 	};
 	structure door_bedroom = {
@@ -364,7 +368,7 @@ int main()
 		.ending = {.i = 10, .j = 5},
 		.CTherVol = 350000,
 		.lambda = 0.12,
-		.surface = 1,
+		.surface = 0.5,
 		.epaisseur = 0.1,
 		.conductivite = 1.0,
 	};
@@ -375,21 +379,17 @@ int main()
 		.ending = {.i = 13, .j = 3},
 		.CTherVol = 3200000,
 		.lambda = 55,
-		.surface = 1,
-		.epaisseur = 0.2,
-		.conductivite = 1,
+		.surface = 0.5,
+		.epaisseur = 0.1,
+		.conductivite = 4.4,
 	};
     int nbrStructure = 8;
 	structure init_structure[8] = {window1, window2, door, radiateur, wall1, wall2, door_bedroom, radiateur_bedroom};
-	int w_top_i = 5;
-    int w_bot_i = 7;
-    int w_top_j = 2;
-    int w_bot_j = 2;
 	float temps[3] = {/* wall */ 20.0, /* AirInt */ 25.0, /* AirExt */ 15.0};
 	float CTherVol[3] = {/* wall */ 2400000, /* AirInt */ 1256, /* AirExt */ 1256};
-	float lambdas[3] = {/* wall */ 1.4 , /* AirInt */ 0.025 , /* AirExt */ 0.025};
+	float lambdas[3] = {/* wall */ 0.061 , /* AirInt */ 0.025 , /* AirExt */ 0.025};
 	float surfaces[3] = {/* wall */ 1 , /* AirInt */ 1 , /* AirExt */ 1};
-	float epaisseurs[3] = {/* wall */ 0.15 , /* AirInt */ 1 , /* AirExt */ 1};
+	float epaisseurs[3] = {/* wall */ 0.394 , /* AirInt */ 1 , /* AirExt */ 1};
 	float conductivites[3] = {/* wall */ 4.4 , /* AirInt */ 1 , /* AirExt */ 1};
     int lapsTime = 86400;
     list* walls = create_list(height * width);
@@ -414,7 +414,6 @@ int main()
 			printMap(map, height, width);
 			printf("\n");
 		}
-        
     }
     return 0;
 }
