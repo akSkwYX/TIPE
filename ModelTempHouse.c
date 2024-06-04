@@ -102,17 +102,11 @@ void updateWalls(cell **map, list *walls)
             {
                 flux_tot += c.conductivite * actCell.surface * (actCell.T - c.T);
 				map[walls->t[k].i + toAdd[l][0]][walls->t[k].j + toAdd[l][1]].T += (1/(actCell.conductivite * actCell.surface))*(c.conductivite * actCell.surface * (actCell.T - c.T));
-
             }
 			else if (strcmp(c.type, "airInt") == 0)
 			{
 				flux_tot += c.conductivite * actCell.surface * (actCell.T - c.T);
 				map[walls->t[k].i + toAdd[l][0]][walls->t[k].j + toAdd[l][1]].T += (1/(actCell.conductivite * actCell.surface))*(c.conductivite * actCell.surface * (actCell.T - c.T));
-			}
-			else if (strcmp(c.type, "radiateur") == 0)
-			{
-				//flux_tot += c.conductivite * (actCell.surface) * (actCell.T - c.T);
-				//map[walls->t[k].i + toAdd[l][0]][walls->t[k].j + toAdd[l][1]].T += (1/(actCell.conductivite * actCell.surface))*(c.conductivite * actCell.surface * (actCell.T - c.T));
 			}
         }
 		map[walls->t[k].i][walls->t[k].j].T -= (1/(actCell.conductivite * actCell.surface))*flux_tot;
@@ -129,6 +123,7 @@ void updateIntAirs(cell **map, list* intAirs){
 		cell actCell = map[intAirs->t[k].i][intAirs->t[k].j];
 		float total_cond = 0;
         float total_conv = 0;
+		float total_chal = 0;
 		for (int l = 0; l < 4; l++){
 			cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
 			total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
@@ -157,10 +152,6 @@ void updateStructures(cell **map, list *structures)
 		cell actCell = map[structures->t[k].i][structures->t[k].j];
 		for (int l=0; l < 4; l++)
         {
-				cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
-				if ((strcmp(actCell.type, "radiateur") == 0) && ((strcmp(c.type, "airInt") == 0) || (strcmp(c.type, "wall") == 0))){
-					map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]].T += (2000*1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
-				}
 		}
 	}
 }
@@ -328,17 +319,6 @@ int main()
 		.epaisseur = 0.1,
 		.conductivite = 1.0,
 	};
-	structure radiateur = {
-		.T = 25.0,
-		.type = "radiateur",
-		.begining = {.i = 8, .j = 14},
-		.ending = {.i = 8, .j = 14},
-		.CTherVol = 3200000,
-		.lambda = 55,
-		.surface = 0.5,
-		.epaisseur = 0.1,
-		.conductivite = 4.4,
-	};
 	structure wall1 = {
 		.T = 15.0,
 		.type = "wall",
@@ -371,17 +351,6 @@ int main()
 		.surface = 0.5,
 		.epaisseur = 0.1,
 		.conductivite = 1.0,
-	};
-	structure radiateur_bedroom = {
-		.T = 25.0,
-		.type = "radiateur",
-		.begining = {.i = 13, .j = 3},
-		.ending = {.i = 13, .j = 3},
-		.CTherVol = 3200000,
-		.lambda = 55,
-		.surface = 0.5,
-		.epaisseur = 0.1,
-		.conductivite = 4.4,
 	};
     int nbrStructure = 8;
 	structure init_structure[8] = {window1, window2, door, radiateur, wall1, wall2, door_bedroom, radiateur_bedroom};
