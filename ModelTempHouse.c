@@ -121,15 +121,17 @@ void updateIntAirs(cell **map, list* intAirs){
 	for (int k = 0; k < intAirs->taille; k++)
 	{
 		cell actCell = map[intAirs->t[k].i][intAirs->t[k].j];
+		float act_rth = actCell.epaisseur / (actCell.lambda * actCell.surface);
 		float total_cond = 0;
         float total_conv = 0;
 		float total_chal = 0;
 		for (int l = 0; l < 4; l++){
 			cell c = map[actCell.co.i + toAdd[l][0]][actCell.co.j + toAdd[l][1]];
-			total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
+			float c_rth = c.epaisseur / (c.lambda * c.surface);
+			total_cond += (c.T / (actCell.CTherVol * actCell.epaisseur * actCell.surface * act_rth)) * 1 - (actCell.T / actCell.CTherVol * actCell.epaisseur * actCell.surface) * 1;
         	total_conv += c.T - actCell.T;
         }
-		map[intAirs->t[k].i][intAirs->t[k].j].T += total_cond + (total_conv/(4*150));
+		map[intAirs->t[k].i][intAirs->t[k].j].T += total_cond + total_conv/(4*150);
 	}
 }
 
@@ -184,10 +186,6 @@ void printMap(cell **map, int height, int width)
 			else if (strcmp(map[i][j].type, "door") == 0)
 			{
 				printf("\x1b[43m");
-			}
-			else if (strcmp(map[i][j].type, "radiateur") == 0)
-			{
-				printf("\x1b[41m");
 			}
             printf("%.1f ", map[i][j].T);
             printf("\x1b[0m");
@@ -352,8 +350,8 @@ int main()
 		.epaisseur = 0.1,
 		.conductivite = 1.0,
 	};
-    int nbrStructure = 8;
-	structure init_structure[8] = {window1, window2, door, radiateur, wall1, wall2, door_bedroom, radiateur_bedroom};
+    int nbrStructure = 6;
+	structure init_structure[6] = {window1, window2, door, wall1, wall2, door_bedroom};
 	float temps[3] = {/* wall */ 20.0, /* AirInt */ 25.0, /* AirExt */ 15.0};
 	float CTherVol[3] = {/* wall */ 2400000, /* AirInt */ 1256, /* AirExt */ 1256};
 	float lambdas[3] = {/* wall */ 0.061 , /* AirInt */ 0.025 , /* AirExt */ 0.025};
