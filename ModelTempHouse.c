@@ -99,11 +99,12 @@ void nextStep(cell *map, int height, int width)
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
 				float total_cond = 0;
 				float total_conv = 0;
+				float total_conv_wall = 0;
 				for (int l = 0; l < 4; l++){
 					cell c = map[(actCell.co.i + toAdd[l][0])*width + actCell.co.j + toAdd[l][1]];
-					if (strcmp(actCell.type, "wall") == 0){
+					if (strcmp(actCell.type, "wall") == 0 || strcmp(actCell.type, "window") == 0 || strcmp(actCell.type, "door") == 0){
 						total_cond += ((map[(actCell.co.i + 2*toAdd[l][0])*width + actCell.co.j + 2*toAdd[l][1]].T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
-						total_conv += c.T - actCell.T;
+						total_conv_wall += (0.06+(c.epaisseur / c.lambda)+0.06)*(actCell.surface)*(actCell.T - c.T);
 					}
 					else{
 						total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
@@ -115,29 +116,37 @@ void nextStep(cell *map, int height, int width)
 			else if (strcmp(actCell.type, "window") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
 				float total_cond = 0;
-				float total_conv = 0;
+				float total_conv_window = 0;
 				for (int l = 0; l < 4; l++){
 					cell c = map[(actCell.co.i + toAdd[l][0])*width + actCell.co.j + toAdd[l][1]];
 					if (strcmp(actCell.type, "window") == 0){
-						total_conv += c.T - actCell.T;
+						total_conv_window += c.T - actCell.T;
 					}
 				}
-				map[i*width + j].T += total_cond + (total_conv/2);
+				map[i*width + j].T += total_cond + (total_conv_window/2);
 			}
 			else if (strcmp(actCell.type, "wall") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
-				float total_cond = 0;
-				float total_conv = 0;
+				float total_conv_airExt = 0;
+				float total_conv_wall = 0;
 				for (int l = 0; l < 4; l++){
 					cell c = map[(actCell.co.i + toAdd[l][0])*width + actCell.co.j + toAdd[l][1]];
 					if (strcmp(actCell.type, "wall") == 0){
+						total_conv_wall += c.T - actCell.T;
+					}
+				}
+				map[i*width + j].T += total_conv_airExt + (total_conv_wall/2);
+			}
+			else if (strcmp(actCell.type, "door") == 0){
+				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
+				float total_conv = 0;
+				for (int l = 0; l < 4; l++){
+					cell c = map[(actCell.co.i + toAdd[l][0])*width + actCell.co.j + toAdd[l][1]];
+					if (strcmp(actCell.type, "wall") == 0 || strcmp(actCell.type, "window") == 0 || strcmp(actCell.type, "door") == 0){
 						total_conv += c.T - actCell.T;
 					}
 				}
-				map[i*width + j].T += total_cond + (total_conv/2);
-			}
-			else if (strcmp(actCell.type, "door") == 0){
-
+				map[i*width + j].T += total_conv/2;
 			}
 		}
 	}
@@ -173,8 +182,8 @@ int main()
 	structure window1 = {
 		.T = 20.0,
 		.type = "window",
-		.begining = {.i = 1, .j = 4},
-		.ending = {.i = 1, .j = 6},
+		.begining = {.i = 2, .j = 8},
+		.ending = {.i = 2, .j = 10},
 		.CTherVol = 17000,
 		.lambda = 1.0,
 		.surface = 1,
@@ -183,8 +192,8 @@ int main()
 	structure window2 = {
 		.T = 20.0,
 		.type = "window",
-		.begining = {.i = 3, .j = 1},
-		.ending = {.i = 4, .j = 1},
+		.begining = {.i = 9, .j = 2},
+		.ending = {.i = 14, .j = 2},
 		.CTherVol = 17000,
 		.lambda = 1.0,
 		.surface = 1,
@@ -193,8 +202,8 @@ int main()
 	structure door = {
 		.T = 20.0,
 		.type = "door",
-		.begining = {.i = , .j = 5},
-		.ending = {.i = 6, .j = 5},
+		.begining = {.i = 17, .j = 10},
+		.ending = {.i = 17, .j = 10},
 		.CTherVol = 350000,
 		.lambda = 0.12,
 		.surface = 1,
