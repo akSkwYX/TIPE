@@ -93,7 +93,23 @@ void nextStep(cell *map, int height, int width)
 		for (int j=0; j<width; j++){
 			cell actCell = map[i*width + j];
 			if (strcmp(actCell.type, "airExt") == 0){
-
+				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
+				float total_conv_wall = 0;
+				float total_conv = 0;
+				for (int l = 0; l < 4; l++){
+					if (i + toAdd[l][0] >= 0 && i + toAdd[l][0] < height && j + toAdd[l][1] >= 0 && j + toAdd[l][1] < width){
+						cell c = map[(actCell.co.i + toAdd[l][0])*width + actCell.co.j + toAdd[l][1]];
+						if (strcmp(actCell.type, "wall") == 0 || strcmp(actCell.type, "window") == 0 || strcmp(actCell.type, "door") == 0){
+							total_conv_wall += (0.06+(c.epaisseur / c.lambda)+0.06)*(actCell.surface)*(actCell.T - c.T);
+						}
+						else{
+							total_conv += c.T - actCell.T;
+						}
+					}else{
+						total_conv += 15 - actCell.T;
+					}
+				}
+				map[i*width + j].T += total_conv_wall + (total_conv/2);
 			}
 			else if (strcmp(actCell.type, "airInt") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
