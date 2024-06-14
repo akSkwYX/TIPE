@@ -132,7 +132,8 @@ void nextStep(cell *map, int height, int width)
 						nbrCellAir++;
 					}
 				}
-				map[i*width + j].T += total_cond + (total_conv_air/(nbrCellAir*300)) + total_conv_wall + (100/(actCell.CTherVol * actCell.surface * actCell.epaisseur));
+				
+				map[i*width + j].T += total_cond + (total_conv_air/(nbrCellAir*300)) + total_conv_wall + (50/(actCell.CTherVol * actCell.surface * actCell.epaisseur));
 			}
 			else if (strcmp(actCell.type, "window") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
@@ -207,7 +208,7 @@ int main()
 		.ending = {.i = 2, .j = 10},
 		.CTherVol = 17000,
 		.lambda = 1.0,
-		.surface = 1,
+		.surface = 2.0,
 		.epaisseur = 0.1,
 	};
 	structure window2 = {
@@ -217,7 +218,7 @@ int main()
 		.ending = {.i = 14, .j = 2},
 		.CTherVol = 17000,
 		.lambda = 1.0,
-		.surface = 1,
+		.surface = 2.0,
 		.epaisseur = 0.1,
 	};
 	structure door = {
@@ -227,7 +228,7 @@ int main()
 		.ending = {.i = 17, .j = 10},
 		.CTherVol = 350000,
 		.lambda = 0.12,
-		.surface = 1,
+		.surface = 2.0,
 		.epaisseur = 0.1,
 	};
 	structure wall_top = {
@@ -237,7 +238,7 @@ int main()
 		.ending = {.i = 2, .j = 17},
 		.CTherVol = 2400000,
 		.lambda = 0.061,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 0.394,
 	};
 	structure wall_right = {
@@ -247,7 +248,7 @@ int main()
 		.ending = {.i = 17, .j = 17},
 		.CTherVol = 2400000,
 		.lambda = 0.061,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 0.394,
 	};
 	structure wall_bottom = {
@@ -257,7 +258,7 @@ int main()
 		.ending = {.i = 17, .j = 17},
 		.CTherVol = 2400000,
 		.lambda = 0.061,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 0.394,
 	};
 	structure wall_left = {
@@ -267,7 +268,7 @@ int main()
 		.ending = {.i = 17, .j = 2},
 		.CTherVol = 2400000,
 		.lambda = 0.061,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 0.394,
 	};
 	structure intAirs = {
@@ -277,7 +278,7 @@ int main()
 		.ending = {.i = 16, .j = 16},
 		.CTherVol = 1256,
 		.lambda = 0.025,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 1,
 	};
 	structure topExt = {
@@ -287,7 +288,7 @@ int main()
 		.ending = {.i = 1, .j = 19},
 		.CTherVol = 1256,
 		.lambda = 0.025,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 1,
 	};
 	structure rightExt = {
@@ -297,7 +298,7 @@ int main()
 		.ending = {.i = 19, .j = 19},
 		.CTherVol = 1256,
 		.lambda = 0.025,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 1,
 	};
 	structure bottomExt = {
@@ -307,7 +308,7 @@ int main()
 		.ending = {.i = 19, .j = 19},
 		.CTherVol = 1256,
 		.lambda = 0.025,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 1,
 	};
 	structure leftExt = {
@@ -317,7 +318,7 @@ int main()
 		.ending = {.i = 19, .j = 1},
 		.CTherVol = 1256,
 		.lambda = 0.025,
-		.surface = 1,
+		.surface = 2.5,
 		.epaisseur = 1,
 	};
     int nbrStructure = 12;
