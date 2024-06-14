@@ -106,7 +106,10 @@ void nextStep(cell *map, int height, int width)
 							total_conv += c.T - actCell.T;
 						}
 					}else{
-						total_conv += 15 - actCell.T;
+						total_conv = 0;
+						total_conv_wall = 0;
+						map[i*width + j].T = 15.0;
+						break;
 					}
 				}
 				map[i*width + j].T += total_conv_wall + (total_conv/2);
@@ -114,8 +117,9 @@ void nextStep(cell *map, int height, int width)
 			else if (strcmp(actCell.type, "airInt") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
 				float total_cond = 0;
-				float total_conv = 0;
+				float total_conv_air = 0;
 				float total_conv_wall = 0;
+				int nbrCellAir = 0;
 				for (int l = 0; l < 4; l++){
 					cell c = map[(actCell.co.i + toAdd[l][0])*width + actCell.co.j + toAdd[l][1]];
 					if (strcmp(actCell.type, "wall") == 0 || strcmp(actCell.type, "window") == 0 || strcmp(actCell.type, "door") == 0){
@@ -124,10 +128,11 @@ void nextStep(cell *map, int height, int width)
 					}
 					else{
 						total_cond += ((c.T - actCell.T) * 1 * c.lambda * c.surface) / ((actCell.CTherVol * actCell.surface * actCell.epaisseur) * c.epaisseur);
-						total_conv += c.T - actCell.T;
+						total_conv_air += c.T - actCell.T;
+						nbrCellAir++;
 					}
 				}
-				map[i*width + j].T += total_cond + (total_conv/(4*300));
+				map[i*width + j].T += total_cond + (total_conv_air/(nbrCellAir*300)) + total_conv_wall + (100/(actCell.CTherVol * actCell.surface * actCell.epaisseur));
 			}
 			else if (strcmp(actCell.type, "window") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
