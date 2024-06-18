@@ -132,8 +132,12 @@ void nextStep(cell *map, int height, int width)
 						nbrCellAir++;
 					}
 				}
-				
-				map[i*width + j].T += total_cond + (total_conv_air/(nbrCellAir*300)) + total_conv_wall + (50/(actCell.CTherVol * actCell.surface * actCell.epaisseur));
+				if (actCell.T >= 18.0){
+					map[i*width + j].T += total_cond + (total_conv_air/nbrCellAir) + total_conv_wall;
+				}
+				else{
+					map[i*width + j].T += total_cond + (total_conv_air/nbrCellAir) + total_conv_wall + (80/(actCell.CTherVol * actCell.surface * actCell.epaisseur));
+				}
 			}
 			else if (strcmp(actCell.type, "window") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
@@ -224,8 +228,8 @@ int main()
 	structure door = {
 		.T = 20.0,
 		.type = "door",
-		.begining = {.i = 17, .j = 10},
-		.ending = {.i = 17, .j = 10},
+		.begining = {.i = 17, .j = 11},
+		.ending = {.i = 17, .j = 11},
 		.CTherVol = 350000,
 		.lambda = 0.12,
 		.surface = 2.0,
@@ -289,7 +293,7 @@ int main()
 		.CTherVol = 1256,
 		.lambda = 0.025,
 		.surface = 2.5,
-		.epaisseur = 1,
+		.epaisseur = 5.0,
 	};
 	structure rightExt = {
 		.T = 15.0,
@@ -299,7 +303,7 @@ int main()
 		.CTherVol = 1256,
 		.lambda = 0.025,
 		.surface = 2.5,
-		.epaisseur = 1,
+		.epaisseur = 5.0,
 	};
 	structure bottomExt = {
 		.T = 15.0,
@@ -309,7 +313,7 @@ int main()
 		.CTherVol = 1256,
 		.lambda = 0.025,
 		.surface = 2.5,
-		.epaisseur = 1,
+		.epaisseur = 5.0,
 	};
 	structure leftExt = {
 		.T = 15.0,
@@ -319,11 +323,121 @@ int main()
 		.CTherVol = 1256,
 		.lambda = 0.025,
 		.surface = 2.5,
-		.epaisseur = 1,
+		.epaisseur = 5.0,
 	};
-    int nbrStructure = 12;
-	structure init_structure[12] = {topExt, rightExt, bottomExt, leftExt, wall_top, wall_right, wall_bottom, wall_left, intAirs, window1, window2, door};
-    cell* map = initialize(height, width, init_structure, nbrStructure);
+	structure wall_bed_1 = {
+		.T = 15.0,
+		.type = "wall",
+		.begining = {.i = 2, .j = 13},
+		.ending = {.i = 17, .j = 13},
+		.CTherVol = 2400000,
+		.lambda = 0.061,
+		.surface = 2.5,
+		.epaisseur = 0.394,
+	};
+	structure wall_bed_2 = {
+		.T = 15.0,
+		.type = "wall",
+		.begining = {.i = 7, .j = 13},
+		.ending = {.i = 7, .j = 17},
+		.CTherVol = 2400000,
+		.lambda = 0.061,
+		.surface = 2.5,
+		.epaisseur = 0.394,
+	};
+	structure window_bed = {
+		.T = 15.0,
+		.type = "window",
+		.begining = {.i = 2, .j = 15},
+		.ending = {.i = 2, .j = 15},
+		.CTherVol = 17000,
+		.lambda = 1.0,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+	structure door_bed = {
+		.T = 20.0,
+		.type = "door",
+		.begining = {.i = 5, .j = 13},
+		.ending = {.i = 5, .j = 13},
+		.CTherVol = 350000,
+		.lambda = 0.12,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+	structure door_bed_2 = {
+		.T = 20.0,
+		.type = "door",
+		.begining = {.i = 8, .j = 13},
+		.ending = {.i = 8, .j = 13},
+		.CTherVol = 350000,
+		.lambda = 0.12,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+	structure window_bed_2 = {
+		.T = 20.0,
+		.type = "window",
+		.begining = {.i = 17, .j = 15},
+		.ending = {.i = 17, .j = 15},
+		.CTherVol = 350000,
+		.lambda = 0.12,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+	structure window_bed_3 = {
+		.T = 20.0,
+		.type = "window",
+		.begining = {.i = 10, .j = 17},
+		.ending = {.i = 12, .j = 17},
+		.CTherVol = 17000,
+		.lambda = 1.0,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+	structure wall_salon = {
+		.T = 20.0,
+		.type = "wall",
+		.begining = {.i = 2, .j = 6},
+		.ending = {.i = 17, .j = 6},
+		.CTherVol = 2400000,
+		.lambda = 0.061,
+		.surface = 2.5,
+		.epaisseur = 0.394,
+	};
+	structure open_door = {
+		.T = 20.0,
+		.type = "airInt",
+		.begining = {.i = 7, .j = 6},
+		.ending = {.i = 8, .j = 6},
+		.CTherVol = 350000,
+		.lambda = 0.12,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+	structure wall_salon_2 = {
+		.T = 20.0,
+		.type = "wall",
+		.begining = {.i = 11, .j = 6},
+		.ending = {.i = 11, .j = 13},
+		.CTherVol = 2400000,
+		.lambda = 0.061,
+		.surface = 2.5,
+		.epaisseur = 0.394,
+	};
+	structure open_door_2 = {
+		.T = 20.0,
+		.type = "airInt",
+		.begining = {.i = 11, .j = 9},
+		.ending = {.i = 11, .j = 10},
+		.CTherVol = 350000,
+		.lambda = 0.12,
+		.surface = 2.0,
+		.epaisseur = 0.1,
+	};
+    int nbrStructure = 23;
+	structure init_structure[23] = {topExt, rightExt, bottomExt, leftExt, wall_top, wall_right, wall_bottom, wall_left, intAirs, window1, window2, door, wall_bed_1, wall_bed_2, window_bed, door_bed, door_bed_2, window_bed_2, window_bed_3, wall_salon, open_door, wall_salon_2, open_door_2};
+	cell* map = initialize(height, width, init_structure, nbrStructure);
 	printMap(map, height, width);
 	FILE* file = fopen("data.csv", "w");
 	int lapsTime = 86400;
@@ -331,11 +445,17 @@ int main()
     {
         fprintf(file, "%f,", map[(intAirs.begining.i + 1)*width + (intAirs.ending.j + 1)].T);
         nextStep(map, height, width);
-        if (t % 3600 == 0)
+        if (t % 3600 == 0 || (t <= 600 && t % 60 == 0))
         {
-            printf("%dh :\n", t/3600);
-            printMap(map, height, width);
-            printf("\n");
+			if (t >= 3600){
+            	//printf("%dh :\n", t/3600);
+            	//printMap(map, height, width);
+            	//printf("\n");
+			} else {
+				printf("%dmin :\n", t/60);
+				printMap(map, height, width);
+				printf("\n");
+			}
         }
         
     }
