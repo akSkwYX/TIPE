@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <time.h>
 
-/* Structures et Implémentation de listes */
+/* Structures */
 
 
 // Structures
@@ -448,9 +448,9 @@ int main()
         if (t % 3600 == 0 || (t <= 600 && t % 60 == 0))
         {
 			if (t >= 3600){
-            	//printf("%dh :\n", t/3600);
-            	//printMap(map, height, width);
-            	//printf("\n");
+            	printf("%dh :\n", t/3600);
+            	printMap(map, height, width);
+            	printf("\n");
 			} else {
 				printf("%dmin :\n", t/60);
 				printMap(map, height, width);
