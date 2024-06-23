@@ -28,6 +28,10 @@ struct cell
 	float lambda; //conductivité thermique en W.K-1.m-1
 	float surface; // en m2
 	float epaisseur; // en m
+    float lambda_iso_ext;
+    float lambda_iso_int;
+    float epaisseur_iso_ext;
+    float epaisseur_iso_int;
 };
 typedef struct cell cell;
 
@@ -62,6 +66,10 @@ cell* initialize(int height, int width, structure* structures, int nbrStructure)
 				map[i*width + j].lambda = structures[k].lambda;
 				map[i*width + j].surface = structures[k].surface;
 				map[i*width + j].epaisseur = structures[k].epaisseur;
+                map[i*width + j].lambda_iso_ext = structures[k].lambda_iso_ext;
+                map[i*width + j].lambda_iso_int = structures[k].lambda_iso_int;
+                map[i*width + j].epaisseur_iso_ext = structures[k].epaisseur_iso_ext;
+                map[i*width + j].epaisseur_iso_int = structures[k].epaisseur_iso_int;
 			}
 		}
 	}
@@ -93,78 +101,79 @@ void printMap(cell *map, int height, int width)
     }
 }
 
-cell* nextStep(cell* map, int height, int width, FILE* file){
+cell* nextStep(cell* map, int height, int width, float Text, FILE* file){
     cell* newMap = (cell*)calloc(height*width, sizeof(cell));
     int toAdd[4][2] = {{0,1}, {0,-1}, {1,0}, {-1,0}};
     for (int i = 0; i < height; i++){
         for (int j = 0; j < width; j++){
             cell actCell = map[i*width + j];
-            float rth = actCell.epaisseur/(actCell.lambda*actCell.surface);
             if (strcmp(actCell.type, "AirInt") == 0){
-                float Q = 0;
+
+                float Q1 = 0; //Echange avec l'air intérieur
+                float Q2 = 0; //Echange avec le mur
                 int nbrVoisinsAir = 0;
                 for (int l = 0; l < 4; l++){
                     if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
                         cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
+                        float rth = c.epaisseur/(c.lambda*c.surface);
                         if (strcmp(c.type, "AirInt") == 0 || strcmp(c.type, "AirExt") == 0){
-                            Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                            nbrVoisinsAir++;
-                        }
-                    }
-                }
-                if (newMap[i*width + j].type == NULL){
-                    newMap[i*width + j] = actCell;
-                }
-                if (actCell.T < 20){
-                    newMap[i*width + j].T += Q/nbrVoisinsAir + 80/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                } else {
-                    newMap[i*width + j].T += Q/nbrVoisinsAir;
-                }
-            } else if (strcmp(actCell.type, "AirExt") == 0){
-                float Q = 0;
-                int nbrVoisinsAir = 0;
-                for (int l = 0; l < 4; l++){
-                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
-                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
-                        if (strcmp(c.type, "AirInt") == 0 || strcmp(c.type, "AirExt") == 0){
-                            Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                            nbrVoisinsAir++;
-                        }
-                    }
-                }
-                if (newMap[i*width + j].type == NULL){
-                    newMap[i*width + j] = actCell;
-                }
-                newMap[i*width + j].T += Q/nbrVoisinsAir;
-            } else {
-                float Q1 = 0;
-                float Q2 = 0;
-                coord coor_int = {0, 0};
-                coord coor_ext = {0, 0};
-                for (int l = 0; l < 4; l++){
-                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
-                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
-                        if (strcmp(c.type, "AirInt") == 0){
                             Q1 += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                            coord coor_int = {i+toAdd[l][0], j+toAdd[l][1]};
-                        } else if (strcmp(c.type, "AirExt") == 0){
-                            Q2 += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                            coord coor_ext = {i+toAdd[l][0], j+toAdd[l][1]};
+                            nbrVoisinsAir++;
+                        } else {
+                            float rth_iso = c.epaisseur_iso_int/(c.lambda_iso_int*c.surface);
+                            Q2 += (c.T - actCell.T) * 1 / (rth_iso * actCell.CTherVol * actCell.surface * actCell.epaisseur);
                         }
+                    } else {
+                        nbrVoisinsAir++;
                     }
                 }
-                if (newMap[i*width + j].type == NULL){
-                    newMap[i*width + j] = actCell;
+
+                newMap[i*width + j] = actCell;
+                /* if (actCell.T < 18){
+                    newMap[i*width + j].T += Q1/nbrVoisinsAir + Q2 + (20 * 1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
+                } else { */
+                    newMap[i*width + j].T += Q1/nbrVoisinsAir + Q2;
+                //}
+
+            } else if (strcmp(actCell.type, "AirExt") == 0){
+                /* float Q = 0;
+                int nbrVoisinsAir = 0;
+                for (int l = 0; l < 4; l++){
+                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
+                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
+                        if (strcmp(c.type, "AirInt") == 0 || strcmp(c.type, "AirExt") == 0){
+                            Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+                            nbrVoisinsAir++;
+                        }
+                    } else {
+                        nbrVoisinsAir++;
+                    }
+                } 
+                */
+                newMap[i*width + j] = actCell;
+                //newMap[i*width + j].T += Q/nbrVoisinsAir;
+            } else {
+
+                float Q = 0;
+                for (int l = 0; l < 4; l++){
+
+                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
+                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
+                        
+                        if (strcmp(c.type, "AirInt") == 0)
+                        {
+                            Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur_iso_int / (actCell.lambda_iso_int * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+                        }
+                        else if (strcmp(c.type, "AirExt") == 0)
+                        {
+                            Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur_iso_ext / (actCell.lambda_iso_ext * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+                        }
+                    }
+
                 }
-                if (newMap[coor_int.i*width + coor_int.j].type == NULL){
-                    newMap[coor_int.i*width + coor_int.j] = map[coor_int.i*width + coor_int.j];
-                }
-                if (newMap[coor_ext.i*width + coor_ext.j].type == NULL){
-                    newMap[coor_ext.i*width + coor_ext.j] = map[coor_ext.i*width + coor_ext.j];
-                }
-                newMap[i*width + j].T += (Q1 + Q2);
-                newMap[coor_int.i*width + coor_int.j].T += Q1;
-                newMap[coor_ext.i*width + coor_ext.j].T -= Q2;
+
+                newMap[i*width + j] = actCell;
+                newMap[i*width + j].T += Q;
             }
         }
     }
@@ -174,7 +183,7 @@ cell* nextStep(cell* map, int height, int width, FILE* file){
 
 int main(){
     structure interieur = {
-        .T = 10,
+        .T = 18,
         .type = "AirInt",
         .begining = {0,0},
         .ending = {2,1},
@@ -209,20 +218,24 @@ int main(){
     };
     int height = 3;
     int width = 5;
+    float Text = 10.0;
     int nbrStructure = 3;
     structure structures[3] = {interieur, mur, exterieur};
     cell* map = initialize(height, width, structures, nbrStructure);
     FILE* file = fopen("test.csv", "w");
     int lapsTime = 86400;
     for (int t = 0; t < lapsTime; t++){
-        //printMap(map, height, width);
-        printf("\n");
-        if (t != lapsTime - 1) {
-            fprintf(file, "%f;%f;%f,", map[0].T, map[1].T, map[2].T);
-        } else {
-            fprintf(file, "%f;%f;%f", map[0].T, map[1].T, map[2].T);
+        if ((t+1) % 3600 == 0){
+            printf("Time : %dh\n", (t+1)/3600);
+            printMap(map, height, width);
+            printf("\n");
         }
-        map = nextStep(map, height, width, file);
+        if (t != lapsTime - 1) {
+            fprintf(file, "%f;%f;%f,", map[6].T, map[7].T, map[8].T);
+        } else {
+            fprintf(file, "%f;%f;%f", map[6].T, map[7].T, map[8].T);
+        }
+        map = nextStep(map, height, width, Text, file);
     }
     free(map);
     fclose(file);
