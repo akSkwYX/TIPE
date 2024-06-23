@@ -129,29 +129,14 @@ cell* nextStep(cell* map, int height, int width, float Text, FILE* file){
                 }
 
                 newMap[i*width + j] = actCell;
-                /* if (actCell.T < 18){
+                if (actCell.T < 18){
                     newMap[i*width + j].T += Q1/nbrVoisinsAir + Q2 + (20 * 1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                } else { */
+                } else {
                     newMap[i*width + j].T += Q1/nbrVoisinsAir + Q2;
-                //}
+                }
 
             } else if (strcmp(actCell.type, "AirExt") == 0){
-                /* float Q = 0;
-                int nbrVoisinsAir = 0;
-                for (int l = 0; l < 4; l++){
-                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
-                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
-                        if (strcmp(c.type, "AirInt") == 0 || strcmp(c.type, "AirExt") == 0){
-                            Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                            nbrVoisinsAir++;
-                        }
-                    } else {
-                        nbrVoisinsAir++;
-                    }
-                } 
-                */
                 newMap[i*width + j] = actCell;
-                //newMap[i*width + j].T += Q/nbrVoisinsAir;
             } else {
 
                 float Q = 0;
