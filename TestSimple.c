@@ -120,7 +120,6 @@ cell* nextStep(cell* map, int height, int width, FILE* file){
                 } else {
                     newMap[i*width + j].T += Q/nbrVoisinsAir;
                 }
-                printf("Q : %f\n", Q/nbrVoisinsAir);
             } else if (strcmp(actCell.type, "AirExt") == 0){
                 float Q = 0;
                 int nbrVoisinsAir = 0;
@@ -154,7 +153,6 @@ cell* nextStep(cell* map, int height, int width, FILE* file){
                         }
                     }
                 }
-                printf("Q1 + Q2 : %f\n", Q1 + Q2);
                 if (newMap[i*width + j].type == NULL){
                     newMap[i*width + j] = actCell;
                 }
@@ -215,11 +213,15 @@ int main(){
     structure structures[3] = {interieur, mur, exterieur};
     cell* map = initialize(height, width, structures, nbrStructure);
     FILE* file = fopen("test.csv", "w");
-    int lapsTime = 200;
+    int lapsTime = 86400;
     for (int t = 0; t < lapsTime; t++){
-        printMap(map, height, width);
+        //printMap(map, height, width);
         printf("\n");
-        fprintf(file, "%f;%f;%f,", map[6].T, map[7].T, map[8].T);
+        if (t != lapsTime - 1) {
+            fprintf(file, "%f;%f;%f,", map[0].T, map[1].T, map[2].T);
+        } else {
+            fprintf(file, "%f;%f;%f", map[0].T, map[1].T, map[2].T);
+        }
         map = nextStep(map, height, width, file);
     }
     free(map);
