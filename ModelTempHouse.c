@@ -113,6 +113,8 @@ cell* nextStep(cell *map, int height, int width)
             if (strcmp(actCell.type, "airInt") == 0)
 			{
                 float Q = 0;
+				float convection = 0;
+				int nbrConvection = 0;
                 for (int l = 0; l < 4; l++){
                     if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
                         cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
@@ -120,9 +122,13 @@ cell* nextStep(cell *map, int height, int width)
                         if (strcmp(c.type, "isolated wall") == 0){
                             float rth_iso = c.epaisseur_iso_int/(c.lambda_iso_int*c.surface);
                             Q += (c.T - actCell.T) * 1 / (rth_iso * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                        } else {
+                        } else if (strcmp(c.type, "airInt") == 0 || strcmp(c.type, "airExt") == 0){
                             Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                        }
+							convection += c.T - actCell.T;
+							nbrConvection++;
+                        } else {
+							Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+						}
                     }
                 }
 
@@ -130,7 +136,7 @@ cell* nextStep(cell *map, int height, int width)
                 if (actCell.T < 18){
                     newMap[i*width + j].T += Q + (80 * 1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
                 } else {
-                    newMap[i*width + j].T += Q;
+                    newMap[i*width + j].T += Q + (convection/(nbrConvection*300));
                 }
             } 
 
@@ -298,10 +304,10 @@ cell* initialize(int height, int width, structure* structures, int nbrStructure)
 
 int main()
 {
-   	int height = 20;
+	int height = 20;
    	int width = 20;
 	// Define the house
-	structure window1 = {
+	 structure window1 = {
 		.T = 10.0,
 		.type = "window",
 		.begining = {.i = 2, .j = 8},
@@ -388,7 +394,7 @@ int main()
         .epaisseur_iso_int = 0.07
 	};
 	structure intAirs = {
-		.T = 10.0,
+		.T = 25.0,
 		.type = "airInt",
 		.begining = {.i = 3, .j = 3},
 		.ending = {.i = 16, .j = 16},
@@ -554,8 +560,12 @@ int main()
 	int lapsTime = 86400;
     for (int t = 0; t < lapsTime; t++)
     {
-        fprintf(file, "%f,", map[(intAirs.begining.i + 1)*width + (intAirs.ending.j + 1)].T);
-        map = nextStep(map, height, width);
+		if (t != lapsTime - 1){
+			fprintf(file, "%f\n", map[(intAirs.begining.i+1)*width + (intAirs.begining.j)].T);
+		} else {
+			fprintf(file, "%f", map[(intAirs.begining.i+1)*width + (intAirs.begining.j)].T);
+		}
+		map = nextStep(map, height, width);
         if ((t+1) % 3600 == 0)
         {
            	printf("%dh :\n", (t+1)/3600);
