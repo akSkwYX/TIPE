@@ -142,9 +142,10 @@ void THliberer(dict* d){
 
 /* Composing the object to modelise */
 
-structure_array* initialize_structure(){
+structure* initialize_structure(int* nbr_structures, int* height, int* width){
 	
-	structure_array* array_of_structures = (structure_array*)malloc(sizeof(structure_array));
+	int local_nbr_structures = 3;
+	structure* structures = (structure*)malloc(sizeof(structure)*local_nbr_structures);
 
 	cell isolated_wall = {
 		.temperature = 20,
@@ -186,27 +187,60 @@ structure_array* initialize_structure(){
 		.thickness = 1
 	};
 
-	structure left_side = {
-		.cell_composing_structure = inside_air,
-		.begining = {0, 0},
-		.ending = {9, 9},
+	coordonates outdoor_coords_temp[8] = {
+		{0, 0}, {20, 2},
+		{18, 3}, {20, 20},
+		{0, 3}, {2, 20},
+		{3, 18}, {17, 20}
 	};
-
-	structure middle_wall = {
-		.cell_composing_structure = wall,
-		.begining = {10, 0},
-		.ending = {10, 9},
-	};
-
-	structure right_side = {
+	coordonates* outdoor_coords = malloc(sizeof(coordonates)*8);
+	for (int i=0; i<8; i++){ outdoor_coords[i] = outdoor_coords_temp[i]; }
+	structure outdoor = {
 		.cell_composing_structure = outside_air,
-		.begining = {11, 0},
-		.ending = {20, 9},
+		.coord_list = 
+		{
+			.list = outdoor_coords,
+			.length = 4
+		}
 	};
 
-	array_of_structures->list_of_structures[1] = left_side;
-	array_of_structures->list_of_structures[2] = middle_wall;
-	array_of_structures->list_of_structures[3] = right_side;
-	array_of_structures->size = 3;
-	return array_of_structures;
+	coordonates wall_coords_temp[8] = {
+		{3, 3}, {3, 17},
+		{4, 17}, {17, 17},
+		{4, 3}, {17, 3},
+		{17, 4}, {17, 16}
+	};
+	coordonates* wall_coords = malloc(sizeof(coordonates)*8);
+	for (int i=0; i<8; i++){ wall_coords[i] = wall_coords_temp[i]; }
+	structure walls = {
+		.cell_composing_structure = wall,
+		.coord_list = 
+		{
+			.list = wall_coords,
+			.length = 4
+		}
+	};
+
+	coordonates inside_coords_temp[2] = {
+		{4, 4},
+		{16, 16}
+	};
+	coordonates* inside_coords = malloc(sizeof(coordonates)*2);
+	for (int i=0; i<2; i++){ inside_coords[i] = inside_coords_temp[i]; }
+	structure inside = {
+		.cell_composing_structure = inside_air,
+		.coord_list =
+		{
+			.list = inside_coords,
+			.length = 1
+		}
+	};
+
+	structures[0] = outdoor;
+	structures[1] = walls;
+	structures[2] = inside;
+	*nbr_structures = local_nbr_structures;
+	*height = 21;
+	*width = 21;
+	return structures;
 }

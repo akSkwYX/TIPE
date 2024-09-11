@@ -50,6 +50,15 @@ struct coordonates {
 
 typedef struct coordonates coordonates;
 
+// Liste de coordonnées
+
+struct coordonates_list {
+	coordonates* list;
+	int length;
+};
+
+typedef struct coordonates_list coordonates_list;
+
 // Cellule représentant une case de la carte
 
 struct cell
@@ -74,20 +83,9 @@ typedef struct cell cell;
 struct structure
 {
 	cell cell_composing_structure;
-	coordonates begining;
-	coordonates ending;
+	coordonates_list coord_list;
 };
 
 typedef struct structure structure;
 
-/* Array struct containing the size */
-
-struct structure_array
-{
-	structure* list_of_structures;
-	int size;
-};
-
-typedef struct structure_array structure_array;
-
-structure_array* initialize_structure(); // Return a list of structures composing the house
+structure* initialize_structure(int* nbr_structures, int* height, int* width); // Return a list of structures composing the house
