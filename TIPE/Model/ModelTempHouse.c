@@ -10,8 +10,8 @@
 
 struct coord
 {
-    int i;
-    int j;
+	int i;
+	int j;
 };
 
 typedef struct coord coord;
@@ -20,17 +20,17 @@ typedef struct coord coord;
 
 struct cell
 {
-    float T; // --------------- en degré Celsius
-    char* type; // ------------ type de la cellule (airExt, airInt, wall, window, door)
-	coord co; // -------------- coordonnées de la cellule
-	float CTherVol; // -------- Capacité thermique volumique en J.K-1.m-3
-	float lambda; // ---------- Conductivité thermique en W.K-1.m-1
-	float surface; // --------- Surface en m2
-	float epaisseur; // ------- Epaisseur en m
-	float lambda_iso_ext; // -- Conductivité thermique de l'isolant extérieur en W.K-1.m-1
-    float lambda_iso_int; // -- Conductivité thermique de l'isolant intérieur en W.K-1.m-1
-    float epaisseur_iso_ext; // Epaisseur de l'isolant extérieur en m
-    float epaisseur_iso_int; // Epaisseur de l'isolant intérieur en m
+	float T;				 // --------------- en degré Celsius
+	char *type;				 // ------------ type de la cellule (airExt, airInt, wall, window, door)
+	coord co;				 // -------------- coordonnées de la cellule
+	float CTherVol;			 // -------- Capacité thermique volumique en J.K-1.m-3
+	float lambda;			 // ---------- Conductivité thermique en W.K-1.m-1
+	float surface;			 // --------- Surface en m2
+	float epaisseur;		 // ------- Epaisseur en m
+	float lambda_iso_ext;	 // -- Conductivité thermique de l'isolant extérieur en W.K-1.m-1
+	float lambda_iso_int;	 // -- Conductivité thermique de l'isolant intérieur en W.K-1.m-1
+	float epaisseur_iso_ext; // Epaisseur de l'isolant extérieur en m
+	float epaisseur_iso_int; // Epaisseur de l'isolant intérieur en m
 };
 
 typedef struct cell cell;
@@ -40,7 +40,7 @@ typedef struct cell cell;
 struct structure
 {
 	float T;
-	char* type;
+	char *type;
 	coord begining;
 	coord ending;
 	float CTherVol;
@@ -59,135 +59,149 @@ typedef struct structure structure;
 
 void printMap(cell *map, int height, int width)
 {
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            if (strcmp(map[i*width + j].type, "airExt") == 0)
-            {
-                printf("\x1b[46m");
-            }
-            else if (strcmp(map[i*width + j].type, "airInt") == 0)
-            {
-                printf("\x1b[30;47m");
-            }
-            else if (strcmp(map[i*width + j].type, "window") == 0)
-            {
-                printf("\x1b[104m");
-            }
-            else if (strcmp(map[i*width + j].type, "wall") == 0)
-            {
-                printf("\x1b[100m");
-            }
-			else if (strcmp(map[i*width + j].type, "isolated wall") == 0)
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			if (strcmp(map[i * width + j].type, "airExt") == 0)
+			{
+				printf("\x1b[46m");
+			}
+			else if (strcmp(map[i * width + j].type, "airInt") == 0)
+			{
+				printf("\x1b[30;47m");
+			}
+			else if (strcmp(map[i * width + j].type, "window") == 0)
+			{
+				printf("\x1b[104m");
+			}
+			else if (strcmp(map[i * width + j].type, "wall") == 0)
+			{
+				printf("\x1b[100m");
+			}
+			else if (strcmp(map[i * width + j].type, "isolated wall") == 0)
 			{
 				printf("\x1b[40;97m");
 			}
-			else if (strcmp(map[i*width + j].type, "door") == 0)
+			else if (strcmp(map[i * width + j].type, "door") == 0)
 			{
 				printf("\x1b[43m");
 			}
-			else if (strcmp(map[i*width + j].type, "radiateur") == 0)
+			else if (strcmp(map[i * width + j].type, "radiateur") == 0)
 			{
 				printf("\x1b[41m");
 			}
-            printf("%.1f ", map[i*width + j].T);
-            printf("\x1b[0m");
-        }
-        printf("\n");
-    }
+			printf("%.1f ", map[i * width + j].T);
+			printf("\x1b[0m");
+		}
+		printf("\n");
+	}
 }
 
 /* Appelle toutes les fonctions de mise à jours */
 
-cell* nextStep(cell *map, int height, int width)
+cell *nextStep(cell *map, int height, int width)
 {
 
-	cell* newMap = (cell*)malloc(sizeof(cell)*height*width);
-	int toAdd[4][2] = {{0,1}, {0,-1}, {1,0}, {-1,0}};
+	cell *newMap = (cell *)malloc(sizeof(cell) * height * width);
+	int toAdd[4][2] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
-	for (int i=0; i<height; i++){
-		for (int j=0; j<width; j++){
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
 
-			cell actCell = map[i*width + j];
+			cell actCell = map[i * width + j];
 
-            if (strcmp(actCell.type, "airInt") == 0)
+			if (strcmp(actCell.type, "airInt") == 0)
 			{
-                float Q = 0;
+				float Q = 0;
 				float convection = 0;
 				int nbrConvection = 0;
-                for (int l = 0; l < 4; l++){
-                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
-                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
-                        float rth = c.epaisseur/(c.lambda*c.surface);
-                        if (strcmp(c.type, "isolated wall") == 0){
-                            float rth_iso = c.epaisseur_iso_int/(c.lambda_iso_int*c.surface);
-                            Q += (c.T - actCell.T) * 1 / (rth_iso * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                        } else if (strcmp(c.type, "airInt") == 0 || strcmp(c.type, "airExt") == 0){
-                            Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+				for (int l = 0; l < 4; l++)
+				{
+					if (i + toAdd[l][0] >= 0 && i + toAdd[l][0] < height && j + toAdd[l][1] >= 0 && j + toAdd[l][1] < width)
+					{
+						cell c = map[(i + toAdd[l][0]) * width + j + toAdd[l][1]];
+						float rth = c.epaisseur / (c.lambda * c.surface);
+						if (strcmp(c.type, "isolated wall") == 0)
+						{
+							float rth_iso = c.epaisseur_iso_int / (c.lambda_iso_int * c.surface);
+							Q += (c.T - actCell.T) * 1 / (rth_iso * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+						}
+						else if (strcmp(c.type, "airInt") == 0 || strcmp(c.type, "airExt") == 0)
+						{
+							Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
 							convection += c.T - actCell.T;
 							nbrConvection++;
-                        } else {
+						}
+						else
+						{
 							Q += (c.T - actCell.T) * 1 / (rth * actCell.CTherVol * actCell.surface * actCell.epaisseur);
 						}
-                    }
-                }
+					}
+				}
 
-                newMap[i*width + j] = actCell;
-                if (actCell.T < 18){
-                    newMap[i*width + j].T += Q + (80 * 1)/(actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                } else {
-                    newMap[i*width + j].T += Q + (convection/(nbrConvection*300));
-                }
-            } 
+				newMap[i * width + j] = actCell;
+				if (actCell.T < 18)
+				{
+					newMap[i * width + j].T += Q + (80 * 1) / (actCell.CTherVol * actCell.surface * actCell.epaisseur);
+				}
+				else
+				{
+					newMap[i * width + j].T += Q + (convection / (nbrConvection * 300));
+				}
+			}
 
 			else if (strcmp(actCell.type, "airExt") == 0)
 			{
-                newMap[i*width + j] = actCell;
-            } 
-			
+				newMap[i * width + j] = actCell;
+			}
+
 			else if (strcmp(actCell.type, "isolated wall") == 0)
 			{
-                float Q = 0;
-                for (int l = 0; l < 4; l++){
+				float Q = 0;
+				for (int l = 0; l < 4; l++)
+				{
 
-                    if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
-                        cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
-                        
-                        if (strcmp(c.type, "airInt") == 0)
-                        {
-                            Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur_iso_int / (actCell.lambda_iso_int * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                        }
-                        else if (strcmp(c.type, "airExt") == 0)
-                        {
-                            Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur_iso_ext / (actCell.lambda_iso_ext * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
-                        }
+					if (i + toAdd[l][0] >= 0 && i + toAdd[l][0] < height && j + toAdd[l][1] >= 0 && j + toAdd[l][1] < width)
+					{
+						cell c = map[(i + toAdd[l][0]) * width + j + toAdd[l][1]];
+
+						if (strcmp(c.type, "airInt") == 0)
+						{
+							Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur_iso_int / (actCell.lambda_iso_int * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+						}
+						else if (strcmp(c.type, "airExt") == 0)
+						{
+							Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur_iso_ext / (actCell.lambda_iso_ext * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
+						}
 						else
 						{
 							Q += (c.T - actCell.T) * 1 / ((c.epaisseur / (c.lambda * c.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
 						}
 					}
-
 				}
 
-				newMap[i*width + j] = actCell;
-				newMap[i*width + j].T += Q;
+				newMap[i * width + j] = actCell;
+				newMap[i * width + j].T += Q;
 			}
 
 			else if (strcmp(actCell.type, "wall") == 0 || strcmp(actCell.type, "window") == 0 || strcmp(actCell.type, "door") == 0)
 			{
 				float Q = 0;
-				for (int l = 0; l < 4; l++){
+				for (int l = 0; l < 4; l++)
+				{
 
-					if (i+toAdd[l][0] >= 0 && i+toAdd[l][0] < height && j+toAdd[l][1] >= 0 && j+toAdd[l][1] < width){
-						cell c = map[(i+toAdd[l][0])*width + j+toAdd[l][1]];
+					if (i + toAdd[l][0] >= 0 && i + toAdd[l][0] < height && j + toAdd[l][1] >= 0 && j + toAdd[l][1] < width)
+					{
+						cell c = map[(i + toAdd[l][0]) * width + j + toAdd[l][1]];
 						Q += (c.T - actCell.T) * 1 / ((actCell.epaisseur / (actCell.lambda * actCell.surface)) * actCell.CTherVol * actCell.surface * actCell.epaisseur);
 					}
-
 				}
 
-				newMap[i*width + j] = actCell;
-				newMap[i*width + j].T += Q;
+				newMap[i * width + j] = actCell;
+				newMap[i * width + j].T += Q;
 			}
 			/* if (strcmp(actCell.type, "airExt") == 0){
 				int toAdd[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Coordonnées à ajouter aux coordonnées de la cellule regardée pour parcourir les cellules adjacentes
@@ -279,36 +293,39 @@ cell* nextStep(cell *map, int height, int width)
 
 /* Initialise la carte des cellules avec leur différents paramètres */
 
-cell* initialize(int height, int width, structure* structures, int nbrStructure)
+cell *initialize(int height, int width, structure *structures, int nbrStructure)
 {
-    cell* map = (cell*)malloc(sizeof(cell)*height*width);
-	for (int k = 0; k < nbrStructure; k++){
-		for (int i = structures[k].begining.i; i <= structures[k].ending.i; i++){
-			for (int j = structures[k].begining.j; j <= structures[k].ending.j; j++){
-				map[i*width + j].T = structures[k].T;
-				map[i*width + j].type = structures[k].type;
-				map[i*width + j].co.i = i;
-				map[i*width + j].co.j = j;
-				map[i*width + j].CTherVol = structures[k].CTherVol;
-				map[i*width + j].lambda = structures[k].lambda;
-				map[i*width + j].surface = structures[k].surface;
-				map[i*width + j].epaisseur = structures[k].epaisseur;
-				map[i*width + j].lambda_iso_ext = structures[k].lambda_iso_ext;
-				map[i*width + j].lambda_iso_int = structures[k].lambda_iso_int;
-				map[i*width + j].epaisseur_iso_ext = structures[k].epaisseur_iso_ext;
-				map[i*width + j].epaisseur_iso_int = structures[k].epaisseur_iso_int;
+	cell *map = (cell *)malloc(sizeof(cell) * height * width);
+	for (int k = 0; k < nbrStructure; k++)
+	{
+		for (int i = structures[k].begining.i; i <= structures[k].ending.i; i++)
+		{
+			for (int j = structures[k].begining.j; j <= structures[k].ending.j; j++)
+			{
+				map[i * width + j].T = structures[k].T;
+				map[i * width + j].type = structures[k].type;
+				map[i * width + j].co.i = i;
+				map[i * width + j].co.j = j;
+				map[i * width + j].CTherVol = structures[k].CTherVol;
+				map[i * width + j].lambda = structures[k].lambda;
+				map[i * width + j].surface = structures[k].surface;
+				map[i * width + j].epaisseur = structures[k].epaisseur;
+				map[i * width + j].lambda_iso_ext = structures[k].lambda_iso_ext;
+				map[i * width + j].lambda_iso_int = structures[k].lambda_iso_int;
+				map[i * width + j].epaisseur_iso_ext = structures[k].epaisseur_iso_ext;
+				map[i * width + j].epaisseur_iso_int = structures[k].epaisseur_iso_int;
 			}
 		}
 	}
-    return map;
+	return map;
 }
 
 int main()
 {
 	int height = 20;
-   	int width = 20;
+	int width = 20;
 	// Define the house
-	 structure window1 = {
+	structure window1 = {
 		.T = 10.0,
 		.type = "window",
 		.begining = {.i = 2, .j = 8},
@@ -344,13 +361,13 @@ int main()
 		.begining = {.i = 2, .j = 2},
 		.ending = {.i = 2, .j = 17},
 		.CTherVol = 2400000,
-        .lambda = 1.4,
-        .surface = 2.5,
-        .epaisseur = 0.15,
-        .lambda_iso_ext = 0.04,
-        .lambda_iso_int = 0.04,
-        .epaisseur_iso_ext = 0.07,
-        .epaisseur_iso_int = 0.07
+		.lambda = 1.4,
+		.surface = 2.5,
+		.epaisseur = 0.15,
+		.lambda_iso_ext = 0.04,
+		.lambda_iso_int = 0.04,
+		.epaisseur_iso_ext = 0.07,
+		.epaisseur_iso_int = 0.07
 	};
 	structure wall_right = {
 		.T = 10.0,
@@ -358,42 +375,39 @@ int main()
 		.begining = {.i = 2, .j = 17},
 		.ending = {.i = 17, .j = 17},
 		.CTherVol = 2400000,
-        .lambda = 1.4,
-        .surface = 2.5,
-        .epaisseur = 0.15,
-        .lambda_iso_ext = 0.04,
-        .lambda_iso_int = 0.04,
-        .epaisseur_iso_ext = 0.07,
-        .epaisseur_iso_int = 0.07
-	};
+		.lambda = 1.4,
+		.surface = 2.5,
+		.epaisseur = 0.15,
+		.lambda_iso_ext = 0.04,
+		.lambda_iso_int = 0.04,
+		.epaisseur_iso_ext = 0.07,
+		.epaisseur_iso_int = 0.07};
 	structure wall_bottom = {
 		.T = 10.0,
 		.type = "isolated wall",
 		.begining = {.i = 17, .j = 2},
 		.ending = {.i = 17, .j = 17},
 		.CTherVol = 2400000,
-        .lambda = 1.4,
-        .surface = 2.5,
-        .epaisseur = 0.15,
-        .lambda_iso_ext = 0.04,
-        .lambda_iso_int = 0.04,
-        .epaisseur_iso_ext = 0.07,
-        .epaisseur_iso_int = 0.07
-	};
+		.lambda = 1.4,
+		.surface = 2.5,
+		.epaisseur = 0.15,
+		.lambda_iso_ext = 0.04,
+		.lambda_iso_int = 0.04,
+		.epaisseur_iso_ext = 0.07,
+		.epaisseur_iso_int = 0.07};
 	structure wall_left = {
 		.T = 10.0,
 		.type = "isolated wall",
 		.begining = {.i = 2, .j = 2},
 		.ending = {.i = 17, .j = 2},
 		.CTherVol = 2400000,
-        .lambda = 1.4,
-        .surface = 2.5,
-        .epaisseur = 0.15,
-        .lambda_iso_ext = 0.04,
-        .lambda_iso_int = 0.04,
-        .epaisseur_iso_ext = 0.07,
-        .epaisseur_iso_int = 0.07
-	};
+		.lambda = 1.4,
+		.surface = 2.5,
+		.epaisseur = 0.15,
+		.lambda_iso_ext = 0.04,
+		.lambda_iso_int = 0.04,
+		.epaisseur_iso_ext = 0.07,
+		.epaisseur_iso_int = 0.07};
 	structure intAirs = {
 		.T = 25.0,
 		.type = "airInt",
@@ -552,29 +566,32 @@ int main()
 		.CTherVol = 1256,
 		.lambda = 0.025,
 		.surface = 2.5,
-		.epaisseur = 1,
+		.epaisseur = 0.0,
 	};
-    int nbrStructure = 23;
+	int nbrStructure = 23;
 	structure init_structure[23] = {topExt, rightExt, bottomExt, leftExt, wall_top, wall_right, wall_bottom, wall_left, intAirs, window1, window2, door, wall_bed_1, wall_bed_2, window_bed, door_bed, door_bed_2, window_bed_2, window_bed_3, wall_salon, open_door, wall_salon_2, open_door_2};
-	cell* map = initialize(height, width, init_structure, nbrStructure);
-	FILE* file = fopen("data.csv", "w");
+	cell *map = initialize(height, width, init_structure, nbrStructure);
+	FILE *file = fopen("data.csv", "w");
 	int lapsTime = 86400;
-    for (int t = 0; t < lapsTime; t++)
-    {
-		if (t != lapsTime - 1){
-			fprintf(file, "%f\n", map[(intAirs.begining.i+1)*width + (intAirs.begining.j)].T);
-		} else {
-			fprintf(file, "%f", map[(intAirs.begining.i+1)*width + (intAirs.begining.j)].T);
+	for (int t = 0; t < lapsTime; t++)
+	{
+		if (t != lapsTime - 1)
+		{
+			fprintf(file, "%f\n", map[(intAirs.begining.i + 1) * width + (intAirs.begining.j)].T);
+		}
+		else
+		{
+			fprintf(file, "%f", map[(intAirs.begining.i + 1) * width + (intAirs.begining.j)].T);
 		}
 		map = nextStep(map, height, width);
-        if ((t+1) % 3600 == 0)
-        {
-           	printf("%dh :\n", (t+1)/3600);
-           	printMap(map, height, width);
-           	printf("\n");
-        }
-    }
+		if ((t + 1) % 3600 == 0)
+		{
+			printf("%dh :\n", (t + 1) / 3600);
+			printMap(map, height, width);
+			printf("\n");
+		}
+	}
 	fclose(file);
 	free(map);
-    return 0;
+	return 0;
 }

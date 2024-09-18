@@ -61,31 +61,33 @@ typedef struct coordonates_list coordonates_list;
 
 // Cellule représentant une case de la carte
 
+enum cell_type { ISOLATED_WALL,  WALL, OUTSIDE_AIR, INSIDE_AIR };
+
 struct cell
 {
-    float temperature; // --------------- en degré Celsius
-    char* type; // ------------ type de la cellule (airExt, airInt, wall, window, door)
-	coordonates coords; // -------------- coordonnées de la cellule
-	float volumetric_heat_capacity; // -------- Capacité thermique volumique en J.K-1.m-3
-	float lambda; // ---------- Conductivité thermique en W.K-1.m-1
-	float surface; // --------- Surface en m2
-	float thickness; // ------- Epaisseur en m
-	float outside_isolation_lambda; // -- Conductivité thermique de l'isolant extérieur en W.K-1.m-1
-    float inside_isolation_lambda; // -- Conductivité thermique de l'isolant intérieur en W.K-1.m-1
-    float outside_isolation_thickness; // Epaisseur de l'isolant extérieur en m
-    float inside_isolation_thickness; // Epaisseur de l'isolant intérieur en m
+    float temperature; // ----------------- Température en degré Celsius
+    enum cell_type type; // --------------- Type de la cellule (airExt, airInt, wall, window, door)
+	coordonates coords; // ---------------- Coordonnées de la cellule
+	float mass_heat_capacity; // ---------- Capacité thermique massique en J.K-1.kg
+	float lambda; // ---------------------- Conductivité thermique en W.K-1.m-1
+	float height; // ---------------------- Hauteur en m
+	float length; // ---------------------- Longueur en m
+	float thickness; // ------------------- Epaisseur en m
+	float outside_isolation_lambda; // ---- Conductivité thermique de l'isolant extérieur en W.K-1.m-1
+    float inside_isolation_lambda; // ----- Conductivité thermique de l'isolant intérieur en W.K-1.m-1
+    float outside_isolation_thickness; // - Epaisseur de l'isolant extérieur en m
+    float inside_isolation_thickness; // -- Epaisseur de l'isolant intérieur en m
+	float surface; // --------------------- Surface en m2
 };
 
 typedef struct cell cell;
 
 // Structure représentant une structure (un ensemble de cellule ayant les mêmes propriétés) de la maison
 
-struct structure
+typedef struct structure
 {
 	cell cell_composing_structure;
 	coordonates_list coord_list;
-};
-
-typedef struct structure structure;
+} structure;
 
 structure* initialize_structure(int* nbr_structures, int* height, int* width); // Return a list of structures composing the house

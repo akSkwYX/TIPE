@@ -8,10 +8,9 @@
 
 /* Fonctions de transition */
 
-float conduction(cell c1, cell c2, float timestep){
-	if (c1.outside_isolation_thickness == 0 || c2.outside_isolation_thickness == 0){
-		return ((c1.temperature - c2.temperature) * timestep) / (c1.thickness / (c1.lambda * c1.surface));
-	}
+float conduction(cell to_update_cell, cell other_cell, float timestep){
+	float rth = other_cell.thickness / (other_cell.lambda * other_cell.surface);
+	return ((other_cell.temperature - to_update_cell.temperature) * timestep) / rth;
 }
 
 float update_inside_air(cell c, cell* voisins, float timestep){
@@ -20,7 +19,7 @@ float update_inside_air(cell c, cell* voisins, float timestep){
 	for (int i=0; i<4; i++){
 		Q += conduction(c, voisins[i], timestep);
 	}
-	return c.temperature + ((Q + W) / c.volumetric_heat_capacity);
+	return c.temperature + ((Q + W) / c.mass_heat_capacity);
 }
 
 float update_outside_air(cell c, cell* voisins, float timestep){
@@ -33,7 +32,16 @@ float update_wall(cell c, cell* voisins, float timestep){
 	for (int i=0; i<4; i++){
 		Q += conduction(c, voisins[i], timestep);
 	}
-	return c.temperature + ((Q + W) / c.volumetric_heat_capacity);
+	return c.temperature + ((Q + W) / c.mass_heat_capacity);
+}
+
+float update_isolated_wall(cell c, cell* voisins, float timestep){
+	float Q = 0;
+	float W = 0;
+	for (int i=0; i<4; i++){
+		Q += conduction(c, voisins[i], timestep);
+	}
+	return c.temperature + ((Q + W) / c.mass_heat_capacity);
 }
 
 cell* update_map(cell* map, int height, int width, float timestep){
@@ -48,14 +56,17 @@ cell* update_map(cell* map, int height, int width, float timestep){
 				map[y*width + x-1],
 				map[y*width + x+1]
 			};
-			if (strcmp(actCell.type, "inside air") == 0){
+			if (actCell.type == INSIDE_AIR){
 				new_map[y*width + x].temperature = update_inside_air(actCell, voisins, timestep);
 			}
-			else if (strcmp(actCell.type, "outside air") == 0){
+			else if (actCell.type == OUTSIDE_AIR){
 				new_map[y*width + x].temperature = update_outside_air(actCell, voisins, timestep);
 			}
-			else if (strcmp(actCell.type, "wall") == 0){
+			else if (actCell.type == WALL){
 				new_map[y*width + x].temperature = update_wall(actCell, voisins, timestep);
+			}
+			else if (actCell.type == ISOLATED_WALL){
+				new_map[y*width + x].temperature = update_isolated_wall(actCell, voisins, timestep);
 			}
 		}
 	}
@@ -84,19 +95,19 @@ void printMap(cell* map, int height, int width)
     {
         for (int x = 0; x < width; x++)
         {
-            if (strcmp(map[y*width + x].type, "outside air") == 0)
+            if (map[y*width + x].type == OUTSIDE_AIR)
             {
                 printf("\x1b[46m");
             }
-            else if (strcmp(map[y*width + x].type, "inside air") == 0)
+            else if (map[y*width + x].type == INSIDE_AIR)
             {
                 printf("\x1b[30;47m");
             }
-			else if (strcmp(map[y*width + x].type, "isolated wall") == 0)
+			else if (map[y*width + x].type == ISOLATED_WALL)
 			{
 				printf("\x1b[40;97m");
 			}
-			else if (strcmp(map[y*width + x].type, "wall") == 0)
+			else if (map[y*width + x].type == WALL)
 			{
 				printf("\x1b[100m");
 			}
@@ -132,8 +143,10 @@ cell* createMap(int height, int width, structure* structures, int nbr_structures
 					map[y*width + x].type = structures[k].cell_composing_structure.type;
 					map[y*width + x].coords.x = x;
 					map[y*width + x].coords.y = y;
-					map[y*width + x].volumetric_heat_capacity = structures[k].cell_composing_structure.volumetric_heat_capacity;
+					map[y*width + x].mass_heat_capacity = structures[k].cell_composing_structure.mass_heat_capacity;
 					map[y*width + x].lambda = structures[k].cell_composing_structure.lambda;
+					map[y*width + x].height = structures[k].cell_composing_structure.height;
+					map[y*width + x].length = structures[k].cell_composing_structure.length;
 					map[y*width + x].surface = structures[k].cell_composing_structure.surface;
 					map[y*width + x].thickness = structures[k].cell_composing_structure.thickness;
 					map[y*width + x].outside_isolation_lambda = structures[k].cell_composing_structure.outside_isolation_lambda;
@@ -157,19 +170,16 @@ int main(){
 	int height;
 	int width;
 	float timestep = 1; // En secondes
-	int	max_time = 10; // En secondes
+	int	max_time = 86400; // En secondes
 	float time = 1;
 	structure* structures = initialize_structure(&nbr_structures, &height, &width);
 	cell* map = createMap(height, width, structures, nbr_structures);
 	while (time <= max_time){
-		/*if (time / 3600 == (int)(time / 3600)){
-			printf("Time: %d\n", (int)(time / 3600));
+		if (time / 3600 == (int)(time / 3600)){
+			printf("Time: %dh\n", (int)(time / 3600));
 			printMap(map, height, width);
 			printf("\n");
 		}
-		*/
-		printMap(map, height, width);
-		printf("\n");
 		map = update_map(map, height, width, timestep);
 		time += timestep;
 	}

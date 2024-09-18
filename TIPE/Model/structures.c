@@ -142,6 +142,7 @@ void THliberer(dict* d){
 
 /* Composing the object to modelise */
 
+
 structure* initialize_structure(int* nbr_structures, int* height, int* width){
 	
 	int local_nbr_structures = 3;
@@ -149,11 +150,13 @@ structure* initialize_structure(int* nbr_structures, int* height, int* width){
 
 	cell isolated_wall = {
 		.temperature = 20,
-		.type = "isolated wall",
-		.volumetric_heat_capacity = 2400000,
+		.type = ISOLATED_WALL,
+		.mass_heat_capacity = 880,
 		.lambda = 1.4,
-		.surface = 2.5,
+		.height = 2.5,
+		.length = 1,
 		.thickness = 0.15,
+		.surface = isolated_wall.height * isolated_wall.length,
 		.outside_isolation_lambda = 0.04,
 		.inside_isolation_lambda = 0.04,
 		.outside_isolation_thickness = 0.07,
@@ -162,29 +165,35 @@ structure* initialize_structure(int* nbr_structures, int* height, int* width){
 
 	cell wall = {
 		.temperature = 20,
-		.type = "wall",
-		.volumetric_heat_capacity = 2400000,
+		.type = WALL,
+		.mass_heat_capacity = 880,
 		.lambda = 1.4,
-		.surface = 2.5,
-		.thickness = 0.15
+		.height = 2.5,
+		.length = 1,
+		.thickness = 0.15,
+		.surface = wall.height * wall.length
 	};
 
 	cell outside_air = {
-		.temperature = 20,
-		.type = "outside air",
-		.volumetric_heat_capacity = 1256,
+		.temperature = 10,
+		.type = OUTSIDE_AIR,
+		.mass_heat_capacity = 1004,
 		.lambda = 0.025,
-		.surface = 2.5,
-		.thickness = 1
+		.height = 2.5,
+		.length = 1,
+		.thickness = 1,
+		.surface = outside_air.height * outside_air.length
 	};
 
 	cell inside_air = {
 		.temperature = 20,
-		.type = "inside air",
-		.volumetric_heat_capacity = 1256,
+		.type = INSIDE_AIR,
+		.mass_heat_capacity = 1004,
 		.lambda = 0.025,
-		.surface = 2.5,
-		.thickness = 1
+		.height = 2.5,
+		.length = 1,
+		.thickness = 1,
+		.surface = inside_air.height * inside_air.length
 	};
 
 	coordonates outdoor_coords_temp[8] = {
@@ -212,8 +221,8 @@ structure* initialize_structure(int* nbr_structures, int* height, int* width){
 	};
 	coordonates* wall_coords = malloc(sizeof(coordonates)*8);
 	for (int i=0; i<8; i++){ wall_coords[i] = wall_coords_temp[i]; }
-	structure walls = {
-		.cell_composing_structure = wall,
+	structure isolated_walls = {
+		.cell_composing_structure = isolated_wall,
 		.coord_list = 
 		{
 			.list = wall_coords,
@@ -237,7 +246,7 @@ structure* initialize_structure(int* nbr_structures, int* height, int* width){
 	};
 
 	structures[0] = outdoor;
-	structures[1] = walls;
+	structures[1] = isolated_walls;
 	structures[2] = inside;
 	*nbr_structures = local_nbr_structures;
 	*height = 21;
