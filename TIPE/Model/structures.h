@@ -61,7 +61,7 @@ typedef struct coordonates_list coordonates_list;
 
 // Cellule représentant une case de la carte
 
-enum cell_type { ISOLATED_WALL,  WALL, OUTSIDE_AIR, INSIDE_AIR };
+enum cell_type { OUTDOOR_INSULATION, INNER_INSULATION,  WALL, OUTSIDE_AIR, INSIDE_AIR };
 
 struct cell
 {
@@ -73,11 +73,9 @@ struct cell
 	float height; // ---------------------- Hauteur en m
 	float length; // ---------------------- Longueur en m
 	float thickness; // ------------------- Epaisseur en m
-	float outside_isolation_lambda; // ---- Conductivité thermique de l'isolant extérieur en W.K-1.m-1
-    float inside_isolation_lambda; // ----- Conductivité thermique de l'isolant intérieur en W.K-1.m-1
-    float outside_isolation_thickness; // - Epaisseur de l'isolant extérieur en m
-    float inside_isolation_thickness; // -- Epaisseur de l'isolant intérieur en m
 	float surface; // --------------------- Surface en m2
+	float volumetric_mass; // ------------- Masse volumique en kg.m-3
+	float mass; // ------------------------ Masse en kg
 };
 
 typedef struct cell cell;

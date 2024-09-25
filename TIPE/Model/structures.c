@@ -145,33 +145,49 @@ void THliberer(dict* d){
 
 structure* initialize_structure(int* nbr_structures, int* height, int* width){
 	
-	int local_nbr_structures = 3;
+	int local_nbr_structures = 4;
 	structure* structures = (structure*)malloc(sizeof(structure)*local_nbr_structures);
 
-	cell isolated_wall = {
-		.temperature = 20,
-		.type = ISOLATED_WALL,
-		.mass_heat_capacity = 880,
-		.lambda = 1.4,
+	cell inner_insulation = {
+		// Laine de roche
+		.temperature = 0,
+		.type = INNER_INSULATION,
+		.mass_heat_capacity = 1030,
+		.lambda = 0.04,
 		.height = 2.5,
-		.length = 1,
-		.thickness = 0.15,
-		.surface = isolated_wall.height * isolated_wall.length,
-		.outside_isolation_lambda = 0.04,
-		.inside_isolation_lambda = 0.04,
-		.outside_isolation_thickness = 0.07,
-		.inside_isolation_thickness = 0.07
+		.length = 0.1,
+		.thickness = 0.07,
+		.surface = inner_insulation.height * inner_insulation.length,
+		.volumetric_mass = 135,
+		.mass = inner_insulation.volumetric_mass * inner_insulation.height * inner_insulation.length * inner_insulation.thickness
+	};
+
+	cell outdoor_insulation = {
+		// Laine de roche
+		.temperature = 20,
+		.type = OUTDOOR_INSULATION,
+		.mass_heat_capacity = 1030,
+		.lambda = 0.04,
+		.height = 2.5,
+		.length = 0.1,
+		.thickness = 0.07,
+		.surface = outdoor_insulation.height * outdoor_insulation.length,
+		.volumetric_mass = 135,
+		.mass = outdoor_insulation.volumetric_mass * outdoor_insulation.height * outdoor_insulation.length * outdoor_insulation.thickness
 	};
 
 	cell wall = {
+		// Béton
 		.temperature = 20,
 		.type = WALL,
 		.mass_heat_capacity = 880,
 		.lambda = 1.4,
 		.height = 2.5,
-		.length = 1,
-		.thickness = 0.15,
-		.surface = wall.height * wall.length
+		.length = 0.1,
+		.thickness = 0.05,
+		.surface = wall.height * wall.length,
+		.volumetric_mass = 2400,
+		.mass = wall.volumetric_mass * wall.surface * wall.thickness
 	};
 
 	cell outside_air = {
@@ -180,9 +196,11 @@ structure* initialize_structure(int* nbr_structures, int* height, int* width){
 		.mass_heat_capacity = 1004,
 		.lambda = 0.025,
 		.height = 2.5,
-		.length = 1,
+		.length = 0.1,
 		.thickness = 1,
-		.surface = outside_air.height * outside_air.length
+		.surface = outside_air.height * outside_air.length,
+		.volumetric_mass = 1.293 * (273.15 / inner_insulation.temperature) * (101325 / 101325),
+		.mass = outside_air.volumetric_mass * outside_air.height * outside_air.length * outside_air.thickness
 	};
 
 	cell inside_air = {
@@ -191,65 +209,104 @@ structure* initialize_structure(int* nbr_structures, int* height, int* width){
 		.mass_heat_capacity = 1004,
 		.lambda = 0.025,
 		.height = 2.5,
-		.length = 1,
+		.length = 0.1,
 		.thickness = 1,
-		.surface = inside_air.height * inside_air.length
+		.surface = inside_air.height * inside_air.length,
+		.volumetric_mass = 1.293 * (273.15 / inner_insulation.temperature) * (101325 / 101325),
+		.mass = inside_air.volumetric_mass * inside_air.height * inside_air.length * inside_air.thickness
 	};
 
-	coordonates outdoor_coords_temp[8] = {
+	int length_outdoor_coords = 2;
+	/* coordonates outdoor_coords_temp[8] = {
 		{0, 0}, {20, 2},
 		{18, 3}, {20, 20},
 		{0, 3}, {2, 20},
 		{3, 18}, {17, 20}
+	}; */
+	coordonates outdoor_coords_temp[2] = {
+		{1, 1}, {1, 2}
 	};
-	coordonates* outdoor_coords = malloc(sizeof(coordonates)*8);
-	for (int i=0; i<8; i++){ outdoor_coords[i] = outdoor_coords_temp[i]; }
+	coordonates* outdoor_coords = malloc(sizeof(coordonates)*length_outdoor_coords);
+	for (int i=0; i<length_outdoor_coords; i++){ outdoor_coords[i] = outdoor_coords_temp[i]; }
 	structure outdoor = {
 		.cell_composing_structure = outside_air,
 		.coord_list = 
 		{
 			.list = outdoor_coords,
-			.length = 4
+			.length = length_outdoor_coords / 2
 		}
 	};
 
-	coordonates wall_coords_temp[8] = {
+	int length_wall_coords = 2;
+	/* coordonates wall_coords_temp[8] = {
 		{3, 3}, {3, 17},
 		{4, 17}, {17, 17},
 		{4, 3}, {17, 3},
 		{17, 4}, {17, 16}
+	}; */
+	coordonates wall_coords_temp[2] = {
+		{2, 1}, {2, 2}
 	};
-	coordonates* wall_coords = malloc(sizeof(coordonates)*8);
-	for (int i=0; i<8; i++){ wall_coords[i] = wall_coords_temp[i]; }
-	structure isolated_walls = {
-		.cell_composing_structure = isolated_wall,
+	coordonates* wall_coords = malloc(sizeof(coordonates)*length_wall_coords);
+	for (int i=0; i<length_wall_coords; i++){ wall_coords[i] = wall_coords_temp[i]; }
+	structure walls = {
+		.cell_composing_structure = wall,
 		.coord_list = 
 		{
 			.list = wall_coords,
-			.length = 4
+			.length = length_wall_coords / 2
 		}
 	};
 
-	coordonates inside_coords_temp[2] = {
-		{4, 4},
-		{16, 16}
+	int length_inner_insulation_coords = 8;
+	/* coordonates inner_insulation_coords_temp[8] = {
+		{4, 4}, {4, 16},
+		{5, 16}, {16, 16},
+		{5, 4}, {16, 4},
+		{16, 5}, {16, 15}
+	}; */
+	coordonates inner_insulation_coords_temp[8] = {
+		{0, 0}, {4, 0},
+		{4, 1}, {4, 3},
+		{0, 1}, {0, 3},
+		{1, 3}, {3, 3}
 	};
-	coordonates* inside_coords = malloc(sizeof(coordonates)*2);
-	for (int i=0; i<2; i++){ inside_coords[i] = inside_coords_temp[i]; }
+	coordonates* inner_insulation_coords = malloc(sizeof(coordonates)*length_inner_insulation_coords);
+	for (int i=0; i<length_inner_insulation_coords; i++){ inner_insulation_coords[i] = inner_insulation_coords_temp[i]; }
+	structure inner_insulations = {
+		.cell_composing_structure = inner_insulation,
+		.coord_list = 
+		{
+			.list = inner_insulation_coords,
+			.length = length_inner_insulation_coords / 2
+		}
+	};
+
+	int length_inside_coords = 2;
+	/* coordonates inside_coords_temp[2] = {
+		{5, 5},
+		{15, 15}
+	}; */
+	coordonates inside_coords_temp[2] = {
+		{3, 1}, {3, 2}
+	};
+	coordonates* inside_coords = malloc(sizeof(coordonates)*length_inside_coords);
+	for (int i=0; i<length_inside_coords; i++){ inside_coords[i] = inside_coords_temp[i]; }
 	structure inside = {
 		.cell_composing_structure = inside_air,
 		.coord_list =
 		{
 			.list = inside_coords,
-			.length = 1
+			.length = length_inside_coords / 2
 		}
 	};
 
 	structures[0] = outdoor;
-	structures[1] = isolated_walls;
-	structures[2] = inside;
+	structures[1] = walls;
+	structures[2] = inner_insulations;
+	structures[3] = inside;
 	*nbr_structures = local_nbr_structures;
-	*height = 21;
-	*width = 21;
+	*height = 4;
+	*width = 5;
 	return structures;
 }
