@@ -76,6 +76,9 @@ struct cell
 	float surface; // --------------------- Surface en m2
 	float volumetric_mass; // ------------- Masse volumique en kg.m-3
 	float mass; // ------------------------ Masse en kg
+	float convection_coefficient_1; // ---- Coefficient de convection en W.K-1.m-2
+	float convection_coefficient_2; // ---- Coefficient de convection en W.K-1.m-2
+	float thermal_exchange_coefficient; //- Coefficient d'échange thermique en W.K-1.m-2
 };
 
 typedef struct cell cell;

@@ -9,22 +9,37 @@
 /* Fonctions de transition */
 
 float conduction(cell* map, int width, int height, cell to_update_cell, cell other_cell, float timestep){
-	if(other_cell.type != INNER_INSULATION && other_cell.type != OUTDOOR_INSULATION){
-		float rth = other_cell.thickness / (other_cell.lambda * other_cell.surface);
-		return ((other_cell.temperature - to_update_cell.temperature) * timestep) / rth;
-	} /* else {
-		int diff_x = other_cell.coords.x - to_update_cell.coords.x;
-		int diff_y = other_cell.coords.y - to_update_cell.coords.y;
-		cell other_other_cell = map[(other_cell.coords.y + diff_y)*width + other_cell.coords.x + diff_x];
-		if (other_other_cell.type = INNER_INSULATION || other_other_cell.type == OUTDOOR_INSULATION){
-			return to_update_cell.temperature;
-		} else {
-			float rth = other_cell.thickness / (other_cell.lambda * other_cell.surface);
-			float rth_other = other_other_cell.thickness / (other_other_cell.lambda * other_other_cell.surface);
-			return ((other_cell.temperature - to_update_cell.temperature) * timestep) / rth;
-			return to_update_cell.temperature;
+	// Case of conducton between wall and air
+	if ( (to_update_cell.type == WALL && (other_cell.type == OUTSIDE_AIR || other_cell.type == INSIDE_AIR || other_cell.type == INNER_INSULATION || other_cell.type == OUTDOOR_INSULATION) ) 
+		|| (to_update_cell.type == INSIDE_AIR && (other_cell.type == WALL || other_cell.type == INNER_INSULATION || other_cell.type == OUTDOOR_INSULATION)) ){
+		// Case of isolating wall
+		if (other_cell.type == INNER_INSULATION || other_cell.type == OUTDOOR_INSULATION){
+			int diff_x = other_cell.coords.x - to_update_cell.coords.x;
+			int diff_y = other_cell.coords.y - to_update_cell.coords.y;
+			cell cell_after_isolation = map[(other_cell.coords.y + diff_y)*width + other_cell.coords.x + diff_x];
+			// Case of a corner ( not implemented for now )
+			if (cell_after_isolation.type == INNER_INSULATION || cell_after_isolation.type == OUTDOOR_INSULATION){
+				// Return T
+				return 0;
+			} 
+			// Case of not a corner
+			else {
+				// Return (T_o - T_s) * dt * h * S
+				return (cell_after_isolation.temperature - to_update_cell.temperature) * timestep * to_update_cell.thermal_exchange_coefficient * to_update_cell.surface;
+			}
 		}
-	} */
+		// Case of a non isolating wall
+		else {
+			// Return (T_o - T_s) * dt * h * S
+			return (other_cell.temperature - to_update_cell.temperature) * timestep * to_update_cell.thermal_exchange_coefficient * to_update_cell.surface;
+		}
+	}
+	// Case of conduction between air and air or wall and wall
+	else if (to_update_cell.type == INSIDE_AIR && other_cell.type == INSIDE_AIR || to_update_cell.type == WALL && other_cell.type == WALL){
+		float rth = to_update_cell.thickness / (to_update_cell.lambda * to_update_cell.surface);
+		// Return (T_o - T_s) * dt / rth
+		return (other_cell.temperature - to_update_cell.temperature) * timestep / rth;
+	}
 }
 
 float update_inside_air(cell* map, int width, int height, cell c, cell* voisins, float timestep){
@@ -176,6 +191,9 @@ cell* createMap(int height, int width, structure* structures, int nbr_structures
 					map[y*width + x].thickness = structures[k].cell_composing_structure.thickness;
 					map[y*width + x].volumetric_mass = structures[k].cell_composing_structure.volumetric_mass;
 					map[y*width + x].mass = structures[k].cell_composing_structure.mass;
+					map[y*width + x].convection_coefficient_1 = structures[k].cell_composing_structure.convection_coefficient_1;
+					map[y*width + x].convection_coefficient_2 = structures[k].cell_composing_structure.convection_coefficient_2;
+					map[y*width + x].thermal_exchange_coefficient = structures[k].cell_composing_structure.thermal_exchange_coefficient;
 				}
 			}
 		}
@@ -193,17 +211,17 @@ int main(){
 	int height;
 	int width;
 	float timestep = 1; // En secondes
-	int	max_time = 86400; // En secondes
+	int	max_time = 3*86400; // En secondes
 	int time_print = 3600; // En secondes
 	float time = 0;
 	structure* structures = initialize_structure(&nbr_structures, &height, &width);
 	cell* map = createMap(height, width, structures, nbr_structures);
 	while (time <= max_time){
-		if (time / time_print == (int)(time / time_print)){
+		/* if (time / time_print == (int)(time / time_print)){
 			printf("Time: %dh\n", (int)(time / time_print));
 			printMap(map, height, width);
 			printf("\n");
-		}
+		} */
 		map = update_map(map, height, width, timestep);
 		time += timestep;
 	}
