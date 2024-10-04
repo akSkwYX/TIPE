@@ -179,46 +179,64 @@ type grammar = | Production of (Trie.trie * grammar list) | E_production
 
 (* 
 D -> A -> N -> A
-						-> E
+			-> E
   -> N -> A
-			 -> E
+	   -> E
 *)
 let gn_grammar = 
-	Production (determinants_dictionary, [Production (adjectif_dictionary, [Production (nom_dictionary, [Production (adjectif_dictionary, []);
-																																																			 E_production])
-																																					])
-																				;Production (nom_dictionary, [Production (adjectif_dictionary, []);
-																																										E_production])
-																				]
-							)
+	Production (determinants_dictionary, [Production (adjectif_dictionary, [Production (nom_dictionary, [Production (adjectif_dictionary, [E_production])
+																										 ;E_production
+																										]
+																					   )
+																			]
+													 )
+										;Production (nom_dictionary, [Production (adjectif_dictionary, [E_production]);
+																	  E_production
+																	 ]
+													)
+										]
+				)
+
+(* match trie with
+| Leaf (b,i) when word = "" -> (b,i)
+| Leaf (b,i) -> (false, [])
+| Node ((b,i), l) when word = "" -> (b,i)
+| Node ((b,i), l) -> 
+	let rec aux l =
+		match l with
+		| [] -> (false, [])
+		| (c, t) :: tl -> if c = word.[0] then trie_search t (word_without_first_char word) else aux tl
+	in aux l *)
+
+let rec has_E_production grammar =
+	List.exists (fun x -> match x with | E_production -> true | _ -> false) grammar
+
+let get_first_word token_list =
+	match token_list with
+	| [] -> failwith "get_first_word : empty list"
+	| D (s, l) :: t -> s
+	| N (s, l) :: t -> s
+	| A (s, l) :: t -> s
+	| F :: t -> failwith "get_first_word : F"
 
 let rec search_grammar grammar (token_list:token list) =
-	match grammar, token_list with
-	| E_production, [] -> true
-	| E_production, _ -> false
-	| Production x, [F] -> false
-	| Production (trie, []), [D (w, i)] | Production (trie, []), [N (w, i)] | Production (trie, []), [A (w, i)] -> fst (Trie.trie_search trie w)
-	| Production (trie, []), [] -> false
-	| Production (trie, lst), [] -> List.exists (fun x -> match x with | E_production -> true | _ -> false) lst
-	| Production (trie, lst), t_l ->
-		let rec aux l t_l =
-			match l, t_l with
-			| [], _ -> false
-			| _, F :: tl_t_l -> false
-			| (Production (trie, prods)) :: t_g, [] -> List.exists (fun x -> match x with | E_production -> true | _ -> false) prods
-			| (Production (trie, prods)) :: t_g, (D (w,i)) :: tl_t_l | (Production (trie, prods)) :: t_g, (N (w,i)) :: tl_t_l | (Production (trie, prods)) :: t_g, (A (w,i)) :: tl_t_l 
-				-> if fst (Trie.trie_search trie w) then
-						let rec aux_prods prods =
-							match prods with
-							| [] -> false
-							| h :: t -> search_grammar h tl_t_l || aux_prods t
-						in
-						aux_prods prods || aux t_g t_l
-					 else
-						aux t_g t_l
-			| (E_production) :: t_g, [] -> true
-			| (E_production) :: t_g, _ -> aux t_g t_l
+	match grammar with
+	| E_production -> token_list = []
+	| Production (_, x) when token_list = [] -> has_E_production x
+	| Production (trie, lst) ->
+		let rec aux l =
+			match l with
+			| [] -> false
+			| (E_production) :: t -> token_list = [] || aux t
+			| (Production (trie, prods)) :: t -> if fst ( Trie.trie_search trie (get_first_word token_list) ) then
+													match prods with
+													| [] -> token_list = [] || aux t
+													| h :: tl -> search_grammar h (List.tl token_list) || aux tl || aux t
+												 else
+													aux t
 		in
-		aux lst t_l
+		aux lst
+
+
 
 let test = search_grammar gn_grammar [D ("le", ['m'; 's']); A ("beau", ['m'; 's']); N ("chat", ['m'; 's']); A ("rouge", ['e'; 's'])] |> print_bool
