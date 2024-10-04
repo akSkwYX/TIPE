@@ -24,6 +24,11 @@ let print_string_list = List.iter (fun x -> print_string x; print_string " | ")
 
 let print_bool = print_endline @. string_of_bool
 
+let option_to_string o =
+	match o with
+	| None -> failwith "option_to_string : None"
+	| Some x -> x
+
 let rec list_without_x_last_char x list =
 	match list with
 	| [] -> []
@@ -86,6 +91,7 @@ module Trie =
 	end
 
 (* ---------------------------------------------------------------------------------------------------------------------------------------------------------------- *)
+(* Orthographic correction and file manipulation *)
 
 let read_dictionnary file =
 	let file = open_in file in
@@ -100,9 +106,9 @@ let read_dictionnary file =
 	read_lines Trie.trie_create
 
 let dictionnary = read_dictionnary "GroupeNominal.txt"
-let determinants_dictionary = read_dictionnary "Liste_determinants.txt"
+(* let determinants_dictionary = read_dictionnary "Liste_determinants.txt"
 let nom_dictionary = read_dictionnary "Liste_nom_communs.txt"
-let adjectif_dictionary = read_dictionnary "Liste_adjectifs.txt"
+let adjectif_dictionary = read_dictionnary "Liste_adjectifs.txt" *)
 
 let sentence_to_list s =
 	let rec aux s_l l =
@@ -133,16 +139,17 @@ let rec verify_sentence l =
 	| [] -> true
 	| h :: t -> if h then verify_sentence t else false
 
-let option_to_string o =
-	match o with
-	| None -> failwith "option_to_string : None"
-	| Some x -> x
+(* ---------------------------------------------------------------------------------------------------------------------------------------------------------------- *)
+(* Token *)
 
-type token =
-	| D of (string * char list)
-	| N of (string * char list)
-	| A of (string * char list)
-	| F
+type word_classe =
+	| Determinant
+	| Nom
+	| Adjectif
+
+type token = 
+	| Token of ( word_classe * (string * char list) )
+	| Unknown
 
 let sentence_to_token_list s =
 	let rec aux list_word list_token =
@@ -150,93 +157,107 @@ let sentence_to_token_list s =
 		| [] -> list_token
 		| word :: t -> let (is_word, information) = Trie.trie_search dictionnary word in
 										if is_word then
-											let rec match_information i possibility=
+											let rec match_information i possibility =
 												match i with
 												| [] -> possibility
-												| ('D'::complementary_information) :: tl -> match_information tl (D (word, complementary_information) :: possibility)
-												| ('N'::complementary_information) :: tl -> match_information tl (N (word, complementary_information) :: possibility)
-												| ('A'::complementary_information) :: tl -> match_information tl (A (word, complementary_information) :: possibility)
-												| _ when possibility = [] -> [F]
+												| ('D'::complementary_information) :: tl -> match_information tl (Token ( Determinant, (word, complementary_information) ) :: possibility)
+												| ('N'::complementary_information) :: tl -> match_information tl (Token ( Nom, (word, complementary_information) ) :: possibility)
+												| ('A'::complementary_information) :: tl -> match_information tl (Token ( Adjectif, (word, complementary_information) ) :: possibility)
+												| _ when possibility = [] -> [Unknown]
 												| _ -> failwith "match_information : wrong information"
 											in aux t (match_information information [] :: list_token)
 										else
-											aux t ([F] :: list_token)
+											aux t ([Unknown] :: list_token)
 	in
 	List.rev (aux (sentence_to_list s) [])
 
 let print_token_list =
 	List.iter (fun x -> match x with
-												| D (s, l) -> print_string "D "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-												| N (s, l) -> print_string "N "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-												| A (s, l) -> print_string "A "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-												| F -> print_string "F "; print_string " ||  "
-											)
+									| Token (Determinant, (s, l)) -> print_string "D "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (Nom, (s, l)) -> print_string "N "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (Adjectif, (s, l)) -> print_string "A "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Unknown -> print_string "F "; print_string " ||  "
+			)
 
 let print_token_list_list =
 	List.iter (fun x -> print_token_list x; print_newline ())
 
-type grammar = | Production of (Trie.trie * grammar list) | E_production
+let get_word token =
+	match token with
+	| Token (Determinant, (s, l)) -> s
+	| Token (Nom, (s, l)) -> s
+	| Token (Adjectif, (s, l)) -> s
+	| Unknown -> failwith "get_word : Unknown"
 
-(* 
-D -> A -> N -> A
-			-> E
-  -> N -> A
-	   -> E
-*)
-let gn_grammar = 
-	Production (determinants_dictionary, [Production (adjectif_dictionary, [Production (nom_dictionary, [Production (adjectif_dictionary, [E_production])
-																										 ;E_production
-																										]
-																					   )
-																			]
-													 )
-										;Production (nom_dictionary, [Production (adjectif_dictionary, [E_production]);
-																	  E_production
-																	 ]
-													)
-										]
-				)
+let get_word_classe token =
+	match token with
+	| Token (Determinant, (s, l)) -> Determinant
+	| Token (Nom, (s, l)) -> Nom
+	| Token (Adjectif, (s, l)) -> Adjectif
+	| Unknown -> failwith "get_word_classe : Unknown"
 
-(* match trie with
-| Leaf (b,i) when word = "" -> (b,i)
-| Leaf (b,i) -> (false, [])
-| Node ((b,i), l) when word = "" -> (b,i)
-| Node ((b,i), l) -> 
-	let rec aux l =
+let all_possibility (l:token list list) :token list list =
+	let rec first_floor_course l acc =
 		match l with
-		| [] -> (false, [])
-		| (c, t) :: tl -> if c = word.[0] then trie_search t (word_without_first_char word) else aux tl
-	in aux l *)
+		| [] -> acc
+		| [h] :: t -> first_floor_course t (List.map (fun x -> h :: x) acc)
+		| h :: t ->
+			let rec second_floor_course l =
+				match l with
+				| [] -> []
+				| hd :: tl -> List.map (fun x -> hd :: x) acc @ second_floor_course tl
+			in
+			first_floor_course t (second_floor_course h)
+	in
+	List.map (List.rev) (first_floor_course l [[]])
 
-let rec has_E_production grammar =
-	List.exists (fun x -> match x with | E_production -> true | _ -> false) grammar
+(* let test = "le chat rouge" |> sentence_to_token_list
+let () = test |> print_token_list_list; print_newline ()
+let () = test |> all_possibility |> print_token_list_list *)
 
-let get_first_word token_list =
-	match token_list with
-	| [] -> failwith "get_first_word : empty list"
-	| D (s, l) :: t -> s
-	| N (s, l) :: t -> s
-	| A (s, l) :: t -> s
-	| F :: t -> failwith "get_first_word : F"
+(* ---------------------------------------------------------------------------------------------------------------------------------------------------------------- *)
+(* Grammar *)
 
-let rec search_grammar grammar (token_list:token list) =
-	match grammar with
-	| E_production -> token_list = []
-	| Production (_, x) when token_list = [] -> has_E_production x
-	| Production (trie, lst) ->
-		let rec aux l =
-			match l with
-			| [] -> false
-			| (E_production) :: t -> token_list = [] || aux t
-			| (Production (trie, prods)) :: t -> if fst ( Trie.trie_search trie (get_first_word token_list) ) then
-													match prods with
-													| [] -> token_list = [] || aux t
-													| h :: tl -> search_grammar h (List.tl token_list) || aux tl || aux t
-												 else
-													aux t
-		in
-		aux lst
+type production =
+	| P of (word_classe * production list)
+	| End
 
+type grammar = production
 
+let gn_grammar =
+	P (Determinant, [P (Adjectif, [P (Nom, [End;
+											 P (Adjectif, [End])])]);
+					  P (Nom, [End;
+					   		   P (Adjectif, [End])])])
 
-let test = search_grammar gn_grammar [D ("le", ['m'; 's']); A ("beau", ['m'; 's']); N ("chat", ['m'; 's']); A ("rouge", ['e'; 's'])] |> print_bool
+let rec recognize_by_grammar (grammar:grammar) (sentence:token list) :bool =
+	match grammar, sentence with
+	| End, _ -> sentence = []
+	| P (wc, lst), [] -> false
+	| P (wc, lst), tk :: tl ->
+		if get_word_classe tk = wc then
+			let rec aux l =
+				match l with
+				| [] -> false
+				| h :: t -> recognize_by_grammar h tl || aux t
+			in aux lst
+		else
+			false
+
+let verify_sentence_by_grammar s =
+	let token_list = sentence_to_token_list s in
+	List.exists (fun x -> recognize_by_grammar gn_grammar x) (all_possibility token_list)
+
+(* let test1 = [Token (Determinant, ("le", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's']))]
+let test2 = [Token (Determinant, ("le", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's'])); Token (Adjectif, ("rouge", ['e'; 's']))]
+let test3 = [Token (Determinant, ("le", ['m'; 's'])); Token (Adjectif, ("beau", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's']))]
+let test4 = [Token (Determinant, ("le", ['m'; 's'])); Token (Adjectif, ("beau", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's'])); Token (Adjectif, ("rouge", ['e'; 's']))]
+let test5 = [Token (Determinant, ("le", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's'])); Token (Nom, ("chien", ['m'; 's']))]
+
+let () = test1 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
+let () = test2 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
+let () = test3 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
+let () = test4 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
+let () = test5 |> recognize_by_grammar gn_grammar |> print_bool; print_newline () *)
+
+let test = In_channel.input_line In_channel.stdin |> option_to_string |> verify_sentence_by_grammar |> print_bool
