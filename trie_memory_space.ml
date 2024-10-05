@@ -220,19 +220,19 @@ let () = test |> all_possibility |> print_token_list_list *)
 
 type production =
 	| P of (word_classe * production list)
-	| End
+	| End of string
 
 type grammar = production
 
 let gn_grammar =
-	P (Determinant, [P (Adjectif, [P (Nom, [End;
-											 P (Adjectif, [End])])]);
-					  P (Nom, [End;
-					   		   P (Adjectif, [End])])])
+	P (Determinant, [P (Adjectif, [P (Nom, [End "Groupe nominal : Déterminant Adjectif Nom";
+											 P (Adjectif, [End "Groupe nominal : Déterminant Adjectif Nom Adjectif"])])]);
+					  P (Nom, [End "Groupe nominal : Déterminant Nom";
+					   		   P (Adjectif, [End "Groupe nominal : Déterminant Nom"])])])
 
 let rec recognize_by_grammar (grammar:grammar) (sentence:token list) :bool =
 	match grammar, sentence with
-	| End, _ -> sentence = []
+	| End _, _ -> sentence = []
 	| P (wc, lst), [] -> false
 	| P (wc, lst), tk :: tl ->
 		if get_word_classe tk = wc then
