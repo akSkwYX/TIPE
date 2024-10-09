@@ -24,6 +24,8 @@ let print_string_list = List.iter (fun x -> print_string x; print_string " | ")
 
 let print_bool = print_endline @. string_of_bool
 
+let list_to_array l = List.to_seq l |> Array.of_seq
+
 let option_to_string o =
 	match o with
 	| None -> failwith "option_to_string : None"
@@ -115,11 +117,21 @@ let sentence_to_list s =
 		match s_l with
 		| [] -> l
 		| ' ' :: t -> aux t l
+		| '\'' :: t ->
+			let rec find_word l w length_w =
+				match l with
+				| [] -> w, length_w
+				| ' ' :: t | '\'' :: t -> w, length_w
+				| c :: t -> find_word t (c::w) (length_w + 1)
+			in
+			let w, length_w = find_word (List.tl s_l) [] 0
+			in
+			aux (list_without_x_last_char (length_w+1) s_l) ((string_of_list (w @ ['\'']))::l)
 		| c :: t ->
 			let rec find_word l w length_w =
 				match l with
 				| [] -> w, length_w
-				| ' ' :: t -> w, length_w
+				| ' ' :: t | '\'' :: t -> w, length_w
 				| c :: t -> find_word t (c::w) (length_w + 1)
 			in
 			let w, length_w = find_word s_l [] 0
@@ -143,6 +155,13 @@ let rec verify_sentence l =
 (* Token *)
 
 type word_classe =
+	| S
+	| GV
+	| GN
+	| MultipleAdj
+	| Pronom_sujet
+	| Sujet
+	| Verbe
 	| Determinant
 	| Nom
 	| Adjectif
@@ -176,6 +195,13 @@ let print_token_list =
 									| Token (Determinant, (s, l)) -> print_string "D "; print_string s; print_string " "; print_char_list l; print_string " ||  "
 									| Token (Nom, (s, l)) -> print_string "N "; print_string s; print_string " "; print_char_list l; print_string " ||  "
 									| Token (Adjectif, (s, l)) -> print_string "A "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (S, (s, l)) -> print_string "S : "
+									| Token (GV, (s, l)) -> print_string "GV : "
+									| Token (GN, (s, l)) -> print_string "GN : "
+									| Token (MultipleAdj, (s, l)) -> print_string "MA : "
+									| Token (Pronom_sujet, (s, l)) -> print_string "PS "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (Sujet, (s, l)) -> print_string "SU "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (Verbe, (s, l)) -> print_string "V "; print_string s; print_string " "; print_char_list l; print_string " ||  "
 									| Unknown -> print_string "F "; print_string " ||  "
 			)
 
@@ -187,6 +213,13 @@ let get_word token =
 	| Token (Determinant, (s, l)) -> s
 	| Token (Nom, (s, l)) -> s
 	| Token (Adjectif, (s, l)) -> s
+	| Token (Sujet, (s, l)) -> s
+	| Token (Verbe, (s, l)) -> s
+	| Token (Pronom_sujet, (s, l)) -> s
+	| Token (S, (s, l)) -> failwith "get_word : trying to get a word from a S"
+	| Token (GV, (s, l)) -> failwith "get_word : trying to get a word from a GV"
+	| Token (GN, (s, l)) -> failwith "get_word : trying to get a word from a GN"
+	| Token (MultipleAdj, (s, l)) -> failwith "get_word : trying to get a word from a MultipleAdj"
 	| Unknown -> failwith "get_word : Unknown"
 
 let get_word_classe token =
@@ -194,6 +227,13 @@ let get_word_classe token =
 	| Token (Determinant, (s, l)) -> Determinant
 	| Token (Nom, (s, l)) -> Nom
 	| Token (Adjectif, (s, l)) -> Adjectif
+	| Token (Sujet, (s, l)) -> Sujet
+	| Token (Verbe, (s, l)) -> Verbe
+	| Token (Pronom_sujet, (s, l)) -> Pronom_sujet
+	| Token (S, (s, l)) -> S
+	| Token (GV, (s, l)) -> GV
+	| Token (GN, (s, l)) -> GN
+	| Token (MultipleAdj, (s, l)) -> MultipleAdj
 	| Unknown -> failwith "get_word_classe : Unknown"
 
 let all_possibility (l:token list list) :token list list =
@@ -218,6 +258,78 @@ let () = test |> all_possibility |> print_token_list_list *)
 (* ---------------------------------------------------------------------------------------------------------------------------------------------------------------- *)
 (* Grammar *)
 
+type syntax_tree =
+	| Node of word_classe * syntax_tree list
+	| Leaf of string
+
+type item =
+	{ 
+	t_a : token array;
+	mutable indice : int;
+	length : int;
+	}
+
+let pass sentence state =
+	if sentence.indice > sentence.length then
+		failwith "pass : empty sentence"
+	else 
+		if state = get_word_classe sentence.t_a.(sentence.indice) then 
+			sentence.indice <- sentence.indice + 1 
+		else 
+			failwith "pass : wrong state"
+
+let rec get_syntax_tree sentence =
+	if sentence.indice > sentence.length then
+		failwith "get_syntax_tree : empty sentence"
+	else
+		get_verbal_group sentence
+
+and get_verbal_group s =
+	Node (GV, [get_subject s; get_verb s])
+
+and get_subject s =
+	if get_word_classe s.t_a.(s.indice) = Determinant then
+		Node (GN, [get_nominal_group s])
+	else if get_word_classe s.t_a.(s.indice) = Pronom_sujet then
+		Node (Pronom_sujet, [get_pronom_sujet s])
+	else
+		failwith "get_subject : wrong state"
+
+and get_nominal_group s =
+	Node (GN, [get_determinant s; get_adjectifs s; get_nom s; get_adjectifs s])
+
+and get_determinant s =
+	let det = get_word s.t_a.(s.indice) in
+	pass s Determinant;
+	Leaf det
+
+and get_nom s =
+	let nom = get_word s.t_a.(s.indice) in
+	pass s Nom;
+	Leaf nom
+
+and get_adjectifs s =
+	if get_word_classe s.t_a.(s.indice) = Adjectif then
+		if get_word_classe s.t_a.(s.indice + 1) = Adjectif then
+			let adj = get_word s.t_a.(s.indice) in
+			pass s Adjectif;
+			Node (MultipleAdj, [Leaf adj; get_adjectifs s])
+		else
+			Leaf (get_word s.t_a.(s.indice))
+	else
+		failwith "get_adjectifs : wrong state"
+
+and get_verb s =
+	let verb = get_word s.t_a.(s.indice) in
+	pass s Verbe;
+	Leaf verb
+
+and get_pronom_sujet s =
+	let pronom = get_word s.t_a.(s.indice) in
+	pass s Pronom_sujet;
+	Leaf pronom
+
+(* 
 type production =
 	| P of (word_classe * production list)
 	| End of string
@@ -248,16 +360,6 @@ let verify_sentence_by_grammar s =
 	let token_list = sentence_to_token_list s in
 	List.exists (fun x -> recognize_by_grammar gn_grammar x) (all_possibility token_list)
 
-(* let test1 = [Token (Determinant, ("le", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's']))]
-let test2 = [Token (Determinant, ("le", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's'])); Token (Adjectif, ("rouge", ['e'; 's']))]
-let test3 = [Token (Determinant, ("le", ['m'; 's'])); Token (Adjectif, ("beau", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's']))]
-let test4 = [Token (Determinant, ("le", ['m'; 's'])); Token (Adjectif, ("beau", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's'])); Token (Adjectif, ("rouge", ['e'; 's']))]
-let test5 = [Token (Determinant, ("le", ['m'; 's'])); Token (Nom, ("chat", ['m'; 's'])); Token (Nom, ("chien", ['m'; 's']))]
-
-let () = test1 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
-let () = test2 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
-let () = test3 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
-let () = test4 |> recognize_by_grammar gn_grammar |> print_bool; print_newline ()
-let () = test5 |> recognize_by_grammar gn_grammar |> print_bool; print_newline () *)
 
 let test = In_channel.input_line In_channel.stdin |> option_to_string |> verify_sentence_by_grammar |> print_bool
+ *)
