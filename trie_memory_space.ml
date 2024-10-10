@@ -228,7 +228,7 @@ let word_classe_to_string wc =
 	| GV -> "GV"
 	| GN -> "GN"
 	| MultipleAdj -> "MultipleAdj"
-	| Pronom_sujet -> "Pronom_sujet"
+	| Pronom_sujet -> "Pronom\\_sujet"
 	| Sujet -> "Sujet"
 	| Verbe -> "Verbe"
 	| Determinant -> "Determinant"
@@ -270,20 +270,20 @@ type item =
 
 let rec syntax_tree_in_tex_aux file tree =
 	match tree with
-	| Leaf s -> Printf.fprintf file "%s" s
+	| Leaf s -> Printf.fprintf file "child {node {%s}}" s
 	| Node (wc, l) ->
-		Printf.fprintf file "child { node { %s " (word_classe_to_string wc);
+		Printf.fprintf file "child { node {%s} " (word_classe_to_string wc);
 		List.iter (fun x -> syntax_tree_in_tex_aux file x) l;
-		Printf.fprintf file " } } \n"
+		Printf.fprintf file "}"
 
 let syntax_tree_in_tex tree file =
-	Printf.fprintf file "\\begin{tikzpicture}\n\\node{S}\n";
+	Printf.fprintf file "\\begin{center}\n\\begin{tikzpicture}\n\\node{S}[sibling distance = 3cm, level distance = 3cm]\n";
 	syntax_tree_in_tex_aux file tree;
-	Printf.fprintf file ";\n\\end{tikzpicture}\n\\newline\n"
+	Printf.fprintf file ";\n\\end{tikzpicture}\n\\end{center}\n"
 
 let syntax_tree_list_in_tex tree_list =
 	let file = open_out "syntax_tree.tex" in
-	Printf.fprintf file "\\documentclass{document}\n\\usepackage{tikz}\n\\begin{document}\n";
+	Printf.fprintf file "\\documentclass{article}\n\\usepackage{tikz}\n\\begin{document}\n";
 	List.iter (fun x -> syntax_tree_in_tex x file) tree_list;
 	Printf.fprintf file "\\end{document}";
 	close_out file;
@@ -301,7 +301,7 @@ let pass sentence state =
 
 let rec get_syntax_tree sentence =
 	if sentence.indice > sentence.length then
-		Leaf "get_syntax_tree : empty sentence"
+		Leaf "get\\_syntax\\_tree : empty sentence"
 	else
 		get_verbal_group sentence
 
@@ -316,55 +316,61 @@ and get_subject s =
 	else if get_word_classe s.t_a.(s.indice) = Pronom_sujet then
 		Node (Pronom_sujet, [get_pronom_sujet s])
 	else
-		Leaf "get_subject : wrong state"
+		Leaf "get\\_subject : wrong state"
 
 and get_nominal_group s =
 	let det_tree = get_determinant s in
+	print_string "get_nominal_group det : "; print_int s.indice; print_newline ();
 	let adj_tree = get_adjectifs s in
+	print_string "get_nominal_group adj : "; print_int s.indice; print_newline ();
 	let nom_tree = get_nom s in
+	print_string "get_nominal_group nom : "; print_int s.indice; print_newline ();
 	let adj_tree_2 = get_adjectifs s in
+	print_string "get_nominal_group adj_2 : "; print_int s.indice; print_newline ();
 	Node (GN, [det_tree; adj_tree; nom_tree; adj_tree_2])
 
 and get_determinant s =
 	let det = get_word s.t_a.(s.indice) in
 	if pass s Determinant then
-		Leaf det
+		Node (Determinant, [Leaf det])
 	else
-		Leaf "get_determinant : wrong state"
+		Leaf "get\\_determinant : wrong state"
 
 and get_nom s =
 	let nom = get_word s.t_a.(s.indice) in
 	if pass s Nom then
-		Leaf nom
+		Node (Nom, [Leaf nom])
 	else
-		Leaf "get_nom : wrong state"
+		Leaf "get\\_nom : wrong state"
 
 and get_adjectifs s =
 	if get_word_classe s.t_a.(s.indice) = Adjectif then
+		let adj = get_word s.t_a.(s.indice) in
 		if get_word_classe s.t_a.(s.indice + 1) = Adjectif then
-			let adj = get_word s.t_a.(s.indice) in
 			if pass s Adjectif then
 				Node (MultipleAdj, [Leaf adj; get_adjectifs s])
 			else
-				Leaf "get_adjectifs : waiting for adjective and doesn't get it"
+				Leaf "get\\_adjectifs : waiting for adjective and doesn't get it"
 		else
-			Leaf (get_word s.t_a.(s.indice))
+			let _ = pass s Adjectif in
+			Node (Adjectif, [Leaf (adj)])
 	else
-		Leaf "get_adjectifs : wrong state"
+		Leaf ""
 
 and get_verb s =
+	print_string "get_verb : "; print_int s.indice; print_newline ();
 	let verb = get_word s.t_a.(s.indice) in
 	if pass s Verbe then
 		Node (Verbe, [Leaf verb])
 	else
-		Leaf "get_verb : wrong state"
+		Leaf "get\\_verb : wrong state"
 
 and get_pronom_sujet s =
 	let pronom = get_word s.t_a.(s.indice) in
 	if pass s Pronom_sujet then
-		Leaf pronom
+		Node (Pronom_sujet, [Leaf pronom])
 	else
-		Leaf "get_pronom_sujet : wrong state"
+		Leaf "get\\_pronom_sujet : wrong state"
 
 let string_to_item s =
 	let token_list = sentence_to_token_list s |> all_possibility in
