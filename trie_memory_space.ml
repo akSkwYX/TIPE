@@ -41,13 +41,12 @@ module Trie =
 	struct
 
 		type trie =
-			| Node of (bool * (char list) list) * (char * trie) list
-			| Leaf of bool * (char list) list
+			| Node of (bool * (string list) list) * (char * trie) list
+			| Leaf of bool * (string list) list
 
 		let trie_create = Leaf (false, [])
 
 		let rec trie_insert trie word information =
-			(* print_string word; print_string " : "; print_char_list information; print_newline (); *)
 			match trie with
 			| Leaf (b,i) when word = "" -> Leaf (true, information::i)
 			| Leaf (b,i) -> trie_insert (Node ((b,i), [(word.[0], Leaf (false, []))])) word information
@@ -77,19 +76,8 @@ module Trie =
 			let rec aux l =
 				match l with
 				| [] -> print_newline ()
-				| h :: t -> print_char_list h; aux t
+				| h :: t -> print_string_list h; aux t
 			in aux l
-
-		(* let rec print_trie trie =
-			match trie with
-			| Leaf b -> b |> string_of_bool |> print_string; print_string " "; print_newline ()
-			| Node (b, l) ->
-				b |> string_of_bool |> print_string; print_string " ";
-				let rec aux l =
-					match l with
-					| [] -> print_newline ()
-					| (c, t) :: tl -> print_char c; print_string " "; print_trie t; aux tl
-				in aux l*)
 	end
 
 (* ---------------------------------------------------------------------------------------------------------------------------------------------------------------- *)
@@ -101,16 +89,12 @@ let read_dictionnary file =
 		let line = In_channel.input_line file |> Option.map (fun x -> String.split_on_char ',' x) in
 		match line with
 		| None -> trie
-		| Some (word::information) -> (* print_string word; print_string " : "; print_char_list (List.map char_of_string information); print_newline (); *)
-																	read_lines ( Trie.trie_insert trie word (List.map char_of_string information) )
+		| Some (word::information) -> read_lines ( Trie.trie_insert trie word information )
 		| Some [] -> failwith "read_dictionnary : empty line"
 	in
 	read_lines Trie.trie_create
 
-let dictionnary = read_dictionnary "GroupeNominal.txt"
-(* let determinants_dictionary = read_dictionnary "Liste_determinants.txt"
-let nom_dictionary = read_dictionnary "Liste_nom_communs.txt"
-let adjectif_dictionary = read_dictionnary "Liste_adjectifs.txt" *)
+let dictionnary = read_dictionnary "Dictionnary.txt"
 
 let sentence_to_list s =
 	let rec aux s_l l =
@@ -167,7 +151,7 @@ type word_classe =
 	| Adjectif
 
 type token = 
-	| Token of ( word_classe * (string * char list) )
+	| Token of ( word_classe * (string * string list) )
 	| Unknown
 
 let sentence_to_token_list s =
@@ -179,9 +163,11 @@ let sentence_to_token_list s =
 											let rec match_information i possibility =
 												match i with
 												| [] -> possibility
-												| ('D'::complementary_information) :: tl -> match_information tl (Token ( Determinant, (word, complementary_information) ) :: possibility)
-												| ('N'::complementary_information) :: tl -> match_information tl (Token ( Nom, (word, complementary_information) ) :: possibility)
-												| ('A'::complementary_information) :: tl -> match_information tl (Token ( Adjectif, (word, complementary_information) ) :: possibility)
+												| ("D"::complementary_information) :: tl -> match_information tl (Token ( Determinant, (word, complementary_information) ) :: possibility)
+												| ("N"::complementary_information) :: tl -> match_information tl (Token ( Nom, (word, complementary_information) ) :: possibility)
+												| ("A"::complementary_information) :: tl -> match_information tl (Token ( Adjectif, (word, complementary_information) ) :: possibility)
+												| ("V"::complementary_information) :: tl -> match_information tl (Token ( Verbe, (word, complementary_information) ) :: possibility)
+												| ("Os"::complementary_information) :: tl -> match_information tl (Token ( Pronom_sujet, (word, complementary_information) ) :: possibility)
 												| _ when possibility = [] -> [Unknown]
 												| _ -> failwith "match_information : wrong information"
 											in aux t (match_information information [] :: list_token)
@@ -192,16 +178,16 @@ let sentence_to_token_list s =
 
 let print_token_list =
 	List.iter (fun x -> match x with
-									| Token (Determinant, (s, l)) -> print_string "D "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-									| Token (Nom, (s, l)) -> print_string "N "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-									| Token (Adjectif, (s, l)) -> print_string "A "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (Determinant, (s, l)) -> print_string "D "; print_string s; print_string " "; print_string_list l; print_string " ||  "
+									| Token (Nom, (s, l)) -> print_string "N "; print_string s; print_string " "; print_string_list l; print_string " ||  "
+									| Token (Adjectif, (s, l)) -> print_string "A "; print_string s; print_string " "; print_string_list l; print_string " ||  "
 									| Token (S, (s, l)) -> print_string "S : "
 									| Token (GV, (s, l)) -> print_string "GV : "
 									| Token (GN, (s, l)) -> print_string "GN : "
 									| Token (MultipleAdj, (s, l)) -> print_string "MA : "
-									| Token (Pronom_sujet, (s, l)) -> print_string "PS "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-									| Token (Sujet, (s, l)) -> print_string "SU "; print_string s; print_string " "; print_char_list l; print_string " ||  "
-									| Token (Verbe, (s, l)) -> print_string "V "; print_string s; print_string " "; print_char_list l; print_string " ||  "
+									| Token (Pronom_sujet, (s, l)) -> print_string "PS "; print_string s; print_string " "; print_string_list l; print_string " ||  "
+									| Token (Sujet, (s, l)) -> print_string "SU "; print_string s; print_string " "; print_string_list l; print_string " ||  "
+									| Token (Verbe, (s, l)) -> print_string "V "; print_string s; print_string " "; print_string_list l; print_string " ||  "
 									| Unknown -> print_string "F "; print_string " ||  "
 			)
 
@@ -236,6 +222,19 @@ let get_word_classe token =
 	| Token (MultipleAdj, (s, l)) -> MultipleAdj
 	| Unknown -> failwith "get_word_classe : Unknown"
 
+let word_classe_to_string wc =
+	match wc with
+	| S -> "S"
+	| GV -> "GV"
+	| GN -> "GN"
+	| MultipleAdj -> "MultipleAdj"
+	| Pronom_sujet -> "Pronom_sujet"
+	| Sujet -> "Sujet"
+	| Verbe -> "Verbe"
+	| Determinant -> "Determinant"
+	| Nom -> "Nom"
+	| Adjectif -> "Adjectif"
+
 let all_possibility (l:token list list) :token list list =
 	let rec first_floor_course l acc =
 		match l with
@@ -269,23 +268,47 @@ type item =
 	length : int;
 	}
 
+let rec syntax_tree_in_tex_aux file tree =
+	match tree with
+	| Leaf s -> Printf.fprintf file "%s" s
+	| Node (wc, l) ->
+		Printf.fprintf file "child { node { %s " (word_classe_to_string wc);
+		List.iter (fun x -> syntax_tree_in_tex_aux file x) l;
+		Printf.fprintf file " } } \n"
+
+let syntax_tree_in_tex tree file =
+	Printf.fprintf file "\\begin{tikzpicture}\n\\node{S}\n";
+	syntax_tree_in_tex_aux file tree;
+	Printf.fprintf file ";\n\\end{tikzpicture}\n\\newline\n"
+
+let syntax_tree_list_in_tex tree_list =
+	let file = open_out "syntax_tree.tex" in
+	Printf.fprintf file "\\documentclass{document}\n\\usepackage{tikz}\n\\begin{document}\n";
+	List.iter (fun x -> syntax_tree_in_tex x file) tree_list;
+	Printf.fprintf file "\\end{document}";
+	close_out file;
+	Sys.command "pdflatex syntax_tree.tex"
+
 let pass sentence state =
 	if sentence.indice > sentence.length then
 		failwith "pass : empty sentence"
 	else 
 		if state = get_word_classe sentence.t_a.(sentence.indice) then 
-			sentence.indice <- sentence.indice + 1 
+			(sentence.indice <- sentence.indice + 1;
+			true)
 		else 
-			failwith "pass : wrong state"
+			false
 
 let rec get_syntax_tree sentence =
 	if sentence.indice > sentence.length then
-		failwith "get_syntax_tree : empty sentence"
+		Leaf "get_syntax_tree : empty sentence"
 	else
 		get_verbal_group sentence
 
 and get_verbal_group s =
-	Node (GV, [get_subject s; get_verb s])
+	let subject_tree = get_subject s in
+	let verb_tree = get_verb s in
+	Node (GV, [subject_tree; verb_tree])
 
 and get_subject s =
 	if get_word_classe s.t_a.(s.indice) = Determinant then
@@ -293,41 +316,70 @@ and get_subject s =
 	else if get_word_classe s.t_a.(s.indice) = Pronom_sujet then
 		Node (Pronom_sujet, [get_pronom_sujet s])
 	else
-		failwith "get_subject : wrong state"
+		Leaf "get_subject : wrong state"
 
 and get_nominal_group s =
-	Node (GN, [get_determinant s; get_adjectifs s; get_nom s; get_adjectifs s])
+	let det_tree = get_determinant s in
+	let adj_tree = get_adjectifs s in
+	let nom_tree = get_nom s in
+	let adj_tree_2 = get_adjectifs s in
+	Node (GN, [det_tree; adj_tree; nom_tree; adj_tree_2])
 
 and get_determinant s =
 	let det = get_word s.t_a.(s.indice) in
-	pass s Determinant;
-	Leaf det
+	if pass s Determinant then
+		Leaf det
+	else
+		Leaf "get_determinant : wrong state"
 
 and get_nom s =
 	let nom = get_word s.t_a.(s.indice) in
-	pass s Nom;
-	Leaf nom
+	if pass s Nom then
+		Leaf nom
+	else
+		Leaf "get_nom : wrong state"
 
 and get_adjectifs s =
 	if get_word_classe s.t_a.(s.indice) = Adjectif then
 		if get_word_classe s.t_a.(s.indice + 1) = Adjectif then
 			let adj = get_word s.t_a.(s.indice) in
-			pass s Adjectif;
-			Node (MultipleAdj, [Leaf adj; get_adjectifs s])
+			if pass s Adjectif then
+				Node (MultipleAdj, [Leaf adj; get_adjectifs s])
+			else
+				Leaf "get_adjectifs : waiting for adjective and doesn't get it"
 		else
 			Leaf (get_word s.t_a.(s.indice))
 	else
-		failwith "get_adjectifs : wrong state"
+		Leaf "get_adjectifs : wrong state"
 
 and get_verb s =
 	let verb = get_word s.t_a.(s.indice) in
-	pass s Verbe;
-	Leaf verb
+	if pass s Verbe then
+		Node (Verbe, [Leaf verb])
+	else
+		Leaf "get_verb : wrong state"
 
 and get_pronom_sujet s =
 	let pronom = get_word s.t_a.(s.indice) in
-	pass s Pronom_sujet;
-	Leaf pronom
+	if pass s Pronom_sujet then
+		Leaf pronom
+	else
+		Leaf "get_pronom_sujet : wrong state"
+
+let string_to_item s =
+	let token_list = sentence_to_token_list s |> all_possibility in
+	let rec aux l =
+		match l with
+		| [] -> []
+		| h :: t -> let token_array = h |> list_to_array in { t_a = token_array; indice = 0; length = Array.length token_array } :: aux t
+	in
+	aux token_list
+
+let item_list_to_syntax_tree_list item =
+	List.map get_syntax_tree item
+
+let string_to_syntax_tree_list s =
+	s |> string_to_item |> item_list_to_syntax_tree_list
 
 (* 
 type production =
@@ -363,3 +415,5 @@ let verify_sentence_by_grammar s =
 
 let test = In_channel.input_line In_channel.stdin |> option_to_string |> verify_sentence_by_grammar |> print_bool
  *)
+
+let test = In_channel.input_line In_channel.stdin |> option_to_string |> string_to_syntax_tree_list |> syntax_tree_list_in_tex
