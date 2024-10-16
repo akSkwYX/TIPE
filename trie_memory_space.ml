@@ -291,7 +291,7 @@ let syntax_tree_list_in_tex tree_list =
 
 let pass sentence state =
 	if sentence.indice > sentence.length then
-		failwith "pass : empty sentence"
+		false
 	else 
 		if state = get_word_classe sentence.t_a.(sentence.indice) then 
 			(sentence.indice <- sentence.indice + 1;
@@ -301,76 +301,74 @@ let pass sentence state =
 
 let rec get_syntax_tree sentence =
 	if sentence.indice > sentence.length then
-		Leaf "get\\_syntax\\_tree : empty sentence"
+		(false, Leaf "get\\_syntax\\_tree : empty sentence")
 	else
 		get_verbal_group sentence
 
 and get_verbal_group s =
-	let subject_tree = get_subject s in
-	let verb_tree = get_verb s in
-	Node (GV, [subject_tree; verb_tree])
+	let (success_subject, subject_tree) = get_subject s in
+	let (success_verb, verb_tree) = get_verb s in
+	( (success_subject && success_verb),  Node (GV, [subject_tree; verb_tree]) )
 
 and get_subject s =
 	if get_word_classe s.t_a.(s.indice) = Determinant then
-		Node (GN, [get_nominal_group s])
+		let (success_gn, gn_tree) = get_nominal_group s in
+		( success_gn, Node (Sujet, [gn_tree]) )
 	else if get_word_classe s.t_a.(s.indice) = Pronom_sujet then
-		Node (Pronom_sujet, [get_pronom_sujet s])
+		let (success_pronom_sujet, pronom_sujet_tree) = get_pronom_sujet s in
+		( success_pronom_sujet, Node (Sujet, [pronom_sujet_tree]) )
 	else
-		Leaf "get\\_subject : wrong state"
+		( false, Leaf "get\\_subject : wrong state" )
 
 and get_nominal_group s =
-	let det_tree = get_determinant s in
-	print_string "get_nominal_group det : "; print_int s.indice; print_newline ();
-	let adj_tree = get_adjectifs s in
-	print_string "get_nominal_group adj : "; print_int s.indice; print_newline ();
-	let nom_tree = get_nom s in
-	print_string "get_nominal_group nom : "; print_int s.indice; print_newline ();
-	let adj_tree_2 = get_adjectifs s in
-	print_string "get_nominal_group adj_2 : "; print_int s.indice; print_newline ();
-	Node (GN, [det_tree; adj_tree; nom_tree; adj_tree_2])
+	let ( success_det, det_tree ) = get_determinant s in
+	let ( success_adj, adj_tree ) = get_adjectifs s in
+	let ( success_nom, nom_tree ) = get_nom s in
+	let ( success_adj2, adj_tree_2 ) = get_adjectifs s in
+	( success_det && success_adj && success_nom && success_adj2, Node (GN, [det_tree; adj_tree; nom_tree; adj_tree_2]) )
 
 and get_determinant s =
 	let det = get_word s.t_a.(s.indice) in
 	if pass s Determinant then
-		Node (Determinant, [Leaf det])
+		( true, Node (Determinant, [Leaf det]) )
 	else
-		Leaf "get\\_determinant : wrong state"
+		( false, Leaf "get\\_determinant : wrong state" )
 
 and get_nom s =
 	let nom = get_word s.t_a.(s.indice) in
 	if pass s Nom then
-		Node (Nom, [Leaf nom])
+		( true, Node (Nom, [Leaf nom]) )
 	else
-		Leaf "get\\_nom : wrong state"
+		( false, Leaf "get\\_nom : wrong state" )
 
 and get_adjectifs s =
 	if get_word_classe s.t_a.(s.indice) = Adjectif then
 		let adj = get_word s.t_a.(s.indice) in
 		if get_word_classe s.t_a.(s.indice + 1) = Adjectif then
 			if pass s Adjectif then
-				Node (MultipleAdj, [Leaf adj; get_adjectifs s])
+				let ( success_adj, adj_tree ) = get_adjectifs s in
+				( success_adj, Node (MultipleAdj, [Leaf adj; adj_tree]) )
 			else
-				Leaf "get\\_adjectifs : waiting for adjective and doesn't get it"
+				( false, Leaf "get\\_adjectifs : waiting for adjective and doesn't get it" )
 		else
 			let _ = pass s Adjectif in
-			Node (Adjectif, [Leaf (adj)])
+			( true, Node (Adjectif, [Leaf (adj)]) )
 	else
-		Leaf ""
+		( true, Leaf "" )
 
 and get_verb s =
-	print_string "get_verb : "; print_int s.indice; print_newline ();
 	let verb = get_word s.t_a.(s.indice) in
 	if pass s Verbe then
-		Node (Verbe, [Leaf verb])
+		( true, Node (Verbe, [Leaf verb]) )
 	else
-		Leaf "get\\_verb : wrong state"
+		( false, Leaf "get\\_verb : wrong state" )
 
 and get_pronom_sujet s =
 	let pronom = get_word s.t_a.(s.indice) in
 	if pass s Pronom_sujet then
-		Node (Pronom_sujet, [Leaf pronom])
+		( true, Node (Pronom_sujet, [Leaf pronom]) )
 	else
-		Leaf "get\\_pronom_sujet : wrong state"
+		( false, Leaf "get\\_pronom_sujet : wrong state" )
 
 let string_to_item s =
 	let token_list = sentence_to_token_list s |> all_possibility in
@@ -382,7 +380,7 @@ let string_to_item s =
 	aux token_list
 
 let item_list_to_syntax_tree_list item =
-	List.map get_syntax_tree item
+	List.map (fun x -> let (success, tree) = get_syntax_tree x in (print_bool success; tree) ) item
 
 let string_to_syntax_tree_list s =
 	s |> string_to_item |> item_list_to_syntax_tree_list
