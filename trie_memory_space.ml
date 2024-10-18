@@ -1,17 +1,3 @@
-(* 
-TO REMOVE BUT WE DON'T KNOW WHAT CAN HAPPEN
-
-let rec orthographic_correction l =
-	match l with
-	| [] -> []
-	| h :: t -> let is_word = Trie.trie_search dictionnary h in
-						  is_word :: (orthographic_correction t)
-
-let rec verify_sentence l =
-	match l with
-	| [] -> true
-	| h :: t -> if h then verify_sentence t else false
- *)
 let ( @. ) = Fun.compose
 
 let word_without_first_char word =
@@ -431,6 +417,43 @@ let check_noun_adjective noun_informations adj_informations =
 			(true, result_informations)
 		else
 			(false, [])
+
+let check_subject_verb subject_informations verb_informations =
+	match subject_informations, verb_informations with
+	| person :: _ :: number :: [], _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: person_verb :: [] ->
+		begin
+		match person, number, person_verb with
+		| "01", "s", "1s" -> (true, subject_informations)
+		| "01", "p", "1p" -> (true, subject_informations)
+		| "02", "s", "2s" -> (true, subject_informations)
+		| "02", "p", "2p" -> (true, subject_informations)
+		| "03", "s", "3s" -> (true, subject_informations)
+		| "03", "p", "3p" -> (true, subject_informations)
+		| _ -> (false, [])
+		end
+	| _ -> failwith "check_pronoun_personnal_verb : Doesn't receive a correct Pronoun_sujet and a Verb"
+
+let check_verbal_group subject_tree verb_tree =
+	let get_person informations =
+		match informations with
+		| _ :: "s" :: [] -> ["03"; "s"]
+		| _ :: "p" :: [] -> ["03"; "p"]
+		| _ -> failwith "get_person : informations doesn't match a personnal pronoun"
+	in
+	match subject_tree, verb_tree with
+	| Node (Sujet, informations_subject, [ Node (Pronom_sujet, _, _); _ ] ), Node (Verbe, informations_verb, [ Leaf verb; _]) -> 
+		let (success, informations) = check_subject_verb informations_subject informations_verb in
+		if success then
+			(true, informations, No)
+		else
+			(false, [], Conjuguaison verb)
+	| Node (Sujet, informations_subject, [ Node (GN, _, _); _ ]), Node (Verbe, informations_verb, [ Leaf verb; _]) -> 
+		let (success, informations) = check_subject_verb (get_person informations_subject) informations_verb in
+		if success then
+			(true, informations, No)
+		else
+			(false, [], Conjuguaison verb)
+	| _ -> failwith "check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
 	
 let check_nominal_group det_tree adj_tree nom_tree adj_tree_2 =
 	let get_first_adjectif_of_tree tree =
@@ -486,14 +509,19 @@ and get_verbal_group s =
 		match verb_tree with
 		| Error e -> Error e
 		| _ ->
-			Node (GV, ["Not implemented yet"], [subject_tree; verb_tree])
+			let (success, informations, error) = check_verbal_group subject_tree verb_tree in
+			if success then
+				Node (GV, informations, [subject_tree; verb_tree])
+			else
+				Error error
 
 and get_subject s =
 	if s.indice >= s.length then
 		Error Empty_sentence
 	else
 		begin
-		if get_word_classe s.t_a.(s.indice) = Determinant then
+		let wc_token = get_word_classe s.t_a.(s.indice) in
+		if wc_token = Determinant || wc_token = Nom || wc_token = Adjectif then
 			let nominal_group_tree = get_nominal_group s in
 			match nominal_group_tree with
 			| Error e -> Error e
@@ -629,40 +657,5 @@ let item_list_to_syntax_tree_list item =
 
 let string_to_syntax_tree_list s =
 	s |> string_to_item |> item_list_to_syntax_tree_list
-
-(* 
-type production =
-	| P of (word_classe * production list)
-	| End of string
-
-type grammar = production
-
-let gn_grammar =
-	P (Determinant, [P (Adjectif, [P (Nom, [End "Groupe nominal : Déterminant Adjectif Nom";
-											 P (Adjectif, [End "Groupe nominal : Déterminant Adjectif Nom Adjectif"])])]);
-					  P (Nom, [End "Groupe nominal : Déterminant Nom";
-					   		   P (Adjectif, [End "Groupe nominal : Déterminant Nom"])])])
-
-let rec recognize_by_grammar (grammar:grammar) (sentence:token list) :bool =
-	match grammar, sentence with
-	| End _, _ -> sentence = []
-	| P (wc, lst), [] -> false
-	| P (wc, lst), tk :: tl ->
-		if get_word_classe tk = wc then
-			let rec aux l =
-				match l with
-				| [] -> false
-				| h :: t -> recognize_by_grammar h tl || aux t
-			in aux lst
-		else
-			false
-
-let verify_sentence_by_grammar s =
-	let token_list = sentence_to_token_list s in
-	List.exists (fun x -> recognize_by_grammar gn_grammar x) (all_possibility token_list)
-
-
-let test = In_channel.input_line In_channel.stdin |> option_to_string |> verify_sentence_by_grammar |> print_bool
- *)
 
 let test = In_channel.input_line In_channel.stdin |> string_of_option |> string_to_syntax_tree_list |> syntax_tree_list_in_tex
