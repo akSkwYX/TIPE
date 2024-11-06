@@ -110,7 +110,6 @@ let read_dictionnary file =
 				let char_list, length_w = find_word s [] 0 in
 				let w = List.rev char_list |> string_of_char_list in
 				match l, w with
-				| _, "" -> failwith "read_dictionnary : empty word"
 				| ("Ip" as first_possibility) :: t, ("Is" as other_possibility)
 				| ("Ip" as first_possibility) :: t, ("Iq" as other_possibility)
 				| ("Ip" as first_possibility) :: t, ("If" as other_possibility)
@@ -135,11 +134,11 @@ let read_dictionnary file =
 				| ("Sp" as first_possibility) :: t, ("Sq" as other_possibility)
 				| ("1s" as first_possibility) :: t, ("2s" as other_possibility)
 				| ("1s" as first_possibility) :: t, ("3s" as other_possibility)
-					-> aux2 (list_without_x_last_char length_w s) ((first_possibility ^ "," ^ other_possibility) :: t)
+					-> aux2 (list_without_x_last_char (length_w+1) s) ((first_possibility ^ "," ^ other_possibility) :: t)
 				| ("Ip,Sp" as first_possibility :: t), ("Sq" as other_possibility)
 				| ("Iq,Sp" as first_possibility :: t), ("Sq" as other_possibility)
-					-> aux2 (list_without_x_last_char length_w s) ((first_possibility ^ "," ^ other_possibility) :: t)
-				| _ -> aux2 (list_without_x_last_char length_w s) (w :: l)
+					-> aux2 (list_without_x_last_char (length_w+1) s) ((first_possibility ^ "," ^ other_possibility) :: t)
+				| _ -> aux2 (list_without_x_last_char (length_w+1) s) (w :: l)
 		in
 		aux2 (char_list_of_string s) []
 	in
@@ -477,19 +476,22 @@ let check_subject_verb subject_informations verb_informations =
 			-> person
 		| _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
 	in
-	let verb_person = verb_informations |> get_verb_person |> String.split_on_char ',' in
-	match subject_informations, verb_person with
+	let list_verb_person = verb_informations |> get_verb_person |> String.split_on_char ',' in
+  match subject_informations, list_verb_person with
 	| person :: _ :: number :: [], h :: t ->
 		begin
-		let rec aux 
-		match person, number, person_verb with
-		| "01", "s", "1s" -> (true, subject_informations)
-		| "01", "p", "1p" -> (true, subject_informations)
-		| "02", "s", "2s" -> (true, subject_informations)
-		| "02", "p", "2p" -> (true, subject_informations)
-		| "03", "s", "3s" -> (true, subject_informations)
-		| "03", "p", "3p" -> (true, subject_informations)
-		| _ -> (false, [])
+    let rec check_all_person_verb list_verb_person =
+      match person, number, list_verb_person with
+      | "O1", "s", ("1s"::t) -> (true, subject_informations)
+      | "O1", "p", ("1p"::t) -> (true, subject_informations)
+      | "O2", "s", ("2s"::t) -> (true, subject_informations)
+      | "O2", "p", ("2p"::t) -> (true, subject_informations)
+      | "O3", "s", ("3s"::t) -> (true, subject_informations)
+      | "O3", "p", ("3p"::t) -> (true, subject_informations)
+      | _, _, (h::t) -> check_all_person_verb t
+      | _ -> (false, [])
+    in
+    check_all_person_verb list_verb_person
 		end
 	| person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
 	| _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
@@ -497,8 +499,8 @@ let check_subject_verb subject_informations verb_informations =
 let check_verbal_group subject_tree verb_tree =
 	let get_person informations =
 		match informations with
-		| g :: "s" :: [] -> ["03"; g; "s"]
-		| g :: "p" :: [] -> ["03"; g; "p"]
+		| g :: "s" :: [] -> ["O3"; g; "s"]
+		| g :: "p" :: [] -> ["O3"; g; "p"]
 		| _ -> failwith "get_person : informations doesn't match a gn"
 	in
 	match subject_tree, verb_tree with
