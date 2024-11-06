@@ -95,9 +95,57 @@ module Trie =
 
 (* Read a .txt of dictionary with first the word and after more informations on word separated by a comma *)
 let read_dictionnary file =
+	(* Transform the line received in the correct format of informations *)
+	let aux (s:string) :string list =
+		let rec aux2 s l =
+			match s with
+			| [] -> List.rev l
+			| _ -> 
+				let rec find_word l w length_w =
+					match l with
+					| [] -> w, length_w
+					| ',' :: t -> w, length_w
+					| c :: t -> find_word t (c::w) (length_w + 1)
+				in
+				let char_list, length_w = find_word s [] 0 in
+				let w = List.rev char_list |> string_of_char_list in
+				match l, w with
+				| _, "" -> failwith "read_dictionnary : empty word"
+				| ("Ip" as first_possibility) :: t, ("Is" as other_possibility)
+				| ("Ip" as first_possibility) :: t, ("Iq" as other_possibility)
+				| ("Ip" as first_possibility) :: t, ("If" as other_possibility)
+				| ("Ip" as first_possibility) :: t, ("Sp" as other_possibility)
+				| ("Ip" as first_possibility) :: t, ("Sq" as other_possibility)
+				| ("Is" as first_possibility) :: t, ("Ip" as other_possibility)
+				| ("Is" as first_possibility) :: t, ("Iq" as other_possibility)
+				| ("Is" as first_possibility) :: t, ("If" as other_possibility)
+				| ("Is" as first_possibility) :: t, ("Sp" as other_possibility)
+				| ("Is" as first_possibility) :: t, ("Sq" as other_possibility)
+				| ("Iq" as first_possibility) :: t, ("Ip" as other_possibility)
+				| ("Iq" as first_possibility) :: t, ("Is" as other_possibility)
+				| ("Iq" as first_possibility) :: t, ("If" as other_possibility)
+				| ("Iq" as first_possibility) :: t, ("Sp" as other_possibility)
+				| ("Iq" as first_possibility) :: t, ("Sq" as other_possibility)
+				| ("If" as first_possibility) :: t, ("Ip" as other_possibility)
+				| ("If" as first_possibility) :: t, ("Is" as other_possibility)
+				| ("If" as first_possibility) :: t, ("Iq" as other_possibility)
+				| ("If" as first_possibility) :: t, ("Sp" as other_possibility)
+				| ("If" as first_possibility) :: t, ("Sq" as other_possibility)
+				| ("Sp" as first_possibility) :: t, ("Ip" as other_possibility)
+				| ("Sp" as first_possibility) :: t, ("Sq" as other_possibility)
+				| ("1s" as first_possibility) :: t, ("2s" as other_possibility)
+				| ("1s" as first_possibility) :: t, ("3s" as other_possibility)
+					-> aux2 (list_without_x_last_char length_w s) ((first_possibility ^ "," ^ other_possibility) :: t)
+				| ("Ip,Sp" as first_possibility :: t), ("Sq" as other_possibility)
+				| ("Iq,Sp" as first_possibility :: t), ("Sq" as other_possibility)
+					-> aux2 (list_without_x_last_char length_w s) ((first_possibility ^ "," ^ other_possibility) :: t)
+				| _ -> aux2 (list_without_x_last_char length_w s) (w :: l)
+		in
+		aux2 (char_list_of_string s) []
+	in
 	let file = open_in file in
 	let rec read_lines trie =
-		let line = In_channel.input_line file |> Option.map (fun x -> String.split_on_char ',' x) in
+		let line = In_channel.input_line file |> Option.map aux in
 		match line with
 		| None -> trie
 		| Some (word::information) -> read_lines ( Trie.trie_insert trie word information )
@@ -419,9 +467,21 @@ let check_noun_adjective noun_informations adj_informations =
 			(false, [])
 
 let check_subject_verb subject_informations verb_informations =
-	match subject_informations, verb_informations with
-	| person :: _ :: number :: [], _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: person_verb :: [] ->
+	let get_verb_person verb_informations =
+		match verb_informations with
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
+			-> failwith "get_verb_person : Not implemented yet"
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+			-> person
+		| _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+	in
+	let verb_person = verb_informations |> get_verb_person |> String.split_on_char ',' in
+	match subject_informations, verb_person with
+	| person :: _ :: number :: [], h :: t ->
 		begin
+		let rec aux 
 		match person, number, person_verb with
 		| "01", "s", "1s" -> (true, subject_informations)
 		| "01", "p", "1p" -> (true, subject_informations)
@@ -431,29 +491,31 @@ let check_subject_verb subject_informations verb_informations =
 		| "03", "p", "3p" -> (true, subject_informations)
 		| _ -> (false, [])
 		end
-	| _ -> failwith "check_pronoun_personnal_verb : Doesn't receive a correct Pronoun_sujet and a Verb"
+	| person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
+	| _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
 
 let check_verbal_group subject_tree verb_tree =
 	let get_person informations =
 		match informations with
-		| _ :: "s" :: [] -> ["03"; "s"]
-		| _ :: "p" :: [] -> ["03"; "p"]
-		| _ -> failwith "get_person : informations doesn't match a personnal pronoun"
+		| g :: "s" :: [] -> ["03"; g; "s"]
+		| g :: "p" :: [] -> ["03"; g; "p"]
+		| _ -> failwith "get_person : informations doesn't match a gn"
 	in
 	match subject_tree, verb_tree with
-	| Node (Sujet, informations_subject, [ Node (Pronom_sujet, _, _); _ ] ), Node (Verbe, informations_verb, [ Leaf verb; _]) -> 
+	| Node (Sujet, informations_subject, [ Node (Pronom_sujet, _, _) ] ), Node (Verbe, informations_verb, [ Leaf verb ]) ->
 		let (success, informations) = check_subject_verb informations_subject informations_verb in
 		if success then
 			(true, informations, No)
 		else
 			(false, [], Conjuguaison verb)
-	| Node (Sujet, informations_subject, [ Node (GN, _, _); _ ]), Node (Verbe, informations_verb, [ Leaf verb; _]) -> 
+	| Node (Sujet, informations_subject, [ Node (GN, informations_gn, _) ]), Node (Verbe, informations_verb, [ Leaf verb ]) -> 
+		let _ = syntax_tree_list_in_tex [subject_tree; verb_tree] in
 		let (success, informations) = check_subject_verb (get_person informations_subject) informations_verb in
 		if success then
 			(true, informations, No)
 		else
 			(false, [], Conjuguaison verb)
-	| _ -> failwith "check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
+	| _ -> let _ = syntax_tree_list_in_tex [subject_tree; verb_tree] in failwith "check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
 	
 let check_nominal_group det_tree adj_tree nom_tree adj_tree_2 =
 	let get_first_adjectif_of_tree tree =
