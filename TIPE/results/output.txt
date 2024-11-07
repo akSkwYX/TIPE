@@ -1,0 +1,20 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./result.tex
+LaTeX2e <2020-02-02> patch level 2
+L3 programming layer <2020-02-14>
+! I can't find file `result.aux'.
+\enddocument ...keatletter \@@input \jobname .aux 
+                                                  \fi \@dofilelist \ifdim \f...
+l.1 \end{document}
+                  
+(Press Enter to retry, or Control-D to exit)
+Please type another input file name: 
+! Emergency stop.
+\enddocument ...keatletter \@@input \jobname .aux 
+                                                  \fi \@dofilelist \ifdim \f...
+l.1 \end{document}
+                  
+!  ==> Fatal error occurred, no output PDF file produced!
+Transcript written on result.log.

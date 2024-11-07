@@ -1,0 +1,26 @@
+(lang dune 3.16)
+
+(name TIPE)
+
+(generate_opam_files true)
+
+(source
+ (github akSkwYX/TIPE))
+
+(authors "SkwYX")
+
+(maintainers "SkwYX")
+
+(license LICENSE)
+
+(documentation https://url/to/documentation)
+
+(package
+ (name TIPE)
+ (synopsis "TIPE about detection and correction of grammatical errors in french sentences")
+ (description "TIPE about detection and correction of grammatical errors in french sentences")
+ (depends ocaml dune)
+ (tags
+  (topics "to describe" your project)))
+
+; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

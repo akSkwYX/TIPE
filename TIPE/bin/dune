@@ -1,0 +1,5 @@
+(executable
+ (public_name TIPE)
+ (name main)
+ (flags (:standard -w -27-32 ))
+ (libraries TIPE))
