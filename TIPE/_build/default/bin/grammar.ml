@@ -45,9 +45,11 @@ let syntax_tree_in_tex tree file =
 	Printf.fprintf file ";\n\\end{tikzpicture}\n\\end{center}\n"
 
 let syntax_tree_list_in_tex tree_list =
-  let file = open_out "result.tex" in
+	Sys.chdir "results";
+  let file = open_out_gen [Open_append] 0 "result.tex" in
 	List.iter (fun x -> syntax_tree_in_tex x file) tree_list;
-  close_out file
+  close_out file;
+	Sys.chdir ".."
 
 (* Represente the sentence which will be itterated over with indice being the index of where is the correction actually *)
 type item =

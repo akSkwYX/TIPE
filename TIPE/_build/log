@@ -13,7 +13,4 @@
 #  ; build_dir = In_build_dir "default"
 #  ; instrument_with = []
 #  }
-$ /home/codespace/.opam/5.2.0/bin/ocamlc.opt -config > /tmp/dune_a2c094_output
-$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl bin/main.ml) > _build/default/bin/.main.eobjs/dune__exe__Main.impl.d
-$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -27-32 -g -I bin/.main.eobjs/byte -I bin/.main.eobjs/native -I lib/.TIPE.objs/byte -I lib/.TIPE.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o bin/.main.eobjs/native/dune__exe__Main.cmx -c -impl bin/main.ml)
-$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -27-32 -g -o bin/main.exe lib/TIPE.cmxa bin/.main.eobjs/native/dune__exe.cmx bin/.main.eobjs/native/dune__exe__Utility.cmx bin/.main.eobjs/native/dune__exe__Trie.cmx bin/.main.eobjs/native/dune__exe__Dictionnary.cmx bin/.main.eobjs/native/dune__exe__Word_classe.cmx bin/.main.eobjs/native/dune__exe__Token.cmx bin/.main.eobjs/native/dune__exe__Grammar.cmx bin/.main.eobjs/native/dune__exe__Main.cmx)
+$ /home/codespace/.opam/5.2.0/bin/ocamlc.opt -config > /tmp/dune_065714_output
