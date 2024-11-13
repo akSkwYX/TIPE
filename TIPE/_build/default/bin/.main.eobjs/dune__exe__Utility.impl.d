@@ -1,1 +1,1 @@
-bin/utility.ml: Array Fun List String
+bin/utility.ml: Array Bytes Fun List String

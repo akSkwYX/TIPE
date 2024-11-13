@@ -1,5 +1,3 @@
-(* open Utility *)
-
 type trie =
 | Node of (bool * (string list) list) * (char * trie) list
 | Leaf of bool * (string list) list

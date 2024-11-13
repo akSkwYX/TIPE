@@ -27,7 +27,7 @@ let () = init_tex "result.tex" "results"
 let test = In_channel.input_line In_channel.stdin 
 					 |> Utility.string_of_option
 					 |> Grammar.string_to_syntax_tree_list
-					 |> Grammar.syntax_tree_list_in_tex
+					 |> Grammar.get_results
 
 let () = end_tex "results/result.tex"
 let () = compile_tex "result.tex" "results"

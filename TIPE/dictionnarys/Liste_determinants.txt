@@ -1,126 +1,78 @@
-de,D,e,i
-des,D,e,p
-du,D,m,s
-la,D,f,s
-un,D,m,s
-le,D,m,s
-les,D,e,p
-une,D,f,s
-au,D,m,s
-son,Dp,e,s
-aux,D,e,p
-cette,Dd,f,s
-ce,Dd,m,s
-ces,Dd,e,p
-ses,Dp,e,p
-sa,Dp,f,s
-leur,Dp,e,s
-notre,Dp,e,s
-cet,Dd,m,s
-leurs,Dp,e,p
-nos,Dp,e,p
-mon,Dp,e,s
-ma,Dp,f,s
-votre,Dp,e,s
-mes,Dp,e,p
-vos,Dp,e,p
-ton,Dp,e,s
-ta,Dp,f,s
-tes,Dp,e,p
-ladite,D,f,s
-ledit,D,m,s
-dudit,D,m,s
-lesdits,D,m,p
-audit,D,m,s
-desdits,D,m,p
-icelle,Dd,f,s
-desdites,D,f,p
-lesdites,D,f,p
-icelles,Dd,f,p
-iceux,Dd,m,p
-auxdits,R,m,p
-icelui,Dd,m,s
-moult,D,e,i
-auxdites,D,f,p
-c’,Dd,m,s
-d’,D,e,i
-l’,D,e,s
-
-de	de	:G:D:e:i/*
-des	des	:G:D:e:p/*
-du	du	:G:D:m:s/*
-la	la	:G:D:f:s/*
-un	un	:G:D:m:s/*
-le	le	:G:D:m:s/*
-les	les	:G:D:e:p/*
-une	une	:G:D:f:s/*
-au	au	:G:R:D:m:s/*
-son	son	:G:Dp:e:s/*
-aux	aux	:G:R:D:e:p/*
-cette	cette	:G:Dd:f:s/*
-ce	ce	:G:Dd:m:s/*
-ces	ces	:G:Dd:e:p/*
-ses	ses	:G:Dp:e:p/*
-sa	sa	:G:Dp:f:s/*
-leur	leur	:G:Dp:e:s/*
-notre	notre	:G:Dp:e:s/*
-quelques	quelque	:G:Di:e:p/*
-cet	cet	:G:Dd:m:s/*
-tous	tous	:G:Di:m:p/*
-tous	tous	:G:Di:m:p/*
-tout	tout	:G:Di:m:s/*
-leurs	leur	:G:Dp:e:p/*
-nos	nos	:G:Dp:e:p/*
-chaque	chaque	:G:Di:e:s/*
-mon	mon	:G:Dp:e:s/*
-toute	toute	:G:Di:f:s/*
-ma	ma	:G:Dp:f:s/*
-toutes	toutes	:G:Di:f:p/*
-votre	votre	:G:Dp:e:s/*
-mes	mes	:G:Dp:e:p/*
-plusieurs	plusieurs	:G:Di:e:p/*
-quelque	quelque	:G:Di:e:s/*
-diverses	diverses	:G:Di:f:p/*
-divers	divers	:G:Di:m:p/*
-quelle	quel	:G:Di:Di:f:s/*
-quel	quel	:G:Di:Di:m:s/*
-vos	vos	:G:Dp:e:p/*
-certains	certain	:G:Di:m:p/*
-ton	ton	:G:Dp:e:s/*
-certain	certain	:G:Di:m:s/*
-certaines	certain	:G:Di:f:p/*
-ta	ta	:G:Dp:f:s/*
-quelles	quel	:G:Di:Di:f:p/*
-quels	quel	:G:Di:Di:m:p/*
-certaine	certain	:G:Di:f:s/*
-tes	tes	:G:Dp:e:p/*
-ladite	ladite	:G:D:f:s/*
-ledit	ledit	:G:D:m:s/*
-nulle	nul	:G:Dn:f:s/*
-dudit	dudit	:G:D:m:s/*
-nul	nul	:G:Dn:m:s/*
-maintes	maint	:G:Di:f:p/*
-lesdits	lesdits	:G:D:m:p/*
-audit	audit	:G:R:D:m:s/*
-aucuns	aucun	:G:Dn:m:p/*
-desdits	desdits	:G:D:m:p/*
-aucun	aucun	:G:Dn:m:s/*
-aucune	aucun	:G:Dn:f:s/*
-icelle	icelle	:G:Dd:Od:f:s/*
-desdites	desdites	:G:D:f:p/*
-lesdites	lesdites	:G:D:f:p/*
-maints	maint	:G:Di:m:p/*
-aucunes	aucun	:G:Dn:f:p/*
-icelles	icelles	:G:Dd:Od:f:p/*
-nuls	nul	:G:Dn:m:p/*
-iceux	iceux	:G:Dd:Od:m:p/*
-mainte	maint	:G:Di:f:s/*
-nulles	nul	:G:Dn:f:p/*
-auxdits	auxdits	:G:R:D:m:p/*
-maint	maint	:G:Di:m:s/*
-icelui	icelui	:G:Dd:Od:m:s/*
-moult	moult	:G:D:e:i/*
-auxdites	auxdites	:G:R:D:f:p/*
-c’	c’	:G:Dd:m:s/*
-d’	d’	:G:D:e:i/*
-l’	l’	:G:D:e:s/*
+de,de,D,e,i
+des,des,D,e,p
+du,du,D,m,s
+la,la,D,f,s
+un,un,D,m,s
+le,le,D,m,s
+les,les,D,e,p
+une,une,D,f,s
+au,au,R,D,m,s
+son,son,D,e,s
+aux,aux,D,e,p
+cette,cette,D,f,s
+ce,ce,D,m,s
+ces,ces,D,e,p
+ses,ses,D,e,p
+sa,sa,D,f,s
+leur,leur,D,e,s
+notre,notre,D,e,s
+quelques,quelque,D,e,p
+cet,cet,D,m,s
+tous,tous,D,m,p
+tous,tous,D,m,p
+tout,tout,D,m,s
+leurs,leur,D,e,p
+nos,nos,D,e,p
+chaque,chaque,D,e,s
+mon,mon,D,e,s
+toute,toute,D,f,s
+ma,ma,D,f,s
+toutes,toutes,D,f,p
+votre,votre,D,e,s
+mes,mes,D,e,p
+plusieurs,plusieurs,D,e,p
+quelque,quelque,D,e,s
+diverses,diverses,D,f,p
+divers,divers,D,m,p
+quelle,quel,D,f,s
+quel,quel,D,m,s
+vos,vos,D,e,p
+certains,certain,D,m,p
+ton,ton,D,e,s
+certain,certain,D,m,s
+certaines,certain,D,f,p
+ta,ta,D,f,s
+quelles,quel,D,f,p
+quels,quel,D,m,p
+certaine,certain,D,f,s
+tes,tes,D,e,p
+ladite,ladite,D,f,s
+ledit,ledit,D,m,s
+nulle,nul,D,f,s
+dudit,dudit,D,m,s
+nul,nul,D,m,s
+maintes,maint,D,f,p
+lesdits,lesdits,D,m,p
+audit,audit,D,m,s
+aucuns,aucun,D,m,p
+desdits,desdits,D,m,p
+aucun,aucun,D,m,s
+aucune,aucun,D,f,s
+icelle,icelle,D,f,s
+desdites,desdites,D,f,p
+lesdites,lesdites,D,f,p
+maints,maint,D,m,p
+aucunes,aucun,D,f,p
+icelles,icelles,D,f,p
+nuls,nul,D,m,p
+iceux,iceux,D,m,p
+mainte,maint,D,f,s
+nulles,nul,D,f,p
+auxdits,auxdits,D,m,p
+maint,maint,D,m,s
+icelui,icelui,D,m,s
+moult,moult,D,e,i
+auxdites,auxdites,D,f,p
+c’,c’,D,m,s
+d’,d’,D,e,i
+l’,l’,D,e,s

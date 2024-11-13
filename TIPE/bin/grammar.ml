@@ -20,7 +20,6 @@ let string_of_error e =
 	| Conjuguaison s -> "Conjuguaison : " ^ s
 	| No -> "No"
 
-
 type syntax_tree =
 	| Node of Word_classe.word_classe * string list * syntax_tree list
 	| Leaf of string
@@ -50,6 +49,19 @@ let syntax_tree_list_in_tex tree_list =
 	List.iter (fun x -> syntax_tree_in_tex x file) tree_list;
   close_out file;
 	Sys.chdir ".."
+
+let is_a_success_tree tree =
+	match tree with
+	| Error _ -> false
+	| _ -> true
+
+let get_results tree_list =
+	let filtered_list = List.filter is_a_success_tree tree_list in
+	match filtered_list with
+	| [] -> syntax_tree_list_in_tex tree_list; print_string "Not a correct sentence"
+	| h :: t -> syntax_tree_list_in_tex filtered_list; print_string "Correct sentence"
+	
+
 
 (* Represente the sentence which will be itterated over with indice being the index of where is the correction actually *)
 type item =
@@ -146,6 +158,16 @@ let check_subject_verb subject_informations verb_informations =
 	| person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
 	| _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
 
+let is_conjugue verb_informations =
+  match verb_informations with
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
+			-> false
+		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+			-> true
+		| _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+
 let check_verbal_group subject_tree verb_tree =
 	let get_person informations =
 		match informations with
@@ -155,18 +177,27 @@ let check_verbal_group subject_tree verb_tree =
 	in
 	match subject_tree, verb_tree with
 	| Node (Word_classe.Sujet, informations_subject, [ Node (Word_classe.Pronom_sujet, _, _) ] ), Node (Word_classe.Verbe, informations_verb, [ Leaf verb ]) ->
-		let (success, informations) = check_subject_verb informations_subject informations_verb in
-		if success then
-			(true, informations, No)
-		else
-			(false, [], Conjuguaison verb)
-	| Node (Word_classe.Sujet, informations_subject, [ Node (Word_classe.GN, informations_gn, _) ]), Node (Word_classe.Verbe, informations_verb, [ Leaf verb ]) -> 
-		syntax_tree_list_in_tex [subject_tree; verb_tree];
-		let (success, informations) = check_subject_verb (get_person informations_subject) informations_verb in
-		if success then
-			(true, informations, No)
-		else
-			(false, [], Conjuguaison verb)
+    if is_conjugue informations_verb then
+      begin
+        let (success, informations) = check_subject_verb informations_subject informations_verb in
+        if success then
+          (true, informations, No)
+        else
+          (false, [], Conjuguaison verb)
+      end
+    else
+      (false, [], Conjuguaison verb)
+	| Node (Word_classe.Sujet, informations_subject, [ Node (Word_classe.GN, informations_gn, _) ]), Node (Word_classe.Verbe, informations_verb, [ Leaf verb ]) ->
+    if is_conjugue informations_verb then
+      begin 
+        let (success, informations) = check_subject_verb (get_person informations_subject) informations_verb in
+        if success then
+          (true, informations, No)
+        else
+          (false, [], Conjuguaison verb)
+      end
+    else
+      (false, [], Conjuguaison verb)
 	| _ -> syntax_tree_list_in_tex [subject_tree; verb_tree]; failwith "check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
 	
 let check_nominal_group det_tree adj_tree nom_tree adj_tree_2 =

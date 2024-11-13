@@ -17,6 +17,11 @@ let char_list_of_string string =
 let string_of_char_list list =
 	list |> List.to_seq |> String.of_seq
 
+let replace_char_in_string (word:string) (index:int) (letter:char) :string =
+	let word_bytes = Bytes.of_string word in
+	Bytes.set word_bytes index letter;
+	Bytes.to_string word_bytes
+
 let print_char_list = List.iter (fun x -> print_char x; print_string " | ")
 
 let print_string_list = List.iter (fun x -> print_string x; print_string " | ")
@@ -40,3 +45,9 @@ let rec list_without_x_last_char x list =
 	| [] -> []
 	| h :: t when x = 0 -> list
 	| h :: t -> list_without_x_last_char (x - 1) t
+
+let list_list_to_list list =
+  List.fold_left (fun acc x -> acc @ x) [] list
+
+let print_string_list_list list =
+  List.iter (fun x -> print_string_list x; print_newline ()) list
