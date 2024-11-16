@@ -167,8 +167,11 @@ let sentence_to_token_list (s:string) :token list list =
 				(* Return all possibility for a word *)
         aux t ((match_information information [] word) :: list_token)
 			else
-        let correction_possibilitys = get_correction_possibility_for_word word in
-				aux t (get_correction_possibility_for_word word :: list_token)
+        begin
+          print_string ("Not a correct sentence : Unknown word " ^ word ^ "\nTrying to find correction\n");
+          let correction_possibilitys = get_correction_possibility_for_word word in
+          aux t (get_correction_possibility_for_word word :: list_token)
+        end
 	in
 	List.rev (aux (sentence_to_list s) [])
 

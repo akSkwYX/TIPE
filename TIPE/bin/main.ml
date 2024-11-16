@@ -1,10 +1,3 @@
-(* open Utility
-open Trie
-open Tokenization
-open Word_classe
-open Grammar
-open Dictionnary *)
-
 let init_tex file_name folder_path =
 	Sys.chdir folder_path;
 	let file = open_out file_name in

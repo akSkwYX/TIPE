@@ -58,18 +58,18 @@ let get_information token =
 
 let get_gender token =
   match token with
-  | Token (Word_classe.Adjectif, (_, l)) -> List.nth l 0 (* Wanting catching error but no success trying later *)
-  | Token (Word_classe.Nom, (_, l)) -> List.nth l 0
-  | Token (Word_classe.Determinant, (_, l)) -> List.nth l 0
-  | Token (Word_classe.Pronom_sujet, (_, l)) -> List.nth l 1
-  | _ -> failwith "get_gender : not something which have a gender"
-
-let get_number token =
-  match token with
   | Token (Word_classe.Adjectif, (_, l)) -> List.nth l 1 (* Wanting catching error but no success trying later *)
   | Token (Word_classe.Nom, (_, l)) -> List.nth l 1
   | Token (Word_classe.Determinant, (_, l)) -> List.nth l 1
   | Token (Word_classe.Pronom_sujet, (_, l)) -> List.nth l 2
+  | _ -> failwith "get_gender : not something which have a gender"
+
+let get_number token =
+  match token with
+  | Token (Word_classe.Adjectif, (_, l)) -> List.nth l 2 (* Wanting catching error but no success trying later *)
+  | Token (Word_classe.Nom, (_, l)) -> List.nth l 2
+  | Token (Word_classe.Determinant, (_, l)) -> List.nth l 2
+  | Token (Word_classe.Pronom_sujet, (_, l)) -> List.nth l 3
   | _ -> failwith "get_number : not something which have a number"
 
 let get_word_classe token =
@@ -167,8 +167,11 @@ let sentence_to_token_list (s:string) :token list list =
 				(* Return all possibility for a word *)
         aux t ((match_information information [] word) :: list_token)
 			else
-        let correction_possibilitys = get_correction_possibility_for_word word in
-				aux t (get_correction_possibility_for_word word :: list_token)
+        begin
+          print_string ("Not a correct sentence : Unknown word " ^ word ^ "\nTrying to find correction\n");
+          let correction_possibilitys = get_correction_possibility_for_word word in
+          aux t (get_correction_possibility_for_word word :: list_token)
+        end
 	in
 	List.rev (aux (sentence_to_list s) [])
 
