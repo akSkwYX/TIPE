@@ -1,4 +1,4 @@
-# dune exec TIPE
+# dune build -w
 # OCAMLPARAM: unset
 # Shared cache: disabled
 # Shared cache location: /home/codespace/.cache/dune/db
@@ -13,4 +13,326 @@
 #  ; build_dir = In_build_dir "default"
 #  ; instrument_with = []
 #  }
-$ /home/codespace/.opam/5.2.0/bin/ocamlc.opt -config > /tmp/dune_042be7_output
+$ /home/codespace/.opam/5.2.0/bin/ocamlc.opt -config > /tmp/dune_cfeb44_output
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -no-alias-deps -opaque -o ml/.main.eobjs/byte/dune__exe.cmo -c -impl ml/.main.eobjs/dune__exe.ml-gen)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -intf ml/main.mli) > _build/default/ml/.main.eobjs/dune__exe__Main.intf.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I ml/.main.eobjs/byte -I ml/.main.eobjs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o ml/.main.eobjs/native/dune__exe.cmx -c -impl ml/.main.eobjs/dune__exe.ml-gen)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Utility.cmo -c -impl ml/utility.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Word_classe.cmo -c -impl ml/word_classe.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Main.cmi -c -intf ml/main.mli)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Trie.cmo -c -impl ml/trie.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -I ml/.main.eobjs/byte -I ml/.main.eobjs/native -I lib/.TIPE.objs/byte -I lib/.TIPE.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/native/dune__exe__Utility.cmx -c -impl ml/utility.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -I ml/.main.eobjs/byte -I ml/.main.eobjs/native -I lib/.TIPE.objs/byte -I lib/.TIPE.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/native/dune__exe__Word_classe.cmx -c -impl ml/word_classe.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+> File "ml/dictionnary.ml", line 57, characters 72-76:
+> 57 | 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie word (radical::information) ) (Trie.trie_insert trie radical (word::information) ) )
+>      		                                                                      ^^^^
+> Error: Unbound value trie
+> Hint: Did you mean trie1 or trie2?
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -I ml/.main.eobjs/byte -I ml/.main.eobjs/native -I lib/.TIPE.objs/byte -I lib/.TIPE.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/native/dune__exe__Trie.cmx -c -impl ml/trie.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+> File "ml/dictionnary.ml", line 57, characters 54-107:
+> 57 | 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ) (Trie.trie_insert trie radical (word::information) ) )
+>      		                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error: This expression has type Dune__exe__Trie.trie
+>        This is not a function; it cannot be applied.
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+> File "ml/dictionnary.ml", line 57, characters 54-107:
+> 57 | 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ) (Trie.trie_insert trie2 radical (word::information) ) )
+>      		                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error: This expression has type Dune__exe__Trie.trie
+>        This is not a function; it cannot be applied.
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+> File "ml/dictionnary.ml", line 60, characters 46-47:
+> 60 | 	read_lines Trie.trie_create, Trie.trie_create)
+>      	                                             ^
+> Error: Syntax error
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+> File "ml/dictionnary.ml", line 57, characters 54-107:
+> 57 | 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ) (Trie.trie_insert trie2 radical (word::information) ) )
+>      		                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error: This expression has type Dune__exe__Trie.trie
+>        This is not a function; it cannot be applied.
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+> File "ml/dictionnary.ml", lines 55-58, characters 2-55:
+> 55 | ..match line with
+> 56 | 		| None -> (trie1, trie2)
+> 57 | 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ), (Trie.trie_insert trie2 radical (word::information) ) )
+> 58 | 		| Some [] -> failwith "read_dictionnary : empty line"
+> Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> Some (word::[])
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+> File "ml/dictionnary.ml", lines 55-58, characters 2-55:
+> 55 | ..match line with
+> 56 | 		| None -> (trie1, trie2)
+> 57 | 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ), (Trie.trie_insert trie2 radical (word::information) ) )
+> 58 | 		| Some [] -> failwith "read_dictionnary : empty line"
+> Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> Some (word::[])
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/dictionnary.ml) > _build/default/ml/.main.eobjs/dune__exe__Dictionnary.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Dictionnary.cmo -c -impl ml/dictionnary.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 87, characters 22-50:
+> 87 | let get_verb_person ( (wc, (s, verb_informations)):token ) :string list =
+>                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error: This pattern matches values of type 'a * 'b
+>        but a pattern was expected which matches values of type token
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -I ml/.main.eobjs/byte -I ml/.main.eobjs/native -I lib/.TIPE.objs/byte -I lib/.TIPE.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/native/dune__exe__Dictionnary.cmx -c -impl ml/dictionnary.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 87, characters 22-23:
+> 87 | let get_verb_person ( :token ) :string list =
+>                            ^
+> Error: Syntax error: "operator" expected.
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 88, characters 8-25:
+> 88 |   match verb_informations with
+>              ^^^^^^^^^^^^^^^^^
+> Error: Unbound value verb_informations
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 90, characters 2-7:
+> 90 |   match verb_informations with
+>        ^^^^^
+> Error: Syntax error
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 91, characters 2-7:
+> 91 |   match verb_informations with
+>        ^^^^^
+> Error: Syntax error
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 91, characters 2-7:
+> 91 |   match verb_informations with
+>        ^^^^^
+> Error: Syntax error
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 97, characters 7-13:
+> 97 |     -> person
+>             ^^^^^^
+> Error: This expression has type string but an expression was expected of type
+>          string list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 97, characters 9-15:
+> 97 |       -> person
+>               ^^^^^^
+> Error: This expression has type string but an expression was expected of type
+>          string list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 101, characters 0-3:
+> 101 | let sentence_to_list s =
+>       ^^^
+> Error: Syntax error: "end" expected
+> File "ml/token.ml", line 91, characters 4-9:
+> 91 |     begin
+>          ^^^^^
+>   This "begin" might be unmatched
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 101, characters 0-3:
+> 101 | let sentence_to_list s =
+>       ^^^
+> Error: Syntax error: "end" expected
+> File "ml/token.ml", line 91, characters 4-9:
+> 91 |     begin
+>          ^^^^^
+>   This "begin" might be unmatched
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 11-17:
+> 98 |         -> person
+>                 ^^^^^^
+> Error: This expression has type string but an expression was expected of type
+>          string list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 98, characters 17-18:
+> 98 |         -> person]
+>                       ^
+> Error: Syntax error: "end" expected
+> File "ml/token.ml", line 91, characters 4-9:
+> 91 |     begin
+>          ^^^^^
+>   This "begin" might be unmatched
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 11-17:
+> 98 |         -> person
+>                 ^^^^^^
+> Error: This expression has type string but an expression was expected of type
+>          string list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 11-24:
+> 98 |         -> Utilityperson
+>                 ^^^^^^^^^^^^^
+> Error: This variant expression is expected to have type string list
+>        There is no constructor Utilityperson within type list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 11-26:
+> 98 |         -> Utility. person
+>                 ^^^^^^^^^^^^^^^
+> Error: Unbound value Utility.person
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 11-24:
+> 98 |         -> Utility.list_ person
+>                 ^^^^^^^^^^^^^
+> Error: Unbound value Utility.list_
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 12-18:
+> 98 |         ->  person
+>                  ^^^^^^
+> Error: This expression has type string but an expression was expected of type
+>          string list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 11-13:
+> 98 |         -> St person
+>                 ^^
+> Error: This variant expression is expected to have type string list
+>        There is no constructor St within type list
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", line 98, characters 33-39:
+> 98 |         -> String.split_on_char  person
+>                                       ^^^^^^
+> Error: This expression has type string but an expression was expected of type
+>          char
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 98, characters 32-33:
+> 98 |         -> String.split_on_char ' person
+>                                      ^
+> Error: Syntax error: "end" expected
+> File "ml/token.ml", line 91, characters 4-9:
+> 91 |     begin
+>          ^^^^^
+>   This "begin" might be unmatched
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", lines 88-100, characters 2-7:
+>  88 | ..match token with
+>  89 |   | Unknown _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+>  90 |   | Token (Word_classe.Verbe, (verb, verb_informations)) ->
+>  91 |     begin
+>  92 |       match verb_informations with
+> ...
+>  97 |       | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+>  98 |         -> String.split_on_char ',' person
+>  99 |       | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+> 100 |     end
+> Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> Token
+>   ((S|GV|GN|MultipleAdj|Pronom_sujet|Sujet|Determinant|Nom|Adjectif|Unknown),
+>   _)
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+> File "ml/token.ml", line 98, characters 42-43:
+> 98 |         -> String.split_on_char ',' person)
+>                                                ^
+> Error: Syntax error: "end" expected
+> File "ml/token.ml", line 91, characters 4-9:
+> 91 |     begin
+>          ^^^^^
+>   This "begin" might be unmatched
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", lines 88-100, characters 2-7:
+>  88 | ..match token with
+>  89 |   | Unknown _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+>  90 |   | Token (Word_classe.Verbe, (verb, verb_informations)) ->
+>  91 |     begin
+>  92 |       match verb_informations with
+> ...
+>  97 |       | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+>  98 |         -> (String.split_on_char ',' person)
+>  99 |       | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+> 100 |     end
+> Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> Token
+>   ((S|GV|GN|MultipleAdj|Pronom_sujet|Sujet|Determinant|Nom|Adjectif|Unknown),
+>   _)
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+> File "ml/token.ml", lines 88-100, characters 2-7:
+>  88 | ..match token with
+>  89 |   | Unknown _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+>  90 |   | Token (Word_classe.Verbe, (verb, verb_informations)) ->
+>  91 |     begin
+>  92 |       match verb_informations with
+> ...
+>  97 |       | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+>  98 |         -> (String.split_on_char ',' person)
+>  99 |       | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+> 100 |     end
+> Error (warning 8 [partial-match]): this pattern-matching is not exhaustive.
+> Here is an example of a case that is not matched:
+> Token
+>   ((S|GV|GN|MultipleAdj|Pronom_sujet|Sujet|Determinant|Nom|Adjectif|Unknown),
+>   _)
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/token.ml) > _build/default/ml/.main.eobjs/dune__exe__Token.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Token.cmo -c -impl ml/token.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Grammar.cmo -c -impl ml/grammar.ml)
+> File "ml/grammar.ml", line 17, characters 95-111:
+> 17 |     "\nVerb person is : " ^ Utility.string_of_string_list (Token.get_verb_person (Token.Token (Word_classe.Vebe, (verb, info_verb))) ) ^
+>                                                                                                     ^^^^^^^^^^^^^^^^
+> Error: Unbound constructor Word_classe.Vebe
+> Hint: Did you mean Verbe?
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlopt.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -I ml/.main.eobjs/byte -I ml/.main.eobjs/native -I lib/.TIPE.objs/byte -I lib/.TIPE.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/native/dune__exe__Token.cmx -c -impl ml/token.ml)
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/grammar.ml) > _build/default/ml/.main.eobjs/dune__exe__Grammar.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Grammar.cmo -c -impl ml/grammar.ml)
+> File "ml/grammar.ml", line 129, characters 24-66:
+> 129 | 	let list_verb_person = verb_informations |> Token.get_verb_person |> String.split_on_char ',' in
+>       	                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> Error: This expression has type string list
+>        but an expression was expected of type string
+[2]
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamldep.opt -modules -impl ml/grammar.ml) > _build/default/ml/.main.eobjs/dune__exe__Grammar.impl.d
+$ (cd _build/default && /home/codespace/.opam/5.2.0/bin/ocamlc.opt -w @1..3@5..28@31..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -26-27-32 -g -bin-annot -bin-annot-occurrences -I ml/.main.eobjs/byte -I lib/.TIPE.objs/byte -no-alias-deps -opaque -open Dune__exe -o ml/.main.eobjs/byte/dune__exe__Grammar.cmo -c -impl ml/grammar.ml)
+> File "ml/grammar.ml", line 170, characters 78-95:
+> 170 |         let (success, informations) = check_subject_verb informations_subject informations_verb in
+>                                                                                     ^^^^^^^^^^^^^^^^^
+> Error: This expression has type string list
+>        but an expression was expected of type Token.token
+[2]
