@@ -222,7 +222,7 @@ let check_nominal_group det_tree adj_tree nom_tree adj_tree_2 =
 				(false, [], Accord ((Word_classe.Adjectif, (get_first_adjectif_of_tree adj_tree)), (Word_classe.Adjectif, (get_first_adjectif_of_tree adj_tree_2))))
 	| _ -> failwith "check_nominal_group : Doesn't receive a correct Adjectif tree"
 
-(* Increasing the index of sentence which is in correcting and return if it receive the expected state *)
+(* Increasing the index of sentence which is currently being corrected *)
 let pass sentence =
 	sentence.indice <- sentence.indice + 1
 
@@ -233,16 +233,16 @@ let rec get_syntax_tree sentence =
 	else
 		get_verbal_group sentence
 
-and get_verbal_group s =
-	let subject_tree = get_subject s in
+and get_verbal_group sentence =
+	let (subject_tree, subject_token) = get_subject sentence in
 	match subject_tree with
 	| Error e -> Error e
 	| _ ->
-		let verb_tree = get_verb s in
+		let (verb_tree, verb_token) = get_verb sentence in
 		match verb_tree with
 		| Error e -> Error e
 		| _ ->
-			let (success, informations, error) = check_verbal_group subject_tree verb_tree in
+			let (success, informations, error) = check_verbal_group subject_token verb_token in
 			if success then
 				Node (Word_classe.GV, informations, [subject_tree; verb_tree])
 			else
@@ -250,24 +250,30 @@ and get_verbal_group s =
 
 and get_subject s =
 	if s.indice >= s.length then
-		Error Empty_sentence
+		(Error Empty_sentence, [])
 	else
 		begin
 		let wc_token = Token.get_word_classe s.t_a.(s.indice) in
-		if wc_token = Word_classe.Determinant || wc_token = Word_classe.Nom || wc_token = Word_classe.Adjectif then
-			let nominal_group_tree = get_nominal_group s in
-			match nominal_group_tree with
-			| Error e -> Error e
-			| Node (Word_classe.GN, informations, _) -> Node (Word_classe.Sujet, informations, [nominal_group_tree])
-			| _ -> failwith "get_subject : wrong tree, waiting for a GN"
-		else if Token.get_word_classe s.t_a.(s.indice) = Word_classe.Pronom_sujet then
-			let pronom_sujet_tree = get_pronom_sujet s in
-			match pronom_sujet_tree with
-			| Error e -> Error e
-			| Node (Word_classe.Pronom_sujet, informations, _) -> Node (Word_classe.Sujet, informations, [pronom_sujet_tree])
-			| _ -> failwith "get_subject : wrong tree, waiting for a Pronom_sujet"
-		else
-			Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice)))
+    match wc_token with
+    | Word_classe.Determinant | Word_classe.Nom | Word_classe.Adjectif
+      ->
+      begin
+        let (nominal_group_tree, nominal_group_token) = get_nominal_group s in
+        match nominal_group_tree with
+        | Error e -> Error e
+        | Node (Word_classe.GN, informations, _) -> Node (Word_classe.Sujet, informations, [nominal_group_tree])
+        | _ -> failwith "get_subject : wrong tree, waiting for a GN"
+      end
+		| Word_classe.Pronom_sujet
+      ->
+      begin
+        let (pronom_sujet_tree, pronom_subject_token) = get_pronom_sujet s in
+        match pronom_sujet_tree with
+        | Error e -> Error e
+        | Node (Word_classe.Pronom_sujet, informations, _) -> Node (Word_classe.Sujet, informations, [pronom_sujet_tree])
+        | _ -> failwith "get_subject : wrong tree, waiting for a Pronom_sujet"
+      end
+		| _ -> Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice)))
 		end
 
 and get_nominal_group s =
