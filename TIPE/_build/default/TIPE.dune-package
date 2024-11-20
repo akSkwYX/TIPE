@@ -1,4 +1,4 @@
 (lang dune 3.16)
 (name TIPE)
 (sections (lib .) (bin ../../bin))
-(files (lib (META dune-package opam)) (bin (TIPE)))
+(files (lib (META dune-package opam)) (bin (main)))
