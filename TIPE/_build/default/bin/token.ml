@@ -17,8 +17,12 @@ let string_of_token t =
   | Token (Word_classe.Unknown, (s, l)) ->  failwith "string_of_token : Unknown token declared as Token"
   | Unknown w ->  "Unknown " ^ w
 
+
+let print_token token =
+  print_string (string_of_token token)
+
 let print_token_list =
-  List.iter (fun x -> print_string (string_of_token x); print_string " | ")
+  List.iter (fun x -> print_token x; print_string " | ")
 
 let print_token_list_list =
   List.iter (fun x -> print_token_list x; print_newline ())
@@ -48,8 +52,8 @@ let get_information token =
   | Token (Word_classe.Pronom_sujet, (s, l)) -> l
   | Token (Word_classe.GN, (s, l)) -> l
   | Token (Word_classe.MultipleAdj, (s, l)) -> l
-  | Token (Word_classe.S, (s, l)) -> failwith "get_information : trying to get a information from a S"
-  | Token (Word_classe.GV, (s, l)) -> failwith "get_information : trying to get a information from a GV"
+  | Token (Word_classe.S, (s, l)) -> l
+  | Token (Word_classe.GV, (s, l)) -> l
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_information : Unknown token declared as Token"
   | Unknown _ -> failwith "get_information : tring to get a information from a Unknown"
 
@@ -89,11 +93,11 @@ let get_verb_person ( token:token ) :string list =
   | Token (Word_classe.Verbe, (verb, verb_informations)) ->
     begin
       match verb_informations with
-      | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
-      | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
-      | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
         -> []
-      | intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
         -> (String.split_on_char ',' person)
       | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
     end
@@ -137,11 +141,11 @@ let sentence_to_token_list (s:string) :token list list =
   let rec match_information i possibility word =
     match i with
     | [] -> possibility
-    | ("D"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Determinant, (word, complementary_information) ) :: possibility) word
-    | ("N"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Nom, (word, complementary_information) ) :: possibility) word
-    | ("A"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Adjectif, (word, complementary_information) ) :: possibility) word
-    | ("V"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Verbe, (word, complementary_information) ) :: possibility) word
-    | ("Os"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Pronom_sujet, (word, complementary_information) ) :: possibility) word
+    | (rad_det::"D"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Determinant, (word, rad_det::complementary_information) ) :: possibility) word
+    | (rad_noun::"N"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Nom, (word, rad_noun::complementary_information) ) :: possibility) word
+    | (rad_adj::"A"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Adjectif, (word, rad_adj::complementary_information) ) :: possibility) word
+    | (rad_verb::"V"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Verbe, (word, rad_verb::complementary_information) ) :: possibility) word
+    | (rad_subj_pronoun::"Os"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Pronom_sujet, (word, rad_subj_pronoun::complementary_information) ) :: possibility) word
     | _ when possibility = [] -> [Unknown "Unknown"]
     | _ -> failwith "match_information : wrong information"
   in

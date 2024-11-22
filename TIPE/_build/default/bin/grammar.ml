@@ -63,8 +63,8 @@ let is_a_success_tree tree =
 let get_results tree_list =
 	let filtered_list = List.filter is_a_success_tree tree_list in
 	match filtered_list with
-	| [] -> syntax_tree_list_in_tex tree_list; print_string "Not a correct sentence"
-	| h :: t -> syntax_tree_list_in_tex filtered_list; print_string "Correct sentence"
+	| [] -> syntax_tree_list_in_tex tree_list; print_string "Not a correct sentence\n"
+	| h :: t -> syntax_tree_list_in_tex filtered_list; print_string "Correct sentence\n"
 	
 
 
@@ -155,6 +155,7 @@ let check_subject_verb subject_token verb_token =
 	| Token.Token (Word_classe.Sujet, (subject, subject_informations)), Token.Token (Word_classe.Verbe, (verb, rad_verb::verb_informations))
 		->
 			begin
+				Utility.print_string_list subject_informations; print_string "\n";
 				let list_verb_person = verb_token |> Token.get_verb_person in
 				match subject_informations, list_verb_person with
 				| person :: _ :: number :: [], h :: t ->
@@ -189,14 +190,15 @@ let check_subject_verb subject_token verb_token =
 	| _, _ -> failwith "check_subject_verb : Doesn't receive a correct Sujet and a Verbe"
 
 let is_conjugue verb_informations =
+	Utility.print_string_list verb_informations; print_string "\n";
   match verb_informations with
-		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
-		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
-		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
+		| rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
+		| rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
+		| rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
 			-> false
-		| intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+		| rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
 			-> true
-		| _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+		| _ -> failwith "is_conjugue : Doesn't receive a correct Verb"
 
 let check_verbal_group subject_token verb_token =
 	let get_person informations =
@@ -346,15 +348,16 @@ and get_subject s =
 		(Error Empty_sentence, Token.Token (Word_classe.Sujet, ("", [])))
 	else
 		begin
-		let wc_token = Token.get_word_classe s.t_a.(s.indice) in
-    match wc_token with
+		let wc_of_token = Token.get_word_classe s.t_a.(s.indice) in
+    match wc_of_token with
     | Word_classe.Determinant | Word_classe.Nom | Word_classe.Adjectif
       ->
       begin
         let (nominal_group_tree, nominal_group_token) = get_nominal_group s in
         match nominal_group_tree with
         | Error e -> (Error e, nominal_group_token)
-        | Node (Word_classe.GN, informations, _) -> (Node (Word_classe.Sujet, informations, [nominal_group_tree]), nominal_group_token)
+        | Node (Word_classe.GN, informations, _) -> (Node (Word_classe.Sujet, informations,
+				 [nominal_group_tree]), Token.Token (Word_classe.Sujet, (Token.get_word nominal_group_token, Token.get_information nominal_group_token)))
         | _ -> failwith "get_subject : wrong tree, waiting for a GN"
       end
 		| Word_classe.Pronom_sujet
@@ -363,7 +366,8 @@ and get_subject s =
         let (pronom_sujet_tree, pronom_subject_token) = get_pronom_sujet s in
         match pronom_sujet_tree with
         | Error e -> (Error e, pronom_subject_token)
-        | Node (Word_classe.Pronom_sujet, informations, _) -> (Node (Word_classe.Sujet, informations, [pronom_sujet_tree]), pronom_subject_token)
+        | Node (Word_classe.Pronom_sujet, informations, _) -> (Node (Word_classe.Sujet, informations, [pronom_sujet_tree]),
+				 Token.Token (Word_classe.Sujet, (Token.get_word pronom_subject_token, Token.get_information pronom_subject_token)))
         | _ -> failwith "get_subject : wrong tree, waiting for a Pronom_sujet"
       end
 		| _ -> (Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice))), (Token.Token (Word_classe.Sujet, (Token.get_word s.t_a.(s.indice), []))) )

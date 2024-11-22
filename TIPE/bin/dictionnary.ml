@@ -1,57 +1,49 @@
 let dictionnary_path = "dictionnarys/Dictionnary.txt"
 
 let read_dictionnary file =
-	(* Transform the line received in the correct format of informations *)
-	let aux (s:string) :string list =
-		let rec aux2 s l =
-			match s with
-			| [] -> List.rev l
-			| _ -> 
-				let rec find_word l w length_w =
-					match l with
-					| [] -> w, length_w
-					| ',' :: t -> w, length_w
-					| c :: t -> find_word t (c::w) (length_w + 1)
-				in
-				let char_list, length_w = find_word s [] 0 in
-				let w = List.rev char_list |> Utility.string_of_char_list in
-				match l, w with
-				| ("Ip" as first_possibility) :: t, ("Is" as other_possibility)
-				| ("Ip" as first_possibility) :: t, ("Iq" as other_possibility)
-				| ("Ip" as first_possibility) :: t, ("If" as other_possibility)
-				| ("Ip" as first_possibility) :: t, ("Sp" as other_possibility)
-				| ("Ip" as first_possibility) :: t, ("Sq" as other_possibility)
-				| ("Is" as first_possibility) :: t, ("Ip" as other_possibility)
-				| ("Is" as first_possibility) :: t, ("Iq" as other_possibility)
-				| ("Is" as first_possibility) :: t, ("If" as other_possibility)
-				| ("Is" as first_possibility) :: t, ("Sp" as other_possibility)
-				| ("Is" as first_possibility) :: t, ("Sq" as other_possibility)
-				| ("Iq" as first_possibility) :: t, ("Ip" as other_possibility)
-				| ("Iq" as first_possibility) :: t, ("Is" as other_possibility)
-				| ("Iq" as first_possibility) :: t, ("If" as other_possibility)
-				| ("Iq" as first_possibility) :: t, ("Sp" as other_possibility)
-				| ("Iq" as first_possibility) :: t, ("Sq" as other_possibility)
-				| ("If" as first_possibility) :: t, ("Ip" as other_possibility)
-				| ("If" as first_possibility) :: t, ("Is" as other_possibility)
-				| ("If" as first_possibility) :: t, ("Iq" as other_possibility)
-				| ("If" as first_possibility) :: t, ("Sp" as other_possibility)
-				| ("If" as first_possibility) :: t, ("Sq" as other_possibility)
-				| ("Sp" as first_possibility) :: t, ("Ip" as other_possibility)
-				| ("Sp" as first_possibility) :: t, ("Sq" as other_possibility)
-				| ("1s" as first_possibility) :: t, ("2s" as other_possibility)
-				| ("1s" as first_possibility) :: t, ("3s" as other_possibility)
-					-> aux2 (Utility.list_without_x_last_char (length_w+1) s) ((first_possibility ^ "," ^ other_possibility) :: t)
-				| ("Ip,Sp" as first_possibility :: t), ("Sq" as other_possibility)
-				| ("Iq,Sp" as first_possibility :: t), ("Sq" as other_possibility)
-					-> aux2 (Utility.list_without_x_last_char (length_w+1) s) ((first_possibility ^ "," ^ other_possibility) :: t)
-				| _ -> aux2 (Utility.list_without_x_last_char (length_w+1) s) (w :: l)
+	let aux (s:string list) :string list =
+		let rec aux2 current_string_list result =
+			match current_string_list with
+			| [] -> List.rev result
+			| ("Ip" as first_possibility) :: ("Is" as other_possibility) :: t
+			| ("Ip" as first_possibility) :: ("Iq" as other_possibility) :: t
+			| ("Ip" as first_possibility) :: ("If" as other_possibility) :: t
+			| ("Ip" as first_possibility) :: ("Sp" as other_possibility) :: t
+			| ("Ip" as first_possibility) :: ("Sq" as other_possibility) :: t
+			| ("Is" as first_possibility) :: ("Ip" as other_possibility) :: t
+			| ("Is" as first_possibility) :: ("Iq" as other_possibility) :: t
+			| ("Is" as first_possibility) :: ("If" as other_possibility) :: t
+			| ("Is" as first_possibility) :: ("Sp" as other_possibility) :: t
+			| ("Is" as first_possibility) :: ("Sq" as other_possibility) :: t
+			| ("Iq" as first_possibility) :: ("Ip" as other_possibility) :: t
+			| ("Iq" as first_possibility) :: ("Is" as other_possibility) :: t
+			| ("Iq" as first_possibility) :: ("If" as other_possibility) :: t
+			| ("Iq" as first_possibility) :: ("Sp" as other_possibility) :: t
+			| ("Iq" as first_possibility) :: ("Sq" as other_possibility) :: t
+			| ("If" as first_possibility) :: ("Ip" as other_possibility) :: t
+			| ("If" as first_possibility) :: ("Is" as other_possibility) :: t
+			| ("If" as first_possibility) :: ("Iq" as other_possibility) :: t
+			| ("If" as first_possibility) :: ("Sp" as other_possibility) :: t
+			| ("If" as first_possibility) :: ("Sq" as other_possibility) :: t
+			| ("Sp" as first_possibility) :: ("Ip" as other_possibility) :: t
+			| ("Sp" as first_possibility) :: ("Sq" as other_possibility) :: t
+			| ("1s" as first_possibility) :: ("2s" as other_possibility) :: t
+			| ("1s" as first_possibility) :: ("3s" as other_possibility) :: t
+				-> aux2 t ((first_possibility ^ "," ^ other_possibility) :: result)
+			| ("Ip,Sp" as first_possibility) :: ("Sq" as other_possibility) :: t
+			| ("Iq,Sp" as first_possibility) :: ("Sq" as other_possibility) :: t
+				-> aux2 t ((first_possibility ^ "," ^ other_possibility) :: result)
+			| h::t -> aux2 t (h::result)
 		in
-		aux2 (Utility.char_list_of_string s) []
+		match s with
+		| [] -> failwith "Dictionnary - read_dictionnary - aux : empty list"
+		| _::_::"V"::t -> aux2 s []
+		| _ -> s
 	in
 	let file = open_in file in
   (* Reads the file and return 2 trie, one where lines are inserted based on the first word and the other one on the second word*)
 	let rec read_lines (trie1, trie2) =
-		let line = In_channel.input_line file |> Option.map aux in
+		let line = In_channel.input_line file |> Option.map (String.split_on_char ',') |> Option.map aux in
 		match line with
 		| None -> (trie1, trie2)
 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ), (Trie.trie_insert trie2 radical (word::information) ) )

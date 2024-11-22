@@ -24,3 +24,6 @@ let word_classe_to_string wc =
   | Nom -> "Nom"
   | Adjectif -> "Adjectif"
   | Unknown -> "Unknown"
+
+let print_word_classe wc =
+  print_string (word_classe_to_string wc)
