@@ -2,7 +2,16 @@ let dictionnary_path = "dictionnarys/Dictionnary.txt"
 
 let read_dictionnary file =
 	let aux (s:string list) :string list =
+    let do_print = ref false in
 		let rec aux2 current_string_list result =
+      if !do_print then
+        begin
+        match current_string_list with
+        | h::h2::t-> print_string "\n1st match : "; print_string h; print_string "\n2nd match : "; print_string h2; print_string "\n"
+        | [h] -> print_string "\n Only one element : "; print_string h; print_string "\n"
+        | [] -> print_string "\n"
+        end
+      else ();
 			match current_string_list with
 			| [] -> List.rev result
 			| ("Ip" as first_possibility) :: ("Is" as other_possibility) :: t
@@ -37,6 +46,7 @@ let read_dictionnary file =
 		in
 		match s with
 		| [] -> failwith "Dictionnary - read_dictionnary - aux : empty list"
+    | "travaille"::_::"V"::t -> do_print := true; aux2 s []
 		| _::_::"V"::t -> aux2 s []
 		| _ -> s
 	in
