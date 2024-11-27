@@ -2,6 +2,13 @@ type token =
 	| Token of ( Word_classe.word_classe * (string * string list) )
 	| Unknown of string
 
+
+(**
+  [string_of_token t] returns a string representation of the token [t].
+
+  @param t The token to be converted to a string.
+  @return The string representation of the token.
+*)
 let string_of_token t =
   match t with
   | Token (Word_classe.Determinant, (s, l)) ->  "D " ^ s ^ " " ^ (Utility.string_of_string_list l)
@@ -18,15 +25,42 @@ let string_of_token t =
   | Unknown w ->  "Unknown " ^ w
 
 
+(**
+  [print_token t] prints the string representation of the token [t].
+
+  @param t The token to be printed.
+  @return Unit
+*)
 let print_token token =
   print_string (string_of_token token)
 
+
+(**
+  [print_token_list l] prints the string representation of the list of tokens [l].
+
+  @param l The list of tokens to be printed.
+  @return Unit
+*)
 let print_token_list =
   List.iter (fun x -> print_token x; print_string " | ")
 
+
+(**
+  [print_token_list_list l] prints the string representation of the list of list of tokens [l].
+
+  @param l The list of list of tokens to be printed.
+  @return Unit
+*)
 let print_token_list_list =
   List.iter (fun x -> print_token_list x; print_newline ())
 
+
+(**
+  [get_word token] returns the word of the token [token].
+
+  @param token The token from which to extract the word.
+  @return The word of the token.
+*)
 let get_word token =
   match token with
   | Token (Word_classe.Determinant, (s, l)) -> s
@@ -42,6 +76,13 @@ let get_word token =
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_word : Unknown token declared as Token"
   | Unknown w -> w
 
+
+(**
+  [get_information token] returns the information of the token [token].
+
+  @param token The token from which to extract the information.
+  @return The information of the token.
+*)
 let get_information token =
   match token with
   | Token (Word_classe.Determinant, (s, l)) -> l
@@ -57,6 +98,21 @@ let get_information token =
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_information : Unknown token declared as Token"
   | Unknown _ -> failwith "get_information : tring to get a information from a Unknown"
 
+
+(** [get_gender token] returns the gender associated with the given [token].
+  * The function matches the [token] against different word classes and extracts
+  * the gender information from the corresponding list.
+  *
+  * @param token The token from which to extract the gender.
+  * @return The gender of the token.
+  * @raise Failure if the token does not belong to a word class that has a gender.
+  *
+  * The function handles the following word classes:
+  * - [Adjectif]: Extracts the second element from the list.
+  * - [Nom]: Extracts the second element from the list.
+  * - [Determinant]: Extracts the second element from the list.
+  * - [Pronom_sujet]: Extracts the third element from the list.
+*)
 let get_gender token =
   match token with
   | Token (Word_classe.Adjectif, (_, l)) -> List.nth l 1 (* Wanting catching error but no success trying later *)
@@ -65,6 +121,18 @@ let get_gender token =
   | Token (Word_classe.Pronom_sujet, (_, l)) -> List.nth l 2
   | _ -> failwith "get_gender : not something which have a gender"
 
+
+(** [get_number token] extracts the number from a given token.
+  *
+  * @param token The token from which to extract the number. The token is expected to be of type [Token] with specific word classes.
+  * @return The number associated with the token.
+  * @raise Failure if the token does not have a number or if the index is out of bounds.
+  *
+  * The function matches the token with different word classes and extracts the number from the list associated with each word class.
+  * - For [Adjectif], [Nom], and [Determinant], it extracts the third element (index 2) from the list.
+  * - For [Pronom_sujet], it extracts the fourth element (index 3) from the list.
+  * - If the token does not match any of the specified word classes, it raises a failure with the message "get_number : not something which have a number".
+  *)
 let get_number token =
   match token with
   | Token (Word_classe.Adjectif, (_, l)) -> List.nth l 2 (* Wanting catching error but no success trying later *)
@@ -73,6 +141,29 @@ let get_number token =
   | Token (Word_classe.Pronom_sujet, (_, l)) -> List.nth l 3
   | _ -> failwith "get_number : not something which have a number"
 
+
+(** [get_word_classe token] returns the word class of the given [token].
+  The function matches the [token] against various patterns and returns
+  the corresponding word class from the [Word_classe] module.
+
+  @param token The token to be analyzed.
+  @return The word class of the token.
+  @raise Failure if the token is of type [Word_classe.Unknown].
+
+  The possible word classes are:
+  - [Word_classe.Determinant]
+  - [Word_classe.Nom]
+  - [Word_classe.Adjectif]
+  - [Word_classe.Sujet]
+  - [Word_classe.Verbe]
+  - [Word_classe.Pronom_sujet]
+  - [Word_classe.S]
+  - [Word_classe.GV]
+  - [Word_classe.GN]
+  - [Word_classe.MultipleAdj]
+  - [Word_classe.Unknown] (raises an exception)
+  - [Unknown] (returns [Unknown])
+*)
 let get_word_classe token =
   match token with
   | Token (Word_classe.Determinant, (s, l)) -> Word_classe.Determinant
@@ -88,6 +179,14 @@ let get_word_classe token =
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_word_classe : Unknown token declared as Token"
   | Unknown _ -> Unknown
 
+(** [get_verb_person token] extracts the person information from a verb token.
+  @param token The token to extract the person information from.
+  @return A list of strings representing the person information.
+  @raise Failure if the token does not match the expected verb format or if the verb information is not in the correct format.
+  The function expects the verb information to be a list of strings with specific elements in a specific order.
+  If the verb information ends with "Y", "P", or "Q", an empty list is returned.
+  Otherwise, the last element of the verb information list is split by commas and returned as a list of strings.
+*)
 let get_verb_person ( token:token ) :string list =
   match token with
   | Token (Word_classe.Verbe, (verb, verb_informations)) ->
@@ -103,6 +202,22 @@ let get_verb_person ( token:token ) :string list =
     end
   | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
 
+(** 
+  Converts a sentence (string) into a list of words.
+
+  @param s The input sentence as a string.
+  @return A list of words extracted from the input sentence.
+
+  The function handles spaces and apostrophes as word delimiters. It uses a recursive helper function `aux` to process the characters of the input string. The helper function `find_word` is used to extract individual words from the character list.
+
+  The function `Utility.list_without_x_last_char` is used to remove processed characters from the list, and `Utility.string_of_char_list` is used to convert a list of characters back into a string.
+
+  Example:
+  {[
+    let words = sentence_to_list "Hello, world! It's a beautiful day."
+    (* words = ["Hello,"; "world!"; "It's"; "a"; "beautiful"; "day."] *)
+  ]}
+*)
 let sentence_to_list s =
 	let rec aux s_l l =
 		match s_l with
@@ -136,7 +251,20 @@ let sentence_to_list s =
 	aux (List.rev (Utility.char_list_of_string s) ) []
 
 
-(* Using precedent function and transforming the sentence to a token list list which is usefull for manipuling the sentence after *)
+
+(** 
+  [sentence_to_token_list s] converts a sentence [s] into a list of token lists.
+  
+  @param s The input sentence as a string.
+  @return A list of token lists representing the sentence.
+  
+  The function works as follows:
+  - It defines a recursive helper function [match_information] that matches the information of each word in the sentence to its corresponding token.
+  - It defines another helper function [get_correction_possibility_for_word] that generates correction possibilities for a given word by replacing each character with every letter from 'a' to 'z' and checking if the modified word exists in the dictionary.
+  - It defines a recursive function [aux] that processes each word in the sentence, checks if it exists in the dictionary, and either adds its token information to the list or attempts to find correction possibilities if the word is unknown.
+  - The function [sentence_to_list] is used to split the input sentence into a list of words.
+  - The final result is a reversed list of token lists representing the sentence.
+*)
 let sentence_to_token_list (s:string) :token list list =
   let rec match_information i possibility word =
     match i with
@@ -149,29 +277,38 @@ let sentence_to_token_list (s:string) :token list list =
     | _ when possibility = [] -> [Unknown "Unknown"]
     | _ -> failwith "match_information : wrong information"
   in
-	let get_correction_possibility_for_word (word:string) :token list =
-		let rec index_loop possibility index =
-			if index = String.length word then possibility
-			else
-				let rec letter_loop possibility letter =
-					match letter with
-					| '{' -> possibility
-					| _ ->
-            if String.get word index = letter then
-              letter_loop possibility (Char.chr (Char.code letter + 1))
-            else
-              begin
-                let modified_word = Utility.replace_char_in_string word index letter in
-                let (is_word, information) = Trie.trie_search Dictionnary.dictionnary modified_word in
-                if is_word then
-                  letter_loop ((modified_word, information) :: possibility) (Char.chr (Char.code letter + 1))
-                else
-                  letter_loop possibility (Char.chr (Char.code letter + 1))
-              end
-				in
-				index_loop (letter_loop possibility 'a' @ possibility) (index + 1)
-		in
-		Utility.list_list_to_list (List.map (fun (word, informations) -> match_information informations [] word) (index_loop [] 0))
+	let rec get_correction_possibility_for_word (word:string) (nbr_test:int) :token list =
+    if nbr_test > 3 then
+      []
+    else
+      begin
+      let rec index_loop possibility index test_word =
+        if index = String.length word then
+          match possibility with
+          | [] -> List.fold_left (fun acc x -> (get_correction_possibility_for_word x (nbr_test+1)) @ acc) [] test_word
+          | _ -> Utility.list_list_to_list (List.map (fun (word, informations) -> match_information informations [] word) possibility)
+        else
+          let rec letter_loop possibility letter test_word =
+            match letter with
+            | '{' -> (possibility, test_word)
+            | _ ->
+              if String.get word index = letter then
+                letter_loop possibility (Char.chr (Char.code letter + 1)) test_word
+              else
+                begin
+                  let modified_word = Utility.replace_char_in_string word index letter in
+                  let (is_word, information) = Trie.trie_search Dictionnary.dictionnary modified_word in
+                  if is_word then
+                    letter_loop ((modified_word, information) :: possibility) (Char.chr (Char.code letter + 1)) (modified_word::test_word)
+                  else
+                    letter_loop possibility (Char.chr (Char.code letter + 1)) (modified_word::test_word)
+                end
+          in
+          let (possibility_letter_loop, test_word_letter_loop) = letter_loop possibility 'a' test_word in
+          index_loop (possibility_letter_loop) (index + 1) (test_word_letter_loop) 
+      in
+      index_loop [] 0 [word]
+      end
 	in
 	let rec aux (list_word:string list) (list_token:token list list) =
 		match list_word with
@@ -186,13 +323,24 @@ let sentence_to_token_list (s:string) :token list list =
         begin
           print_string ("Not a correct sentence : Unknown word " ^ word ^ "\nTrying to find correction\n");
           let correction_possibilitys = get_correction_possibility_for_word word in
-          aux t (get_correction_possibility_for_word word :: list_token)
+          aux t ((get_correction_possibility_for_word word 0) :: list_token)
         end
 	in
 	List.rev (aux (sentence_to_list s) [])
 
-(* Returning all sentence possible with all meaning of each word
-Exemple : "rouge" can be a noun or an adjective *)
+
+(** 
+  [all_possibility l] generates all possible combinations of tokens from a list of lists of tokens.
+  
+  @param l A list of lists of tokens, where each inner list represents possible tokens for a word.
+  @return A list of lists of tokens, where each inner list represents a possible combination of tokens.
+  
+  The function works in two main steps:
+  1. [first_floor_course]: Iterates over the outer list of token lists.
+  2. [second_floor_course]: Iterates over each inner list of tokens and combines them with the accumulated results.
+  
+  The final result is a list of all possible combinations of tokens, with each combination being a list of tokens.
+*)
 let all_possibility (l:token list list) :token list list =
 	(* Firstly itterating over the token list of list of possibility for words *)
 	let rec first_floor_course (l:token list list) (acc: token list list) :token list list =

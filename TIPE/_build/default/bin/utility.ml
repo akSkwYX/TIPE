@@ -1,5 +1,3 @@
-(* Usefull various function *)
-
 let ( @. ) = Fun.compose
 
 let word_without_first_char word =

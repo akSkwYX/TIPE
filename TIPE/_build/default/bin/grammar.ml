@@ -29,6 +29,20 @@ type syntax_tree =
 	| Error of error
 	| Empty
 
+
+(** 
+  Recursively generates LaTeX code for a syntax tree and writes it to a file.
+
+  @param file The output file where the LaTeX code will be written.
+  @param tree The syntax tree to be converted into LaTeX code.
+
+  The function handles different types of nodes in the syntax tree:
+  - [Empty]: Does nothing.
+  - [Leaf s]: Writes a LaTeX node with the string [s].
+  - [Error e]: Writes a LaTeX node with the error string [e].
+  - [Node (wc, [], l)]: Writes a LaTeX node with the word class [wc] and recursively processes the list of children [l].
+  - [Node (wc, i, l)]: Writes a LaTeX node with the word class [wc] and additional information [i], then recursively processes the list of children [l].
+*)
 let rec syntax_tree_in_tex_aux file tree =
 	match tree with
 	| Empty -> ()
@@ -43,11 +57,26 @@ let rec syntax_tree_in_tex_aux file tree =
 		List.iter (fun x -> syntax_tree_in_tex_aux file x) l;
 		Printf.fprintf file "}"
 
+
+(** [syntax_tree_in_tex tree file] generates a LaTeX representation of the given syntax tree [tree]
+  and writes it to the specified output [file]. The function uses the TikZ package to create a 
+  graphical representation of the syntax tree, with nodes and edges formatted for better readability.
+
+  @param tree The syntax tree to be converted into LaTeX format.
+  @param file The output channel where the LaTeX code will be written.
+*)
 let syntax_tree_in_tex tree file =
 	Printf.fprintf file "\\begin{center}\n\\begin{tikzpicture}\n\\node{Sentence}[sibling distance = 3cm, level distance = 3cm, align=center]\n";
 	syntax_tree_in_tex_aux file tree;
 	Printf.fprintf file ";\n\\end{tikzpicture}\n\\end{center}\n"
 
+
+(** [syntax_tree_list_in_tex tree_list] generates a LaTeX representation of a list of syntax trees.
+  It changes the current working directory to "results", appends the LaTeX representation of each
+  syntax tree in [tree_list] to the file "result.tex", and then changes the working directory back.
+
+  @param tree_list The list of syntax trees to be converted to LaTeX and appended to "result.tex".
+*)
 let syntax_tree_list_in_tex tree_list =
 	Sys.chdir "results";
   let file = open_out_gen [Open_append] 0 "result.tex" in
@@ -55,11 +84,26 @@ let syntax_tree_list_in_tex tree_list =
   close_out file;
 	Sys.chdir ".."
 
+
+(** 
+  Checks if the given tree is a success tree.
+
+  @param tree The tree to check.
+  @return [true] if the tree is a success tree, [false] otherwise.
+*)
 let is_a_success_tree tree =
 	match tree with
 	| Empty | Error _ -> false
 	| _ -> true
 
+
+(** [get_results tree_list] filters the given [tree_list] to only include 
+  successful syntax trees and prints the results in TeX format. 
+  If no successful trees are found, it prints "Not a correct sentence". 
+  Otherwise, it prints "Correct sentence".
+
+  @param tree_list The list of syntax trees to be processed.
+*)
 let get_results tree_list =
 	let filtered_list = List.filter is_a_success_tree tree_list in
 	match filtered_list with
@@ -76,6 +120,20 @@ type item =
 	length : int;
 	}
 
+(** 
+  Checks the gender compatibility between two given genders.
+
+  @param g1 The first gender to check.
+  @param g2 The second gender to check.
+  @return A tuple where the first element is a boolean indicating if the genders are compatible,
+          and the second element is the resulting gender if they are compatible, or an empty string if not.
+          
+  The function considers the following rules for compatibility:
+  - If both genders are the same, they are compatible and the resulting gender is the same as the input genders.
+  - If one gender is "m" (male) and the other is "e" (either), they are compatible and the resulting gender is "m".
+  - If one gender is "f" (female) and the other is "e" (either), they are compatible and the resulting gender is "f".
+  - Any other combination is considered incompatible.
+*)
 let check_gender g1 g2 =
 	match g1, g2 with
 	| x, y when x = y -> true, x
@@ -83,6 +141,20 @@ let check_gender g1 g2 =
 	| "f", "e" | "e", "f" -> true, "f"
 	| _ -> false, ""
 
+(** 
+  Checks the relationship between two numbers represented as strings.
+
+  @param n1 The first number as a string.
+  @param n2 The second number as a string.
+  @return A tuple where the first element is a boolean indicating if the numbers have a valid relationship,
+          and the second element is the resulting string based on the relationship.
+          
+  The function returns:
+  - (true, x) if both numbers are equal.
+  - (true, "s") if one number is "s" and the other is "i".
+  - (true, "p") if one number is "p" and the other is "i".
+  - (false, "") if none of the above conditions are met.
+*)
 let check_number n1 n2 =
 	match n1, n2 with
 	| x, y when x = y -> true, x
@@ -90,7 +162,17 @@ let check_number n1 n2 =
 	| "p", "i" | "i", "p" -> true, "p"
 	| _ -> false, ""
 
-(* Checking gender and number compatibility for adjectives, nouns, determinants, NOT FOR OTHERS *)
+
+(** 
+  [check_gender_number informations_1 informations_2] checks if the gender and number information 
+  in [informations_1] and [informations_2] match. 
+
+  @param informations_1 A list of strings representing gender and number information.
+  @param informations_2 A list of strings representing gender and number information.
+  @return A tuple where the first element is a boolean indicating if both gender and number match, 
+          and the second element is a list containing the resulting gender and number if they match, 
+          or an empty list if they do not match.
+*)
 let check_gender_number (informations_1:string list) (informations_2:string list) :(bool * string list) =
 	match informations_1, informations_2 with
 	| [], [] -> true, []
@@ -103,6 +185,18 @@ let check_gender_number (informations_1:string list) (informations_2:string list
 			(false, [])
 	| _ -> (false, [])
 
+
+(** 
+  [check_det_noun det_token noun_token] checks the agreement between a determinant and a noun.
+  
+  @param det_token The token representing the determinant.
+  @param noun_token The token representing the noun.
+  
+  @return A tuple where the first element is a boolean indicating whether the determinant and noun agree in gender and number, 
+          and the second element is a list of resulting information if they agree, or an empty list if they do not.
+  
+  @raise Failure if the provided tokens are not a correct Determinant and a Nom.
+*)
 let check_det_noun det_token noun_token =
 	match det_token, noun_token with
 	| Token.Token (Word_classe.Determinant, (det, rad_det::det_informations)), Token.Token (Word_classe.Nom, (noun, rad_noun::noun_informations)) 
@@ -116,6 +210,17 @@ let check_det_noun det_token noun_token =
 			end
 	| _, _ -> failwith "check_det_noun : Doesn't receive a correct Determinant and a Nom"
 
+(** 
+  [check_adjectives adj_token_1 adj_token_2] checks if two adjective tokens are compatible in terms of gender and number.
+  
+  @param adj_token_1 The first adjective token to be checked.
+  @param adj_token_2 The second adjective token to be checked.
+  
+  @return A tuple where the first element is a boolean indicating whether the adjectives are compatible, 
+          and the second element is a list of adjective information if they are compatible, or an empty list if they are not.
+  
+  @raise Failure if either of the tokens is not an adjective.
+*)
 let check_adjectives adj_token_1 adj_token_2 =
 	match adj_token_1, adj_token_2 with
 	| Token.Token (Word_classe.Adjectif, (adj1, rad_adj_1::adj_informations_1)), Token.Token (Word_classe.Adjectif, (adj2, rad_adj_2::adj_informations_2))
@@ -133,6 +238,18 @@ let check_adjectives adj_token_1 adj_token_2 =
 			end
 	| _, _ -> failwith "check_adjectives : Doesn't receive a correct Adjectif"
 
+(** 
+  [check_noun_adjective noun_token adj_token] checks if the given noun and adjective tokens agree in gender and number.
+  
+  @param noun_token The token representing the noun, expected to be of type [Token.Token (Word_classe.Nom, ...)].
+  @param adj_token The token representing the adjective, expected to be of type [Token.Token (Word_classe.Adjectif, ...)] or [Token.Token (Word_classe.MultipleAdj, ...)].
+  
+  @return A tuple [(bool, informations)] where:
+    - [bool] indicates whether the noun and adjective agree in gender and number.
+    - [informations] is a list of resulting information if the agreement check is successful, otherwise an empty list.
+  
+  @raise Failure if the provided tokens are not of the correct types (i.e., not a noun and an adjective).
+*)
 let check_noun_adjective noun_token adj_token =
 	match noun_token, adj_token with
 	| Token.Token (Word_classe.Nom, (noun, rad_noun::noun_informations)), Token.Token (Word_classe.Adjectif, (adj, rad_adj::adj_informations))
@@ -150,15 +267,31 @@ let check_noun_adjective noun_token adj_token =
 			end
 	| _, _ -> failwith "check_noun_adjective : Doesn't receive a correct Nom and a Adjectif"
 
+(** 
+  [check_subject_verb subject_token verb_token] checks if the subject and verb tokens agree in person and number.
+  
+  @param subject_token The token representing the subject, expected to be of type [Token.Token (Word_classe.Sujet, (subject, subject_informations))].
+  @param verb_token The token representing the verb, expected to be of type [Token.Token (Word_classe.Verbe, (verb, rad_verb::verb_informations))].
+  
+  @return A tuple [(bool, subject_informations)] where the boolean indicates if the subject and verb agree, and [subject_informations] contains details about the subject.
+  
+  @raise Failure if the tokens do not match the expected patterns for a subject and a verb, or if the verb does not have the correct person and number information.
+  
+  The function works by extracting the person and number information from the subject and verb tokens, and then recursively checking if they match.
+  
+  Example:
+  - If the subject is first person singular ("O1", "s") and the verb is also first person singular ("1s"), the function returns (true, subject_informations).
+  - If the subject is third person plural ("O3", "p") and the verb is third person plural ("3p"), the function returns (true, subject_informations).
+  - If there is no match, the function returns (false, []).
+*)
 let check_subject_verb subject_token verb_token =
 	match subject_token, verb_token with
 	| Token.Token (Word_classe.Sujet, (subject, subject_informations)), Token.Token (Word_classe.Verbe, (verb, rad_verb::verb_informations))
 		->
 			begin
-				Utility.print_string_list subject_informations; print_string "\n";
 				let list_verb_person = verb_token |> Token.get_verb_person in
 				match subject_informations, list_verb_person with
-				| person :: _ :: number :: [], h :: t ->
+				| rad_subject :: person :: _ :: number :: [], h :: t ->
 					begin
 					let rec check_all_person_verb list_verb_person =
 						match person, number, list_verb_person with
@@ -173,7 +306,7 @@ let check_subject_verb subject_token verb_token =
 					in
 					check_all_person_verb list_verb_person
 					end
-				| gender :: number :: [], h :: t ->
+				| rad_subject :: gender :: number :: [], h :: t ->
 					begin
 						let rec check_all_person_verb list_verb_person =
 							match number, list_verb_person with
@@ -184,13 +317,31 @@ let check_subject_verb subject_token verb_token =
 						in
 						check_all_person_verb list_verb_person
 					end
-				| person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
+				| rad_subject :: person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
 				| _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
 			end
 	| _, _ -> failwith "check_subject_verb : Doesn't receive a correct Sujet and a Verbe"
 
+(** 
+  Checks if a verb is conjugated based on its information.
+
+  @param verb_informations A list of strings representing the verb information. 
+  The list should contain the following elements in order:
+  - rad_verb: The root of the verb.
+  - intransitif: Indicates if the verb is intransitive.
+  - transitif_direct: Indicates if the verb is directly transitive.
+  - transitif_indirect: Indicates if the verb is indirectly transitive.
+  - pronominal: Indicates if the verb is pronominal.
+  - impersonnel: Indicates if the verb is impersonal.
+  - auxiliaire_etre: Indicates if the verb uses "être" as an auxiliary.
+  - auxiliaire_avoir: Indicates if the verb uses "avoir" as an auxiliary.
+  - A string indicating the conjugation status or tense/person information.
+
+  @return true if the verb is conjugated, false otherwise.
+
+  @raise Failure if the input list does not match the expected format.
+*)
 let is_conjugue verb_informations =
-	Utility.print_string_list verb_informations; print_string "\n";
   match verb_informations with
 		| rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
 		| rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
@@ -200,12 +351,25 @@ let is_conjugue verb_informations =
 			-> true
 		| _ -> failwith "is_conjugue : Doesn't receive a correct Verb"
 
+(** 
+  [check_verbal_group subject_token verb_token] checks the agreement between a subject and a verb.
+  
+  @param subject_token The token representing the subject, expected to be of type [Token.Token (Word_classe.Sujet, (subject, informations_subject))].
+  @param verb_token The token representing the verb, expected to be of type [Token.Token (Word_classe.Verbe, (verb, informations_verb))].
+  
+  @return A tuple containing:
+    - A boolean indicating whether the subject and verb agree.
+    - A list of result informations if the agreement check is successful.
+    - An error type [No] if the agreement check is successful, or [Conjuguaison] with relevant details if it fails.
+  
+  @raise Failure if the input tokens do not match the expected subject and verb types, or if the subject informations do not match the expected patterns in [get_person].
+*)
 let check_verbal_group subject_token verb_token =
 	let get_person informations =
 		match informations with
-		| g :: "s" :: [] -> ["O3"; g; "s"]
-		| g :: "p" :: [] -> ["O3"; g; "p"]
-		| _ -> failwith "get_person : informations doesn't match a gn"
+		| g :: n :: [] -> ["O3"; g; n]
+    | rad_subject :: "O1" :: g :: n :: [] -> ["O1"; g; n]
+		| _ -> failwith "get_person : informations doesn't match a gn or a pronuoun subjet"
 	in
 	match subject_token, verb_token with
 	| Token.Token (Word_classe.Sujet, (subject, informations_subject)), Token.Token (Word_classe.Verbe, (verb, informations_verb))
@@ -222,6 +386,28 @@ let check_verbal_group subject_token verb_token =
 			end
 	| _, _ -> failwith "check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
 	
+(** 
+  [check_nominal_group det_token adj_token noun_token adj_token_2] checks the agreement between a determinant, 
+  one or two adjectives, and a noun. The function takes four tokens as input: a determinant token, an adjective token, 
+  a noun token, and a second adjective token. It returns a tuple containing a boolean indicating success, 
+  a list of result informations, and an optional error type.
+
+  The function matches the input tokens against several patterns to ensure they are of the correct word classes 
+  (Determinant, Adjectif, Nom, MultipleAdj). It then performs agreement checks between the determinant and the noun, 
+  the first adjective and the noun, and the second adjective and the noun, if applicable.
+
+  @param det_token The determinant token to be checked.
+  @param adj_token The first adjective token to be checked.
+  @param noun_token The noun token to be checked.
+  @param adj_token_2 The second adjective token to be checked.
+
+  @return A tuple containing:
+    - A boolean indicating whether the agreement checks were successful.
+    - A list of result informations from the agreement checks.
+    - An optional error type indicating the type of agreement error, if any.
+
+  @raise Failure if the input tokens do not match the expected patterns.
+*)
 let check_nominal_group det_token adj_token noun_token adj_token_2 =
 	match det_token, adj_token, noun_token, adj_token_2 with
 	| Token.Token (Word_classe.Determinant, (det, rad_det::det_informations)),
@@ -315,11 +501,22 @@ let check_nominal_group det_token adj_token noun_token adj_token_2 =
 			end
 	| _, _, _, _ -> failwith "check_nominal_group : Doesn't receive a correct Determinant, Adjectif, Nom and Adjectif"
 
-(* Increasing the index of sentence which is currently being corrected *)
+
+(** [pass sentence] increments the [indice] field of the given [sentence] by 1.
+
+  @param sentence The record whose [indice] field will be incremented.
+*)
 let pass sentence =
 	sentence.indice <- sentence.indice + 1
 
-(* First call of mutual recursivity for checking *)
+
+(** [get_syntax_tree sentence] returns the syntax tree of the given [sentence].
+  If the sentence index is greater than its length, it returns an [Error Empty_sentence].
+  Otherwise, it extracts the verbal group tree and token from the sentence and returns the verbal group tree.
+
+  @param sentence The sentence to analyze.
+  @return The syntax tree of the sentence or an error if the sentence is empty.
+*)
 let rec get_syntax_tree sentence =
 	if sentence.indice > sentence.length then
 		Error Empty_sentence
@@ -327,6 +524,26 @@ let rec get_syntax_tree sentence =
 		let (verbal_group_tree, verbal_group_token) = get_verbal_group sentence in
 		verbal_group_tree
 
+(** [get_verbal_group sentence] parses a sentence to extract the verbal group.
+  *
+  * This function first attempts to extract the subject from the sentence using [get_subject].
+  * If the subject extraction fails, it returns an error along with the subject token.
+  * If the subject extraction is successful, it proceeds to extract the verb using [get_verb].
+  * If the verb extraction fails, it returns an error along with the verb token.
+  * If both the subject and verb extractions are successful, it checks the validity of the verbal group
+  * using [check_verbal_group].
+  * 
+  * If the verbal group is valid, it returns a tuple containing:
+  * - A node representing the verbal group with the subject and verb trees as children.
+  * - A token representing the verbal group.
+  * 
+  * If the verbal group is invalid, it returns an error along with the token.
+  *
+  * @param sentence The sentence to parse.
+  * @return A tuple containing either:
+  * - A node representing the verbal group and a token if successful.
+  * - An error and a token if unsuccessful.
+  *)
 and get_verbal_group sentence =
 	let (subject_tree, subject_token) = get_subject sentence in
 	match subject_tree with
@@ -343,6 +560,22 @@ and get_verbal_group sentence =
 			else
 				( Error error, token )
 
+(** [get_subject s] extracts the subject from the sentence represented by [s].
+  It returns a tuple containing a parse tree and a token.
+
+  @param s The sentence structure containing the tokens and other information.
+  @return A tuple where the first element is either:
+      - [Node (Word_classe.Sujet, informations, children)] if a subject is successfully parsed.
+      - [Error e] if an error occurs during parsing.
+      The second element of the tuple is a token representing the subject.
+
+  The function handles different cases based on the word class of the current token:
+  - If the token is a determinant, noun, or adjective, it attempts to parse a nominal group.
+  - If the token is a subject pronoun, it attempts to parse a subject pronoun.
+  - If the token does not match any expected word class, it returns an error indicating a missing subject.
+
+  @raise Failure if the parse tree does not match the expected structure.
+*)
 and get_subject s =
 	if s.indice >= s.length then
 		(Error Empty_sentence, Token.Token (Word_classe.Sujet, ("", [])))
@@ -373,6 +606,27 @@ and get_subject s =
 		| _ -> (Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice))), (Token.Token (Word_classe.Sujet, (Token.get_word s.t_a.(s.indice), []))) )
 		end
 
+(** 
+  Parses a nominal group from the input string `s`.
+
+  This function attempts to parse a nominal group by sequentially parsing its components:
+  determinant, adjectives, and noun. It then checks the validity of the parsed nominal group.
+
+  @param s The input string to parse.
+  @return A tuple containing:
+    - A parse tree representing the nominal group or an error.
+    - A token representing the nominal group or an error token.
+
+  The function follows these steps:
+  1. Parse the determinant using `get_determinant`.
+  2. Parse the adjectives using `get_adjectifs`.
+  3. Parse the noun using `get_nom`.
+  4. Parse additional adjectives using `get_adjectifs`.
+  5. Check the validity of the nominal group using `check_nominal_group`.
+  6. Construct the final parse tree and token based on the results.
+
+  If any parsing step fails, the function returns an error.
+*)
 and get_nominal_group s =
 	let (det_tree, det_token) = get_determinant s in
 	match det_tree with
@@ -401,6 +655,18 @@ and get_nominal_group s =
 					else
 						(Error error, token)
 
+(** [get_determinant s] is a function that processes a sentence structure [s] to extract a determinant token.
+  It returns a tuple containing an error or a node and the token itself.
+  
+  - If the sentence index [s.indice] is greater than or equal to the sentence length [s.length], 
+    it returns an error [Empty_sentence] and a default determinant token.
+  - If the current token is unknown, it returns an error [Unknown_word w] and the token.
+  - If the current token is a determinant, it advances the sentence index and returns a node with the determinant information and the token.
+  - If the current token is not a determinant, it returns an error [Missing (Word_classe.Determinant, word)] and the token.
+  
+  @param s The sentence structure to be processed.
+  @return A tuple containing either an error or a node and the token.
+*)
 and get_determinant s =
 	if s.indice >= s.length then
 		(Error Empty_sentence, Token.Token (Word_classe.Determinant, ("", [])))
@@ -413,6 +679,22 @@ and get_determinant s =
 		| Token (_, (word, _)) -> (Error (Missing (Word_classe.Determinant, word)), token)
 		end
 
+(** [get_nom s] is a function that processes a sentence [s] to extract a noun (Nom).
+  It returns a tuple containing a result and a token.
+  
+  - If the current index of the sentence [s] is greater than or equal to the length of the sentence,
+    it returns an error indicating an empty sentence and a default token.
+  - Otherwise, it retrieves the current token from the sentence.
+  
+  The function then matches the token:
+  - If the token is [Unknown w], it returns an error indicating an unknown word [w] and the token.
+  - If the token is a noun ([Token (Word_classe.Nom, (nom, informations))]), it advances the sentence index,
+    and returns a node containing the noun information and the token.
+  - If the token is of any other type, it returns an error indicating a missing noun and the token.
+  
+  @param s The sentence to process.
+  @return A tuple containing a result and a token.
+*)
 and get_nom s =
 	if s.indice >= s.length then
 		(Error Empty_sentence, Token.Token (Word_classe.Nom, ("", [])))
@@ -425,6 +707,27 @@ and get_nom s =
 		| Token (_, (word, _)) -> (Error (Missing (Word_classe.Nom, word)), token)
 		end
 
+(** 
+  This module provides functions to process adjectives in a sentence.
+
+  @param s The input sentence structure containing tokens and indices.
+
+  @return A tuple containing a parse tree node and the current token.
+
+  The main function is [get_adjectifs], which processes the input sentence to extract adjectives and their information.
+  
+  - [make_adj_tree_list adj_list adj_informations_list] creates a list of adjective parse tree nodes from the given lists of adjectives and their information.
+  - [gender_number_comparison adj_informations_1 adj_informations_2] compares two lists of adjective information (gender and number) and returns the most appropriate one.
+  - [aux' s current_adj_list current_adj_informations_list current_token] is a recursive helper function that processes the sentence to extract adjectives and build the parse tree.
+
+  The function handles various cases:
+  - If the end of the sentence is reached, it returns the appropriate parse tree node based on the collected adjectives.
+  - If an unknown word is encountered, it returns an error.
+  - If an adjective token is encountered, it updates the current lists and continues processing.
+  - If a non-adjective token is encountered, it returns the appropriate parse tree node based on the collected adjectives.
+
+  @raise Failure if the adjective lists and their information lists do not have the same length or if the adjective information comparison fails.
+*)
 and get_adjectifs s =
 	let make_adj_tree_list adj_list adj_informations_list =
 		let rec aux adj_list adj_informations_list result =
@@ -482,6 +785,17 @@ and get_adjectifs s =
 	aux' s [] [] ( Token.Token (Word_classe.Adjectif, ("", [])) )
 
 
+(** [get_verb s] is a function that processes the input sentence [s] to extract a verb token.
+  It returns a tuple containing an error or a node and the token.
+  
+  - If the sentence index is greater than or equal to the sentence length, it returns an error indicating an empty sentence.
+  - If the token at the current index is unknown, it returns an error indicating an unknown word.
+  - If the token is a verb, it advances the sentence index and returns a node containing the verb information and the token.
+  - If the token is not a verb, it returns an error indicating a missing verb and the token.
+  
+  @param s The input sentence to process.
+  @return A tuple containing either an error or a node and the token.
+*)
 and get_verb s =
 	if s.indice >= s.length then
 		(Error Empty_sentence, Token.Token (Word_classe.Verbe, ("", [])))
@@ -494,6 +808,15 @@ and get_verb s =
 		| Token (_, (word, _)) -> (Error (Missing (Word_classe.Verbe, word)), token)
 		end
 
+(** [get_pronom_sujet s] analyzes the token stream [s] to identify and process a subject pronoun.
+  - If the current index in the stream [s] is beyond its length, it returns an [Error Empty_sentence] and a default token.
+  - If the current token is an unknown word, it returns an [Error (Unknown_word w)] and the token.
+  - If the current token is a subject pronoun, it advances the stream and returns a [Node] with the pronoun information and the token.
+  - If the current token is not a subject pronoun, it returns an [Error (Missing (Word_classe.Pronom_sujet, word))] and the token.
+  
+  @param s The token stream to be analyzed.
+  @return A tuple containing either an error or a node, and the current token.
+*)
 and get_pronom_sujet s =
 	if s.indice >= s.length then
 		(Error Empty_sentence, Token.Token (Word_classe.Pronom_sujet, ("", [])))
@@ -506,6 +829,21 @@ and get_pronom_sujet s =
 		| Token (_, (word, _)) -> (Error (Missing (Word_classe.Pronom_sujet, word)), token)
 		end
 
+(** [string_to_item s] converts a string [s] into a list of items.
+  Each item is a record with the following fields:
+  - [t_a]: an array of tokens derived from the string [s]
+  - [indice]: an index initialized to 0
+  - [length]: the length of the token array
+
+  The function first converts the string [s] into a list of token lists
+  using [Token.sentence_to_token_list] and [Token.all_possibility].
+  Then, it recursively processes each token list, converting it into an
+  array and creating a record for each array.
+
+  @param s The input string to be converted.
+  @return A list of items, where each item is a record containing the token array,
+      an initial index, and the length of the token array.
+*)
 let string_to_item s =
 	let token_list = Token.sentence_to_token_list s |> Token.all_possibility in
 	let rec aux l =
@@ -515,8 +853,18 @@ let string_to_item s =
 	in
 	aux token_list
 
+(** [item_list_to_syntax_tree_list item] converts a list of items into a list of syntax trees.
+  @param item A list of items to be converted.
+  @return A list of syntax trees obtained by applying [get_syntax_tree] to each item in the input list.
+*)
 let item_list_to_syntax_tree_list item =
 	List.map get_syntax_tree item
 
+(** [string_to_syntax_tree_list s] converts a string [s] into a list of syntax trees.
+  It first converts the string to an item and then transforms the item list into a list of syntax trees.
+
+  @param s The input string to be converted.
+  @return A list of syntax trees derived from the input string.
+*)
 let string_to_syntax_tree_list s =
 	s |> string_to_item |> item_list_to_syntax_tree_list

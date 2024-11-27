@@ -1,17 +1,22 @@
 let dictionnary_path = "dictionnarys/Dictionnary.txt"
 
+(** 
+  Reads a dictionary file and returns two tries: one where lines are inserted based on the first word and the other one on the second word.
+
+  @param file The path to the dictionary file.
+  @return A tuple of two tries: the first trie is indexed by the first word in each line, and the second trie is indexed by the second word in each line.
+
+  The dictionary file is expected to have lines with words separated by commas. The function processes the lines and inserts them into the tries based on specific patterns.
+
+  The function raises an exception if:
+  - The input list is empty.
+  - A line in the dictionary file is empty.
+  - A line in the dictionary file has a wrong format.
+*)
 let read_dictionnary file =
 	let aux (s:string list) :string list =
     let do_print = ref false in
 		let rec aux2 current_string_list result =
-      if !do_print then
-        begin
-        match current_string_list with
-        | h::h2::t-> print_string "\n1st match : "; print_string h; print_string "\n2nd match : "; print_string h2; print_string "\n"
-        | [h] -> print_string "\n Only one element : "; print_string h; print_string "\n"
-        | [] -> print_string "\n"
-        end
-      else ();
 			match current_string_list with
 			| [] -> List.rev result
 			| ("Ip" as first_possibility) :: ("Is" as other_possibility) :: t
