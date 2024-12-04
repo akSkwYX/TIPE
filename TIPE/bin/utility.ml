@@ -77,10 +77,11 @@ let rec join_2_lists list1 list2 =
   @param list3 The third list.
   @return List of 3-tuple.
 
+
   Example:
   join_3_lists [1; 2] ["a"; "b"] [true; false] = [(1, "a", true); (1, "a", false); (1, "b", true); (1, "b", false); (2, "a", true); (2, "a", false); (2, "b", true); (2, "b", false)]
 *)
-let rec join_3_lists list1 list2 list3 =
+let join_3_lists list1 list2 list3 =
   let rec pair_with_all x y lst =
     match lst with
     | [] -> []
@@ -102,15 +103,19 @@ let rec join_3_lists list1 list2 list3 =
   @param list4 The fourth list.
   @return List of 4-tuple.
 
+  
   Example:
   join_4_lists [1; 2] ["a"; "b"] [true; false] [3; 4] = [(1, "a", true, 3); (1, "a", true, 4); (1, "a", false, 3); (1, "a", false, 4); (1, "b", true, 3); (1, "b", true, 4); (1, "b", false, 3); (1, "b", false, 4); (2, "a", true, 3); (2, "a", true, 4); (2, "a", false, 3); (2, "a", false, 4); (2, "b", true, 3); (2, "b", true, 4); (2, "b", false, 3); (2, "b", false, 4)]
-
-let rec join_4_lists list1 list2 list3 list4 =
-  let rec pair_with_all x lst =
+*)
+let join_4_lists list1 list2 list3 list4 =
+  let rec pair_with_all x y z lst =
     match lst with
     | [] -> []
-    | y::ys -> (x, y) :: pair_with_all x ys
+    | w::ws -> (x, y, z, w) :: pair_with_all x y z ws
   in
-  match list1 with
-  | [] -> []
-  | x::xs -> (pair_with_all x list2) @ (join_4_lists xs list2 list3 list4)
+  let rec combine_three_lists l1 l2 l3 =
+    match l1 with
+    | [] -> []
+    | x::xs -> (List.concat (List.map (fun y -> List.concat (List.map (fun z -> pair_with_all x y z list4) l3)) l2)) @ (combine_three_lists xs l2 l3)
+  in
+  combine_three_lists list1 list2 list3

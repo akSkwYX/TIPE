@@ -1,5 +1,8 @@
+dune__exe__Checkings
+dune__exe__Correction
 dune__exe__Dictionnary
 dune__exe__Grammar
+dune__exe__Syntax_tree
 dune__exe__Token
 dune__exe__Trie
 dune__exe__Utility
