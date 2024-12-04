@@ -11,16 +11,16 @@ type token =
 *)
 let string_of_token t =
   match t with
-  | Token (Word_classe.Determinant, (s, l)) ->  "D " ^ s ^ " " ^ (Utility.string_of_string_list l)
-  | Token (Word_classe.Nom, (s, l)) ->  "N " ^ s ^ " " ^ (Utility.string_of_string_list l)
-  | Token (Word_classe.Adjectif, (s, l)) ->  "A " ^ s ^ " " ^ (Utility.string_of_string_list l)
-  | Token (Word_classe.S, (s, l)) ->  "S : "
-  | Token (Word_classe.GV, (s, l)) ->  "GV : "
-  | Token (Word_classe.GN, (s, l)) ->  "GN : "
-  | Token (Word_classe.MultipleAdj, (s, l)) ->  "MA : "
-  | Token (Word_classe.Pronom_sujet, (s, l)) ->  "PS " ^ s ^ " " ^ (Utility.string_of_string_list l)
-  | Token (Word_classe.Sujet, (s, l)) ->  "SU " ^ s ^ " " ^ (Utility.string_of_string_list l)
-  | Token (Word_classe.Verbe, (s, l)) ->  "V " ^ s ^ " " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.Determinant, (s, l)) ->  "D : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.Nom, (s, l)) ->  "N : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.Adjectif, (s, l)) ->  "A : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.S, (s, l)) ->  "S : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.GV, (s, l)) ->  "GV : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.GN, (s, l)) ->  "GN : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.MultipleAdj, (s, l)) ->  "MA : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.Pronom_sujet, (s, l)) ->  "PS : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.Sujet, (s, l)) ->  "SU : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
+  | Token (Word_classe.Verbe, (s, l)) ->  "V : " ^ s ^ " | " ^ (Utility.string_of_string_list l)
   | Token (Word_classe.Unknown, (s, l)) ->  failwith "string_of_token : Unknown token declared as Token"
   | Unknown w ->  "Unknown " ^ w
 
@@ -69,10 +69,10 @@ let get_word token =
   | Token (Word_classe.Sujet, (s, l)) -> s
   | Token (Word_classe.Verbe, (s, l)) -> s
   | Token (Word_classe.Pronom_sujet, (s, l)) -> s
-  | Token (Word_classe.S, (s, l)) -> failwith "get_word : trying to get a word from a S"
-  | Token (Word_classe.GV, (s, l)) -> failwith "get_word : trying to get a word from a GV"
-  | Token (Word_classe.GN, (s, l)) -> failwith "get_word : trying to get a word from a GN"
-  | Token (Word_classe.MultipleAdj, (s, l)) -> failwith "get_word : trying to get a word from a MultipleAdj"
+  | Token (Word_classe.S, (s, l)) -> s
+  | Token (Word_classe.GV, (s, l)) -> s
+  | Token (Word_classe.GN, (s, l)) -> s
+  | Token (Word_classe.MultipleAdj, (s, l)) -> s
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_word : Unknown token declared as Token"
   | Unknown w -> w
 

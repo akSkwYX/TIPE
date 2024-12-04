@@ -121,7 +121,10 @@ zlibrarytopaths.code.tex)))
 [Loading MPS to PDF converter (version 2006.09.02).]
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 (/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (results//result.aux) )<
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
-Output written on results//result.pdf (1 page, 15844 bytes).
+Overfull \hbox (48.04355pt too wide) in paragraph at lines 8--9
+ [] 
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (results//result.aux) )
+(see the transcript file for additional information)</usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
+Output written on results//result.pdf (1 page, 17308 bytes).
 Transcript written on results//result.log.

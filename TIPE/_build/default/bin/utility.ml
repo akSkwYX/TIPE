@@ -49,3 +49,13 @@ let list_list_to_list list =
 
 let print_string_list_list list =
   List.iter (fun x -> print_string_list x; print_newline ()) list
+
+let rec join_2_lists list1 list2 =
+  let rec pair_with_all x lst =
+    match lst with
+    | [] -> []
+    | y::ys -> (x, y) :: pair_with_all x ys
+  in
+  match list1 with
+  | [] -> []
+  | x::xs -> (pair_with_all x list2) @ (join_2_lists xs list2)

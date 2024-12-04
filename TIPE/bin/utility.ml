@@ -49,3 +49,68 @@ let list_list_to_list list =
 
 let print_string_list_list list =
   List.iter (fun x -> print_string_list x; print_newline ()) list
+
+
+(**
+  [join_2_lists list1 list2] returns a list of pairs where each element of [list1]
+  is paired with each element of [list2].
+
+  @param list1 The first list.
+  @param list2 The second list.
+  @return A list of pairs.
+*)
+let rec join_2_lists list1 list2 =
+  let rec pair_with_all x lst =
+    match lst with
+    | [] -> []
+    | y::ys -> (x, y) :: pair_with_all x ys
+  in
+  match list1 with
+  | [] -> []
+  | x::xs -> (pair_with_all x list2) @ (join_2_lists xs list2)
+
+(**
+  [join_3_lists list1 list2 list3] returns a list of 3-tuple where each element of [list1], [list2], [list3] are joined together.
+
+  @param list1 The first list.
+  @param list2 The second list.
+  @param list3 The third list.
+  @return List of 3-tuple.
+
+  Example:
+  join_3_lists [1; 2] ["a"; "b"] [true; false] = [(1, "a", true); (1, "a", false); (1, "b", true); (1, "b", false); (2, "a", true); (2, "a", false); (2, "b", true); (2, "b", false)]
+*)
+let rec join_3_lists list1 list2 list3 =
+  let rec pair_with_all x y lst =
+    match lst with
+    | [] -> []
+    | z::zs -> (x, y, z) :: pair_with_all x y zs
+  in
+  let rec combine_two_lists l1 l2 =
+    match l1 with
+    | [] -> []
+    | x::xs -> (List.concat (List.map (fun y -> pair_with_all x y list3) l2)) @ (combine_two_lists xs l2)
+  in
+  combine_two_lists list1 list2
+
+(**
+  [join_4_lists list1 list2 list3 list4] returns a list of 4-tuple where each element of [list1], [list2], [list3], [list4] are joined together.
+
+  @param list1 The first list.
+  @param list2 The second list.
+  @param list3 The third list.
+  @param list4 The fourth list.
+  @return List of 4-tuple.
+
+  Example:
+  join_4_lists [1; 2] ["a"; "b"] [true; false] [3; 4] = [(1, "a", true, 3); (1, "a", true, 4); (1, "a", false, 3); (1, "a", false, 4); (1, "b", true, 3); (1, "b", true, 4); (1, "b", false, 3); (1, "b", false, 4); (2, "a", true, 3); (2, "a", true, 4); (2, "a", false, 3); (2, "a", false, 4); (2, "b", true, 3); (2, "b", true, 4); (2, "b", false, 3); (2, "b", false, 4)]
+
+let rec join_4_lists list1 list2 list3 list4 =
+  let rec pair_with_all x lst =
+    match lst with
+    | [] -> []
+    | y::ys -> (x, y) :: pair_with_all x ys
+  in
+  match list1 with
+  | [] -> []
+  | x::xs -> (pair_with_all x list2) @ (join_4_lists xs list2 list3 list4)

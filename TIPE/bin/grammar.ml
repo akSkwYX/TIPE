@@ -2,6 +2,7 @@
 (*     Hearth of project : Detecting errors and making correction     *)
 (* ------------------------------------------------------------------ *)
 
+(* TODO :: Implementing correction of agreement inside nominal group and between verb and nominal group *)
 
 type error =
 	| Empty_sentence
@@ -66,7 +67,7 @@ let rec syntax_tree_in_tex_aux file tree =
   @param file The output channel where the LaTeX code will be written.
 *)
 let syntax_tree_in_tex tree file =
-	Printf.fprintf file "\\begin{center}\n\\begin{tikzpicture}\n\\node{Sentence}[sibling distance = 3cm, level distance = 3cm, align=center]\n";
+	Printf.fprintf file "\\begin{center}\n\\begin{tikzpicture}\n\\node{Sentence}[sibling distance = 4cm, level distance = 3cm, align=center]\n";
 	syntax_tree_in_tex_aux file tree;
 	Printf.fprintf file ";\n\\end{tikzpicture}\n\\end{center}\n"
 
@@ -306,7 +307,7 @@ let check_subject_verb subject_token verb_token =
 					in
 					check_all_person_verb list_verb_person
 					end
-				| rad_subject :: gender :: number :: [], h :: t ->
+				| gender :: number :: [], h :: t ->
 					begin
 						let rec check_all_person_verb list_verb_person =
 							match number, list_verb_person with
@@ -318,6 +319,7 @@ let check_subject_verb subject_token verb_token =
 						check_all_person_verb list_verb_person
 					end
 				| rad_subject :: person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
+				| person :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
 				| _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
 			end
 	| _, _ -> failwith "check_subject_verb : Doesn't receive a correct Sujet and a Verbe"
@@ -501,7 +503,6 @@ let check_nominal_group det_token adj_token noun_token adj_token_2 =
 			end
 	| _, _, _, _ -> failwith "check_nominal_group : Doesn't receive a correct Determinant, Adjectif, Nom and Adjectif"
 
-
 (** [pass sentence] increments the [indice] field of the given [sentence] by 1.
 
   @param sentence The record whose [indice] field will be incremented.
@@ -515,11 +516,11 @@ let pass sentence =
   Otherwise, it extracts the verbal group tree and token from the sentence and returns the verbal group tree.
 
   @param sentence The sentence to analyze.
-  @return The syntax tree of the sentence or an error if the sentence is empty.
+  @return A syntax tree list of possible correction of the sentence or the syntax tree of the sentence if it's correct
 *)
-let rec get_syntax_tree sentence =
+let rec get_syntax_tree sentence :syntax_tree list =
 	if sentence.indice > sentence.length then
-		Error Empty_sentence
+		[Error Empty_sentence]
 	else
 		let (verbal_group_tree, verbal_group_token) = get_verbal_group sentence in
 		verbal_group_tree
@@ -545,20 +546,25 @@ let rec get_syntax_tree sentence =
   * - An error and a token if unsuccessful.
   *)
 and get_verbal_group sentence =
-	let (subject_tree, subject_token) = get_subject sentence in
-	match subject_tree with
-	| Error e -> (Error e, subject_token)
-	| _ ->
-		let (verb_tree, verb_token) = get_verb sentence in
-		match verb_tree with
-		| Error e -> (Error e, verb_token)
-		| _ ->
-			let (success, informations, error) = check_verbal_group subject_token verb_token in
-			let token = Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word verb_token), informations) ) in
-			if success then
-				(Node (Word_classe.GV, informations, [subject_tree; verb_tree]), token)
-			else
-				( Error error, token )
+  let construct_verbal_group subject_list verb_list =
+    let combination = Utility.join_2_lists subject_list verb_list in
+    let rec aux l result =
+      match l with
+      | ((Error e, token), _)::t | (_, (Error e, token))::t -> aux t (([Error e], token)::result)
+      | ((subject_tree, subject_token), (verb_tree, verb_token))::t 
+        ->  let (success, informations, error) = check_verbal_group subject_token verb_token in 
+            let token = Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word verb_token), informations) ) in
+            if success then
+              aux t (([Node (Word_classe.GV, informations, [subject_tree; verb_tree])], token)::result)
+            else
+              aux t (([Error error], token)::result)
+      | _ -> failwith "get_verbal_group : wrong list"
+    in
+    aux combination []
+  in
+	let subject_list = get_subject sentence in
+	let verb_list = get_verb sentence in
+  construct_verbal_group subject_list verb_list
 
 (** [get_subject s] extracts the subject from the sentence represented by [s].
   It returns a tuple containing a parse tree and a token.
@@ -578,7 +584,7 @@ and get_verbal_group sentence =
 *)
 and get_subject s =
 	if s.indice >= s.length then
-		(Error Empty_sentence, Token.Token (Word_classe.Sujet, ("", [])))
+		[(Error Empty_sentence, Token.Token (Word_classe.Sujet, ("", [])))]
 	else
 		begin
 		let wc_of_token = Token.get_word_classe s.t_a.(s.indice) in
@@ -586,24 +592,26 @@ and get_subject s =
     | Word_classe.Determinant | Word_classe.Nom | Word_classe.Adjectif
       ->
       begin
-        let (nominal_group_tree, nominal_group_token) = get_nominal_group s in
-        match nominal_group_tree with
-        | Error e -> (Error e, nominal_group_token)
-        | Node (Word_classe.GN, informations, _) -> (Node (Word_classe.Sujet, informations,
-				 [nominal_group_tree]), Token.Token (Word_classe.Sujet, (Token.get_word nominal_group_token, Token.get_information nominal_group_token)))
-        | _ -> failwith "get_subject : wrong tree, waiting for a GN"
+        let nominal_group_list = get_nominal_group s in
+        List.map (fun (nominal_group_tree, nominal_group_token) -> 
+          match nominal_group_tree with
+          | Error e -> (Error e, nominal_group_token)
+          | Node (Word_classe.GN, informations, _) -> (Node (Word_classe.Sujet, informations, [nominal_group_tree]), Token.Token (Word_classe.Sujet, (Token.get_word nominal_group_token, Token.get_information nominal_group_token)))
+          | _ -> failwith "get_subject : wrong tree, waiting for a GN"
+        ) nominal_group_list
       end
 		| Word_classe.Pronom_sujet
       ->
       begin
-        let (pronom_sujet_tree, pronom_subject_token) = get_pronom_sujet s in
-        match pronom_sujet_tree with
-        | Error e -> (Error e, pronom_subject_token)
-        | Node (Word_classe.Pronom_sujet, informations, _) -> (Node (Word_classe.Sujet, informations, [pronom_sujet_tree]),
-				 Token.Token (Word_classe.Sujet, (Token.get_word pronom_subject_token, Token.get_information pronom_subject_token)))
-        | _ -> failwith "get_subject : wrong tree, waiting for a Pronom_sujet"
+        let pronoun_subject_list = get_pronom_sujet s in
+        List.map (fun (pronoun_subject_tree, pronoun_subject_token) ->
+          match pronoun_subject_tree with
+          | Error e -> (Error e, pronoun_subject_token)
+          | Node (Word_classe.Sujet, informations, _) -> (Node (Word_classe.Sujet, informations, [pronoun_subject_tree]), Token.Token (Word_classe.Sujet, (Token.get_word pronoun_subject_token, Token.get_information pronoun_subject_token)))
+          | _ -> failwith "get_subject : wrong tree, waiting for a Pronom_sujet"
+        ) pronoun_subject_list
       end
-		| _ -> (Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice))), (Token.Token (Word_classe.Sujet, (Token.get_word s.t_a.(s.indice), []))) )
+		| _ -> [Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice))), (Token.Token (Word_classe.Sujet, (Token.get_word s.t_a.(s.indice), []))) ]
 		end
 
 (** 
@@ -628,32 +636,23 @@ and get_subject s =
   If any parsing step fails, the function returns an error.
 *)
 and get_nominal_group s =
-	let (det_tree, det_token) = get_determinant s in
-	match det_tree with
-	| Error e -> (Error e, det_token)
-	| _ ->
-		let (adj_tree, adj_token) = get_adjectifs s in
-		match adj_tree with
-		| Error e -> (Error e, adj_token)
-		| _ ->
-			let (noun_tree, noun_token) = get_nom s in
-			match noun_tree with
-			| Error e -> (Error e, noun_token)
-			| _ ->
-				let (adj_tree_2, adj_token_2) = get_adjectifs s in
-				match adj_tree_2 with
-				| Error e -> (Error e, adj_token_2)
-				| _ ->
-					let (success, informations, error) = check_nominal_group det_token adj_token noun_token adj_token_2 in
-					let token = Token.Token (Word_classe.GN, (Token.get_word det_token ^ " " ^ Token.get_word adj_token ^ " " ^ Token.get_word noun_token ^ " " ^ Token.get_word adj_token_2, informations)) in
-					if success then
-						match adj_tree, adj_tree_2 with
-						| Node (Word_classe.Adjectif, [], [Leaf ""]), Node (Word_classe.Adjectif, [], [Leaf ""]) -> (Node (Word_classe.GN, informations, [det_tree; noun_tree]), token)
-						| Node (Word_classe.Adjectif, [], [Leaf ""]), _ -> (Node (Word_classe.GN, informations, [det_tree; noun_tree; adj_tree_2]), token)
-						| _, Node (Word_classe.Adjectif, [], [Leaf ""]) -> (Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree]), token)
-						| _ -> (Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)
-					else
-						(Error error, token)
+  let combination = Utility.combine_4_lists (get_determinant s) (get_adjectifs s) (get_nom s) (get_adjectifs s) in
+    
+
+	let det_list = get_determinant s in
+	let adjective1_list = get_adjectifs s in
+	let noun_list = get_nom s in
+	let adjective2_list = get_adjectifs s in
+  let (success, informations, error) = check_nominal_group det_token adj_token noun_token adj_token_2 in
+  let token = Token.Token (Word_classe.GN, (Token.get_word det_token ^ " " ^ Token.get_word adj_token ^ " " ^ Token.get_word noun_token ^ " " ^ Token.get_word adj_token_2, informations)) in
+  if success then
+    match adj_tree, adj_tree_2 with
+    | Node (Word_classe.Adjectif, [], [Leaf ""]), Node (Word_classe.Adjectif, [], [Leaf ""]) -> (Node (Word_classe.GN, informations, [det_tree; noun_tree]), token)
+    | Node (Word_classe.Adjectif, [], [Leaf ""]), _ -> (Node (Word_classe.GN, informations, [det_tree; noun_tree; adj_tree_2]), token)
+    | _, Node (Word_classe.Adjectif, [], [Leaf ""]) -> (Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree]), token)
+    | _ -> (Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)
+  else
+    (Error error, token)
 
 (** [get_determinant s] is a function that processes a sentence structure [s] to extract a determinant token.
   It returns a tuple containing an error or a node and the token itself.
@@ -739,17 +738,19 @@ and get_adjectifs s =
 		List.rev (aux adj_list adj_informations_list [])
 	in
 	let gender_number_comparison adj_informations_1 adj_informations_2 =
-		match adj_informations_1, adj_informations_2 with
+		let formated_adj_informations adj_informations =
+			match adj_informations with
+			| [rad; g; n] -> [g; n]
+			| [g; n] -> [g; n]
+			| _ -> failwith ("formated_adj_informations : adj_informations doesn't match the expected format")
+		in
+		match (formated_adj_informations adj_informations_1), (formated_adj_informations adj_informations_2) with
 		| x, y when x = y -> x
-		| ["m"; "s"], ["e"; "s"] | ["e"; "s"], ["m"; "s"] -> ["m"; "s"]
-		| ["f"; "s"], ["e"; "s"] | ["e"; "s"], ["f"; "s"] -> ["f"; "s"]
-		| ["m"; "p"], ["e"; "p"] | ["e"; "p"], ["m"; "p"] -> ["m"; "p"]
-		| ["f"; "p"], ["e"; "p"] | ["e"; "p"], ["f"; "p"] -> ["f"; "p"]
-		| ["m"; "s"], ["m"; "i"] | ["m"; "i"], ["m"; "s"] -> ["m"; "s"]
-		| ["f"; "s"], ["f"; "i"] | ["f"; "i"], ["f"; "s"] -> ["f"; "s"]
-		| ["m"; "p"], ["m"; "i"] | ["m"; "i"], ["m"; "p"] -> ["m"; "p"]
-		| ["f"; "p"], ["f"; "i"] | ["f"; "i"], ["f"; "p"] -> ["f"; "p"]
-		| ["e"; n], [g; "i"] | [g; "i"], ["e"; n] -> [g; n]
+		| ["e"; "i"], [g; n] | [g; n], ["e"; "i"] -> [g; n]
+		| ["e"; "s"], [g; "s"] | [g; "s"], ["e"; "s"] -> [g; "s"]
+		| ["e"; "p"], [g; "p"] | [g; "p"], ["e"; "p"] -> [g; "p"]
+		| ["m"; "i"], ["m"; n] | ["m"; n], ["m"; "i"] -> ["m"; n]
+		| ["f"; "i"], ["f"; n] | ["f"; n], ["f"; "i"] -> ["f"; n]
 		| _ -> failwith "information_comparison : adj_informations_1 and adj_informations_2 doesn't match"
 	in
 	let rec aux' s current_adj_list current_adj_informations_list current_token =
@@ -846,6 +847,7 @@ and get_pronom_sujet s =
 *)
 let string_to_item s =
 	let token_list = Token.sentence_to_token_list s |> Token.all_possibility in
+	Token.print_token_list_list token_list; print_newline ();
 	let rec aux l =
 		match l with
 		| [] -> []
