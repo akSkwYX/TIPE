@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2024.11.27)  5 DEC 2024 17:11
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2024.11.27)  11 DEC 2024 08:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -380,92 +380,23 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 8--9
- [] 
- []
-
-
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 14--15
- [] 
- []
-
 [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 20--21
- [] 
- []
-
-[2]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 26--27
- [] 
- []
-
-[3]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 32--33
- [] 
- []
-
-[4]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 38--39
- [] 
- []
-
-[5]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 44--45
- [] 
- []
-
-[6]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 50--51
- [] 
- []
-
-[7]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 56--57
- [] 
- []
-
-[8]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 62--63
- [] 
- []
-
-[9]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 68--69
- [] 
- []
-
-[10]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 74--75
- [] 
- []
-
-[11]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 80--81
- [] 
- []
-
-[12]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 86--87
- [] 
- []
-
-[13] [14] (results//result.aux) ) 
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (results//result.aux) ) 
 Here is how much of TeX's memory you used:
- 12803 strings out of 481239
- 271883 string characters out of 5920376
- 476981 words of memory out of 5000000
- 27900 multiletter control sequences out of 15000+600000
+ 11456 strings out of 481239
+ 237058 string characters out of 5920376
+ 443376 words of memory out of 5000000
+ 26553 multiletter control sequences out of 15000+600000
  532338 words of font info for 24 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,16n,60p,454b,1611s stack positions out of 5000i,500n,10000p,200000b,80000s
-</usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/amsfonts/cm/cmr10.pfb>
-Output written on results//result.pdf (14 pages, 37645 bytes).
+ 60i,8n,60p,403b,779s stack positions out of 5000i,500n,10000p,200000b,80000s
+</u
+sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
+Output written on results//result.pdf (1 page, 12802 bytes).
 PDF statistics:
- 57 PDF objects out of 1000 (max. 8388607)
- 39 compressed objects within 1 object stream
+ 15 PDF objects out of 1000 (max. 8388607)
+ 10 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

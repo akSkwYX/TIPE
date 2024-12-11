@@ -26,6 +26,8 @@ let print_string_list = List.iter (fun x -> print_string x; print_string " | ")
 
 let print_bool = print_endline @. string_of_bool
 
+let print_int_matrix m = Array.iter (fun x -> Array.iter (fun y -> print_int y; print_string " ") x; print_newline ()) m
+
 let array_of_list l = List.to_seq l |> Array.of_seq
 
 let string_of_string_list l =

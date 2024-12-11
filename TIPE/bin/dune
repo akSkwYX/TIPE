@@ -1,5 +1,6 @@
 (executable
  (public_name main)
  (name main)
- (flags (:standard -w -26-27-32 ))
+ (modes byte exe)
+ (flags (:standard -g -w -26-27-32-39 ))
  (libraries TIPE))

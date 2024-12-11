@@ -121,49 +121,7 @@ zlibrarytopaths.code.tex)))
 [Loading MPS to PDF converter (version 2006.09.02).]
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 (/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 8--9
- [] 
-
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 14--15
- [] 
-[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 20--21
- [] 
-[2]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 26--27
- [] 
-[3]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 32--33
- [] 
-[4]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 38--39
- [] 
-[5]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 44--45
- [] 
-[6]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 50--51
- [] 
-[7]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 56--57
- [] 
-[8]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 62--63
- [] 
-[9]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 68--69
- [] 
-[10]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 74--75
- [] 
-[11]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 80--81
- [] 
-[12]
-Overfull \hbox (48.04355pt too wide) in paragraph at lines 86--87
- [] 
-[13] [14] (results//result.aux) )
-(see the transcript file for additional information)</usr/share/texlive/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
-Output written on results//result.pdf (14 pages, 37645 bytes).
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (results//result.aux) )<
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
+Output written on results//result.pdf (1 page, 12802 bytes).
 Transcript written on results//result.log.
