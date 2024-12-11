@@ -216,6 +216,7 @@ let check_subject_verb subject_token verb_token =
   @raise Failure if the input list does not match the expected format.
 *)
 let is_conjugue verb_informations =
+  Utility.print_string_list verb_informations;
   match verb_informations with
     | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
     | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
@@ -249,6 +250,7 @@ let check_verbal_group subject_token verb_token =
   | Token.Token (Word_classe.Sujet, (subject, informations_subject)), Token.Token (Word_classe.Verbe, (verb, informations_verb))
     ->
       begin
+        Utility.print_string_list informations_verb; print_newline ();
         if is_conjugue informations_verb then
           let (success, result_informations) = check_subject_verb subject_token verb_token in
           if success then

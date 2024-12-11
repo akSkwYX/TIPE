@@ -4,34 +4,44 @@ let rad_dict = Dictionnary.rad_dictionnary
 
 (* Distance between words : Distance of Levenshtein *)
 
-let distance word_1 word_2 =
+let distanceLevenshtein word_1 word_2 =
 
-  let word_list_1 = Utility.char_list_of_string word_1 in
-  let word_list_2 = Utility.char_list_of_string word_2 in
-  let length_1 = String.length word_1 in
-  let length_2 = String.length word_2 in
-  let min_length = min length_1 length_2 in
-  let max_length = max length_1 length_2 in
-  let matrix_distance = Array.make_matrix 2 (min_length+1) 0 in
-  matrix_distance.(0) <- Array.mapi (fun i x -> i) matrix_distance.(0);
+  let len_1 = String.length word_1 in
+  let len_2 = String.length word_2 in
+  
+  let matrix_distance = Array.make_matrix 2 (len_2 + 1) 0 in
   matrix_distance.(1).(0) <- 1;
-  let word_list_1 = ref word_1 in
-  let word_list_2 = ref word_2 in
-  
-  for _ = 0 to max_length-1 do
-    for j = 1 to min_length do
-      match word_list_1, word_list_2 with
-      | h1::t1, h2::t2 when h1=h2 -> matrix_distance.(1).(j) <- matrix_distance.(0).(j-1)
-      | h1::t1, h2::t2 -> matrix_distance.(1).(j) <- min (min (matrix_distance.(0).(j) + 1) (matrix_distance.(1).(j-1) + 1)) (matrix_distance.(0).(j-1)+1)
-      | _ -> failwith "distance : word_1 longer than word_2"
-    done;
-    Utility.print_int_matrix matrix_distance; print_newline ();
-    matrix_distance.(0) <- matrix_distance.(1);
+  for j = 1 to len_2 do
+    matrix_distance.(0).(j) <- j
   done;
-  matrix_distance.(1).(min_length)
   
+  for i = 1 to len_1 do
+    for j = 1 to len_2 do
+      let cost = if word_1.[i - 1] = word_2.[j - 1] then 0 else 1 in
+      matrix_distance.(1).(j) <- min (min (matrix_distance.(0).(j) + 1) (matrix_distance.(1).(j - 1) + 1)) (matrix_distance.(0).(j - 1) + cost)
+    done;
+    for j = 0 to len_2 do
+      matrix_distance.(0).(j) <- matrix_distance.(1).(j)
+    done;
+    matrix_distance.(1).(0) <- i+1
+  done;
 
-(* Misspelled correction *)
+  matrix_distance.(1).(len_2)
+
+let min_distance word l =
+  let rec aux l min_word min_result min_distance =
+    match l with
+    | [] -> min_result
+    | (Token.Token (_, (word_2, _)),_) as result :: t -> let d = distanceLevenshtein word word_2 in
+                                            if d < min_distance then aux t word_2 result d
+                                            else aux t min_word min_result min_distance 
+    | _ -> failwith "min_distance : invalid token"
+  in
+  match l with
+  | [] -> failwith "min_distance : empty list"
+  | (token, informations) :: t -> aux t (Token.get_word token) (token, informations) (distanceLevenshtein word (Token.get_word token))
+
+(*Misspelled correction *)
 
 let get_correction_possibility_for_word word = ()
   (* TODO *)
@@ -68,7 +78,7 @@ let correct_verb subject_token verb_token =
                 if is_correct then aux t ((h, informations) :: res)
                 else aux t res
   in
-  aux potential_correction_token_list []
+  min_distance (Token.get_word verb_token) (aux potential_correction_token_list [])
 
 let construct_verb_tree verb_token =
   match verb_token with
@@ -84,18 +94,15 @@ let correct_verbal_group subject_tree subject_token verb_tree verb_token :(synta
     begin
       print_string "Error on verbal group :: Wrong conjugation of : "; print_string (Token.get_word verb_token); print_newline ();
       print_string "Trying to fix..."; print_newline ();
-      let correct_token_information_list = correct_verb subject_token verb_token in
-      print_string "Suggested corrections : "; print_newline ();
-      List.iter (fun (token, informations) -> Printf.printf "- %s -" (Token.get_word token)) correct_token_information_list; print_newline ();
-      List.map (fun (token, informations) -> 
+      let (corrected_token, corrected_informations) = correct_verb subject_token verb_token in
+      print_string "Suggested corrections : "; print_string (Token.get_word corrected_token); print_newline ();
+      (* List.map (fun (token, informations) -> 
                 (Node (Word_classe.GV,
                       informations,
                       [subject_tree; (construct_verb_tree token)]),
                       (Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word token), informations) )))
                )
                correct_token_information_list
+      *)
+      [(Node (Word_classe.GV, informations, [subject_tree; (construct_verb_tree corrected_token)]), (Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word corrected_token), informations ))) )]
       end
-
-let () = print_int (distance "dors" "dort"); print_newline ()
-(* let () = print_int (distance "chien" "chat"); print_newline ()
-let () = print_int (distance "couille" "couille"); print_newline () *)
