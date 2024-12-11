@@ -251,6 +251,15 @@ let sentence_to_list s =
 	aux (List.rev (Utility.char_list_of_string s) ) []
 
 let get_token_from_informations word informations =
+  match informations with
+  | (rad_det::"D"::complementary_information) -> Token ( Word_classe.Determinant, (word, rad_det::complementary_information) )
+  | (rad_noun::"N"::complementary_information) -> Token ( Word_classe.Nom, (word, rad_noun::complementary_information) )
+  | (rad_adj::"A"::complementary_information) -> Token ( Word_classe.Adjectif, (word, rad_adj::complementary_information) )
+  | (rad_verb::"V"::complementary_information) -> Token ( Word_classe.Verbe, (word, rad_verb::complementary_information) )
+  | (rad_subj_pronoun::"Os"::complementary_information) -> Token ( Word_classe.Pronom_sujet, (word, rad_subj_pronoun::complementary_information) )
+  | _ -> failwith "get_token_from_informations : wrong information"
+
+let get_token_from_informations_list word informations =
   let rec match_information i possibility word =
     match i with
     | [] -> possibility
@@ -260,7 +269,7 @@ let get_token_from_informations word informations =
     | (rad_verb::"V"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Verbe, (word, rad_verb::complementary_information) ) :: possibility) word
     | (rad_subj_pronoun::"Os"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Pronom_sujet, (word, rad_subj_pronoun::complementary_information) ) :: possibility) word
     | _ when possibility = [] -> [Unknown "Unknown"]
-    | _ -> failwith "match_information : wrong information"
+    | _ -> failwith "get_token_from_informaations_list :: match_information : wrong information"
   in
   match_information informations [] word
 
@@ -281,7 +290,7 @@ let get_token_from_informations word informations =
 let sentence_to_token_list (s:string) :token list list =
   
 	let rec get_correction_possibility_for_word (word:string) (nbr_test:int) :token list =
-    if nbr_test > 3 then
+    if nbr_test > 2 then
       []
     else
       begin
@@ -289,7 +298,7 @@ let sentence_to_token_list (s:string) :token list list =
         if index = String.length word then
           match possibility with
           | [] -> List.fold_left (fun acc x -> (get_correction_possibility_for_word x (nbr_test+1)) @ acc) [] test_word
-          | _ -> Utility.list_list_to_list (List.map (fun (word, informations) -> get_token_from_informations word informations) possibility)
+          | _ -> Utility.list_list_to_list (List.map (fun (word, informations) -> get_token_from_informations_list word informations) possibility)
         else
           let rec letter_loop possibility letter test_word =
             match letter with
@@ -321,12 +330,13 @@ let sentence_to_token_list (s:string) :token list list =
 			let (is_word, information) = Trie.trie_search Dictionnary.dictionnary word in
 			if is_word then
 				(* Return all possibility for a word *)
-        aux t ((get_token_from_informations word information) :: list_token)
+        aux t ((get_token_from_informations_list word information) :: list_token)
 			else
         begin
           print_string ("Not a correct sentence : Unknown word " ^ word ^ "\nTrying to find correction\n");
-          let correction_possibilitys = get_correction_possibility_for_word word in
-          aux t ((get_correction_possibility_for_word word 0) :: list_token)
+          let correction_possibilitys = get_correction_possibility_for_word word 0 in
+          print_string ("Possible correction found : "); print_int (List.length correction_possibilitys); print_newline ();
+          aux t (correction_possibilitys :: list_token)
         end
 	in
 	List.rev (aux (sentence_to_list s) [])

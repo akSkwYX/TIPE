@@ -2,16 +2,29 @@ open Syntax_tree
 
 let rad_dict = Dictionnary.rad_dictionnary
 
-let seek_word word =
-  print_string word; print_newline ();
-  let (is_word, potential_correction) = Trie.trie_search rad_dict word in
-  Utility.print_string_list_list potential_correction; print_newline ();
-  Token.get_token_from_informations word potential_correction
+let is_verb word_informations =
+  match word_informations with
+  | rad_word :: "V" :: _ -> true
+  | _ -> false
+
+let seek_word word_token =
+  match word_token with
+  | Token.Token (_, (_, (rad_word::_))) 
+    -> 
+    begin
+      let (is_word, potential_correction) = Trie.trie_search rad_dict rad_word in
+      let rec get_correction_token_list potential_correction res =
+        match potential_correction with
+        | [] -> res
+        | (word :: "V" :: complementary_informations) :: t -> get_correction_token_list t ((Token.get_token_from_informations word (rad_word :: "V" :: complementary_informations)) :: res)
+        | h::t -> get_correction_token_list t res
+      in
+      get_correction_token_list potential_correction []
+    end
+  | _ -> failwith "seek_word : invalid token"
 
 let correct_verb subject_token verb_token =
-  let verb = Token.get_word verb_token in
-  let potential_correction_token_list = seek_word verb in
-  Token.print_token_list potential_correction_token_list; print_newline ();
+  let potential_correction_token_list = seek_word verb_token in
   let rec aux l res =
     match l with
     | [] -> res
@@ -33,8 +46,16 @@ let correct_verbal_group subject_tree subject_token verb_tree verb_token :(synta
     [(Node (Word_classe.GV, informations, [subject_tree; verb_tree]), token)]
   else
     begin
-      Printf.printf "Not a correct sentence :: verb : %s\nSearching a correction...\n" (Token.get_word verb_token);
+      print_string "Error on verbal group :: Wrong conjugation of : "; print_string (Token.get_word verb_token); print_newline ();
+      print_string "Trying to fix..."; print_newline ();
       let correct_token_information_list = correct_verb subject_token verb_token in
-      List.iter (fun (token, informations) -> Printf.printf "Correction : %s\n" (Token.get_word token)) correct_token_information_list;
-      List.map (fun (token, informations) -> (Node (Word_classe.GV, informations, [subject_tree; (construct_verb_tree verb_token)]), token)) correct_token_information_list
+      print_string "Suggested corrections : "; print_newline ();
+      List.iter (fun (token, informations) -> Printf.printf "- %s -" (Token.get_word token)) correct_token_information_list; print_newline ();
+      List.map (fun (token, informations) -> 
+                (Node (Word_classe.GV,
+                      informations,
+                      [subject_tree; (construct_verb_tree token)]),
+                      (Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word token), informations) )))
+               )
+               correct_token_information_list
     end

@@ -201,8 +201,7 @@ let check_subject_verb subject_token verb_token =
             in
             check_all_person_verb list_verb_person
           end
-        | rad_subject :: person :: _ :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
-        | person :: number :: [], _ -> failwith "check_subject_verb : Doesn't receive a correct Verb"
+        | _, [] -> (false, [])
         | _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
       end
   | _, _ -> failwith "check_subject_verb : Doesn't receive a correct Sujet and a Verbe"

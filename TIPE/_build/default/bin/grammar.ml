@@ -448,7 +448,6 @@ and get_pronom_sujet s =
 *)
 let string_to_item s =
 	let token_list = Token.sentence_to_token_list s |> Token.all_possibility in
-	Token.print_token_list_list token_list;
 	let rec aux l =
 		match l with
 		| [] -> []
