@@ -1,5 +1,7 @@
 let ( @. ) = Fun.compose
 
+let distinct l = List.fold_left (fun acc x -> if List.mem x acc then acc else x :: acc) [] l
+
 let split_string string i =
   (String.sub string 0 i, String.sub string i (String.length string - i))
 

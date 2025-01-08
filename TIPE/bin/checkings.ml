@@ -191,7 +191,7 @@ let is_imperative verb_token =
     -> false
   | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
     -> List.exists ((=) "e") (String.split_on_char ',' temps)
-  | l -> (Utility.print_string_list verb_informations; print_newline (); failwith "chekings.ml - is_imperative : Doesn't receive a correct Verb")
+  | l -> failwith "chekings.ml - is_imperative : Doesn't receive a correct Verb"
 
 (** 
   [check_subject_verb subject_token verb_token] checks if the subject and verb tokens agree in person and number.
@@ -237,8 +237,6 @@ let check_subject_verb subject_token verb_token =
         | gender :: number :: [], h :: t ->
           begin
             let rec check_all_person_verb list_verb_person =
-              print_string "number : "; print_string number; print_string " "; print_string @@ string_of_bool (number = "s"); print_newline ();
-              print_string "list_verb_person : "; print_string (Utility.string_of_string_list list_verb_person); print_newline ();
               match number, list_verb_person with
               | "s", ("3s"::t)
               | "p", ("3p"::t) -> (true, subject_informations)
@@ -277,7 +275,7 @@ let is_pronoun_subject subject_token =
   | Token.Token (Word_classe.Sujet, (_, informations)) -> List.exists ((=) "O1") informations || List.exists ((=) "O2") informations || List.exists ((=) "O3") informations
   | _ -> failwith "Checkings - is_pronoun_subject : Doesn't receive a correct Sujet"
 
-(** 
+(**
   [check_verbal_group subject_token verb_token] checks the agreement between a subject and a verb.
   
   @param subject_token The token representing the subject, expected to be of type [Token.Token (Word_classe.Sujet, (subject, informations_subject))].

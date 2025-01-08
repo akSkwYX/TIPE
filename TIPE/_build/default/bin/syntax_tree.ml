@@ -43,6 +43,10 @@ let print_syntax_tree tree =
 			print_depth depth;
 			print_string (Checkings.string_of_error error);
 			print_newline ()
-		| Empty -> ()
+		| Empty ->
+      print_depth depth;
+      print_string "Empty";
 	in
 	print_tree tree 0
+
+let distinct tree_list = List.fold_left (fun acc x -> if List.mem x acc then acc else x :: acc) [] tree_list

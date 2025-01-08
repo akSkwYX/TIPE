@@ -157,14 +157,28 @@ let correct_verbal_group subject_tree subject_token verb_tree verb_token :(synta
     | Empty -> 
       begin
         match subject_tree with
-        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2])]) 
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree ; Node (Word_classe.Nom, _, _) as noun_tree])])
+          -> let token = Token.Token ( Word_classe.GN, (Token.get_word subject_token, informations)) in
+              [(Node (Word_classe.GN, informations, [det_tree; noun_tree]), token)]
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.Adjectif, _, _) as adj_tree; Node (Word_classe.Nom, _, _) as noun_tree])])
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.MultipleAdj, _, _) as adj_tree; Node (Word_classe.Nom, _, _) as noun_tree])])
+        -> let token = Token.Token ( Word_classe.GN, (Token.get_word subject_token, informations)) in
+              [(Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree]), token)]
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.Adjectif, _, _) as noun_tree; Node (Word_classe.Adjectif, _, _) as adj_tree_2])])
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.MultipleAdj, _, _) as noun_tree; Node (Word_classe.Adjectif, _, _) as adj_tree_2])])
+        -> let token = Token.Token ( Word_classe.GN, (Token.get_word subject_token, informations)) in
+              [(Node (Word_classe.GN, informations, [det_tree; noun_tree; adj_tree_2]), token)]
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.Adjectif, _, _) as adj_tree; Node (Word_classe.Nom, _, _) as noun_tree; Node (Word_classe.Adjectif, _, _) as adj_tree_2])])
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.MultipleAdj, _, _) as adj_tree; Node (Word_classe.Nom, _, _) as noun_tree; Node (Word_classe.Adjectif, _, _) as adj_tree_2])])
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.Adjectif, _, _) as adj_tree; Node (Word_classe.Nom, _, _) as noun_tree; Node (Word_classe.MultipleAdj, _, _) as adj_tree_2])])
+        | Node (Word_classe.Sujet, informations_subject, [Node (Word_classe.GN, informations, [ Node (Word_classe.Determinant, _, _) as det_tree; Node (Word_classe.MultipleAdj, _, _) as adj_tree; Node (Word_classe.Nom, _, _) as noun_tree; Node (Word_classe.MultipleAdj, _, _) as adj_tree_2])])
           -> let token = Token.Token ( Word_classe.GN, (Token.get_word subject_token, informations)) in
               [(Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)]
         | _ -> failwith "correction.ml - correct_verbal_group : invalid subject_tree"
       end
     | _ ->
-      let token = Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word verb_token), informations) ) in
-      [(Node (Word_classe.GV, informations, [subject_tree; verb_tree]), token)]
+      let token = Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word verb_token), []) ) in
+      [(Node (Word_classe.GV, [], [subject_tree; verb_tree]), token)]
   else
     begin
       print_newline ();
@@ -193,6 +207,7 @@ let is_determiner word_informations =
 
 let correct_determiner determiner_token noun_token =
   let potential_correction_token_list = seek_word determiner_token in
+  Token.print_token_list potential_correction_token_list;
   let rec aux l res =
     match l with
     | [] -> res
@@ -311,17 +326,17 @@ let correct_nominal_group det_tree det_token adj_tree adj_token noun_tree noun_t
     | Empty, Empty ->
       begin
         let token = Token.Token ( Word_classe.GN, ((Token.get_word det_token) ^ " " ^ (Token.get_word noun_token), informations) ) in
-        [(Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)]
+        [(Node (Word_classe.GN, informations, [det_tree; noun_tree]), token)]
       end
     | Empty, _ ->
       begin
         let token = Token.Token ( Word_classe.GN, ((Token.get_word det_token) ^ " " ^ (Token.get_word noun_token) ^ " " ^ (Token.get_word adj_token_2), informations) ) in
-        [(Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)]
+        [(Node (Word_classe.GN, informations, [det_tree; noun_tree; adj_tree_2]), token)]
       end
     | _, Empty ->
       begin
         let token = Token.Token ( Word_classe.GN, ((Token.get_word det_token) ^ " " ^ (Token.get_word adj_token) ^ " " ^ (Token.get_word noun_token), informations) ) in
-        [(Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)]
+        [(Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree]), token)]
       end
     | _ ->
       begin

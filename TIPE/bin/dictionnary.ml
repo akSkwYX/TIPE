@@ -1,4 +1,4 @@
-let dictionnary_path = "dictionnarys/Dictionnary.txt"
+let dictionnary_path = "dictionnarys/dictionnary.txt"
 
 (** 
   Reads a dictionary file and returns two tries: one where lines are inserted based on the first word and the other one on the second word.

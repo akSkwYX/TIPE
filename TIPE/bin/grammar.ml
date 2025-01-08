@@ -1,9 +1,3 @@
-(* ------------------------------------------------------------------ *)
-(*     Hearth of project : Detecting errors and making correction     *)
-(* ------------------------------------------------------------------ *)
-
-(* TODO :: Implementing correction of agreement inside nominal group and between verb and nominal group *)
-
 open Syntax_tree
 
 (** 
@@ -86,7 +80,7 @@ let get_results result_list =
 	let (filtered_tree_list, filtered_token_list) = Utility.disjoin_in_2_lists filtered_list in
 	match filtered_list with
 	| [] -> syntax_tree_list_in_tex tree_list; print_string "Not a correct sentence\n"
-	| _ -> syntax_tree_list_in_tex filtered_tree_list; print_string "Corrected sentence :\n"; List.iter (fun x -> print_string (Token.get_word x); print_newline ()) filtered_token_list
+	| _ -> syntax_tree_list_in_tex (Syntax_tree.distinct filtered_tree_list); print_string "Corrected sentence :\n"; List.iter (fun x -> Token.print_token x; print_newline ()) (Token.distinct filtered_token_list)
 
 (* Represente the sentence which will be itterated over with indice being the index of where is the correction actually *)
 type item =
@@ -346,7 +340,7 @@ and get_adjectifs s =
 	let rec aux' s current_adj_list current_adj_informations_list current_token =
 		if s.indice >= s.length then
 			match current_adj_list with
-			| [] -> (Error Empty_sentence, Token.Token (Word_classe.Adjectif, ("", [])))
+			| [] -> (Empty, Token.Token (Word_classe.Adjectif, ("", [])))
 			| _ -> (Node (Word_classe.MultipleAdj, (List.fold_left gender_number_comparison ["e"; "i"] current_adj_informations_list), make_adj_tree_list current_adj_list current_adj_informations_list), current_token)
 		else
 			begin

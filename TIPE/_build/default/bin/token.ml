@@ -24,7 +24,6 @@ let string_of_token t =
   | Token (Word_classe.Unknown, (s, l)) ->  failwith "string_of_token : Unknown token declared as Token"
   | Unknown w ->  "Unknown " ^ w
 
-
 (**
   [print_token t] prints the string representation of the token [t].
 
@@ -98,6 +97,8 @@ let get_information token =
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_information : Unknown token declared as Token"
   | Unknown _ -> failwith "get_information : tring to get a information from a Unknown"
 
+  let distinct token_list =
+    List.fold_left (fun acc x -> if List.mem x acc then acc else x :: acc) [] token_list
 
 (** [get_gender token] returns the gender associated with the given [token].
   * The function matches the [token] against different word classes and extracts
