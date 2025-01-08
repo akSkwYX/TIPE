@@ -70,6 +70,25 @@ let check_gender g1 g2 =
         (false, [])
     | _ -> (false, [])
 
+let is_begining_by_vowel noun_token =
+  let noun = Token.get_word noun_token in
+  let first_letter = noun.[0] in
+  first_letter = 'a' || first_letter = 'e' || first_letter = 'i' || first_letter = 'o' || first_letter = 'u' || first_letter = 'y'
+
+let is_begining_by_h_muet noun_token =
+  let noun = Token.get_word noun_token in
+  let first_letter = noun.[0] in
+  first_letter = 'h'
+
+let can_be_elison det_token =
+  let det = Token.get_word det_token in
+  det = "le" || det = "de" || det = "ce" || det = "me" || det = "te" || det = "se" || det = "ne" || det = "je" ||
+  det = "la" || det = "ma" || det = "ta" || det = "sa" || det = "quelque" || det = "quelques" || det = "que"
+
+let is_elison det_token =
+  let det = Token.get_word det_token in
+  det = "l’" || det = "d’" || det = "c’" || det = "m’" || det = "t’" || det = "s’" || det = "n’" || det = "j’"
+
 (** 
 [check_det_noun det_token noun_token] checks the agreement between a determinant and a noun.
 
@@ -86,11 +105,18 @@ let check_det_noun det_token noun_token =
   | Token.Token (Word_classe.Determinant, (det, rad_det::det_informations)), Token.Token (Word_classe.Nom, (noun, rad_noun::noun_informations)) 
     ->
       begin
-        let (success, result_informations) = check_gender_number det_informations noun_informations in
-        if success then
-          (true, result_informations)
-        else
+        if can_be_elison det_token && (is_begining_by_vowel noun_token || is_begining_by_h_muet noun_token) then
           (false, [])
+        else if is_elison det_token && not (is_begining_by_vowel noun_token || is_begining_by_h_muet noun_token) then
+          (false, [])
+        else
+          begin
+            let (success, result_informations) = check_gender_number det_informations noun_informations in
+            if success then
+              (true, result_informations)
+            else
+              (false, [])
+          end
       end
   | _, _ -> failwith "check_det_noun : Doesn't receive a correct Determinant and a Nom"
 
@@ -151,6 +177,22 @@ let check_noun_adjective noun_token adj_token =
       end
   | _, _ -> failwith "check_noun_adjective : Doesn't receive a correct Nom and a Adjectif"
 
+let is_imperative verb_token =
+  let verb_informations = Token.get_information verb_token in
+  match verb_informations with
+  | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
+  | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
+    -> false
+  | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: auxiliaire :: gender :: number :: []
+    -> false
+  | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "e" :: person :: []
+    -> true
+  | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: auxiliaire :: gender :: number :: person :: []
+    -> false
+  | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+    -> List.exists ((=) "e") (String.split_on_char ',' temps)
+  | l -> (Utility.print_string_list verb_informations; print_newline (); failwith "chekings.ml - is_imperative : Doesn't receive a correct Verb")
+
 (** 
   [check_subject_verb subject_token verb_token] checks if the subject and verb tokens agree in person and number.
   
@@ -170,6 +212,8 @@ let check_noun_adjective noun_token adj_token =
 *)
 let check_subject_verb subject_token verb_token =
   match subject_token, verb_token with
+  | Token.Token (Word_classe.Sujet, ("", [])), Token.Token (Word_classe.Verbe, (verb, verb_informations))
+    -> if is_imperative verb_token then (true, Token.get_verb_person verb_token) else (false, [])
   | Token.Token (Word_classe.Sujet, (subject, subject_informations)), Token.Token (Word_classe.Verbe, (verb, rad_verb::verb_informations))
     ->
       begin
@@ -193,8 +237,10 @@ let check_subject_verb subject_token verb_token =
         | gender :: number :: [], h :: t ->
           begin
             let rec check_all_person_verb list_verb_person =
+              print_string "number : "; print_string number; print_string " "; print_string @@ string_of_bool (number = "s"); print_newline ();
+              print_string "list_verb_person : "; print_string (Utility.string_of_string_list list_verb_person); print_newline ();
               match number, list_verb_person with
-              | "s", ("3s"::t) -> (true, subject_informations)
+              | "s", ("3s"::t)
               | "p", ("3p"::t) -> (true, subject_informations)
               | _, (h::t) -> check_all_person_verb t
               | _ -> (false, [])
@@ -202,9 +248,9 @@ let check_subject_verb subject_token verb_token =
             check_all_person_verb list_verb_person
           end
         | _, [] -> (false, [])
-        | _ -> failwith "check_subject_verb : Doesn't receive a correct Subject"
+        | _ -> failwith "Chekings - check_subject_verb : Doesn't receive a correct Subject"
       end
-  | _, _ -> failwith "check_subject_verb : Doesn't receive a correct Sujet and a Verbe"
+  | _, _ -> failwith "Checkings - check_subject_verb : Doesn't receive a correct Sujet and a Verbe"
 
 (** 
   Checks if a verb is conjugated based on its information.
@@ -215,16 +261,21 @@ let check_subject_verb subject_token verb_token =
 
   @raise Failure if the input list does not match the expected format.
 *)
-let is_conjugue verb_informations =
-  Utility.print_string_list verb_informations;
+let is_conjugue verb_token =
+  let verb_informations = Token.get_information verb_token in
   match verb_informations with
     | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
     | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
     | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
       -> false
-    | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
+    | rad_verb :: intransitif :: transitif_direct :: if_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
       -> true
     | _ -> failwith "is_conjugue : Doesn't receive a correct Verb"
+
+let is_pronoun_subject subject_token =
+  match subject_token with
+  | Token.Token (Word_classe.Sujet, (_, informations)) -> List.exists ((=) "O1") informations || List.exists ((=) "O2") informations || List.exists ((=) "O3") informations
+  | _ -> failwith "Checkings - is_pronoun_subject : Doesn't receive a correct Sujet"
 
 (** 
   [check_verbal_group subject_token verb_token] checks the agreement between a subject and a verb.
@@ -244,23 +295,34 @@ let check_verbal_group subject_token verb_token =
     match informations with
     | g :: n :: [] -> ["O3"; g; n]
     | rad_subject :: "O1" :: g :: n :: [] -> ["O1"; g; n]
-    | _ -> failwith "get_person : informations doesn't match a gn or a pronuoun subjet"
+    | _ -> failwith "Checkings - get_person : informations doesn't match a gn or a pronuoun subjet"
   in
   match subject_token, verb_token with
+  | Token.Token (Word_classe.Sujet, ("", [])), Token.Token (Word_classe.Verbe, (verb, informations_verb))
+    ->
+      begin
+        if is_imperative verb_token then
+          (true, Token.get_verb_person verb_token , No)
+        else
+          (false, [], Missing (Word_classe.Sujet, ""))
+      end
+  | Token.Token (Word_classe.Sujet, (_, informations)), Token.Token (Word_classe.Verbe, ("", [])) when not (is_pronoun_subject subject_token)
+    -> (true, informations, No)
   | Token.Token (Word_classe.Sujet, (subject, informations_subject)), Token.Token (Word_classe.Verbe, (verb, informations_verb))
     ->
       begin
-        Utility.print_string_list informations_verb; print_newline ();
-        if is_conjugue informations_verb then
-          let (success, result_informations) = check_subject_verb subject_token verb_token in
-          if success then
-            (true, result_informations, No)
-          else
-            (false, [], Conjuguaison ((Word_classe.Sujet, subject, get_person informations_subject), (verb, informations_verb)))
+        if is_conjugue verb_token then
+          begin
+            let (success, result_informations) = check_subject_verb subject_token verb_token in
+            if success then
+              (true, result_informations, No)
+            else
+              (false, [], Conjuguaison ((Word_classe.Sujet, subject, get_person informations_subject), (verb, informations_verb)))
+          end
         else
           (false, [], Conjuguaison ((Word_classe.Sujet, subject, get_person informations_subject), (verb, informations_verb)))
       end
-  | _, _ -> failwith "check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
+  | _, _ -> failwith "Checkings - check_verbal_group : Doesn't receive a correct Sujet and a Verbe"
   
 (** 
   [check_nominal_group det_token adj_token noun_token adj_token_2] checks the agreement between a determinant, 

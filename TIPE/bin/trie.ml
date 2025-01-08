@@ -35,8 +35,8 @@ let rec trie_insert trie word information =
   | Node ((b,i), list) ->
     let rec aux l head =
       match l with
-      | [] -> Node ( (b,i), (word.[0], ( trie_insert trie_create (Utility.word_without_first_char word) information) )::list )
-      | (c, t) :: tail when c = word.[0] -> Node ( (b,i), ( (c, trie_insert t (Utility.word_without_first_char word) information) :: head @ tail ) )
+      | [] -> Node ( (b,i), (word.[0], ( trie_insert trie_create (Utility.string_without_first_char word) information) )::list )
+      | (c, t) :: tail when c = word.[0] -> Node ( (b,i), ( (c, trie_insert t (Utility.string_without_first_char word) information) :: head @ tail ) )
       | h :: tail -> aux tail (h :: head)
     in aux list []
     
@@ -61,7 +61,7 @@ let rec trie_search trie word  =
     let rec aux l =
       match l with
       | [] -> (false, [])
-      | (c, t) :: tl -> if c = word.[0] then trie_search t (Utility.word_without_first_char word) else aux tl
+      | (c, t) :: tl -> if c = word.[0] then trie_search t (Utility.string_without_first_char word) else aux tl
     in aux l
 
 

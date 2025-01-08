@@ -1,1 +1,1 @@
-bin/syntax_tree.ml: Checkings Word_classe
+bin/syntax_tree.ml: Checkings List Word_classe

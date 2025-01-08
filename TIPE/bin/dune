@@ -4,3 +4,10 @@
  (modes byte exe)
  (flags (:standard -g -w -26-27-32-39 ))
  (libraries TIPE))
+
+(executable
+ (public_name test)
+ (name test)
+ (modes byte exe)
+ (flags (:standard -g -w -26-27-32-39 ))
+ (libraries TIPE))

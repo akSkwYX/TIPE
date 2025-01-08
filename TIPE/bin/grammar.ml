@@ -67,7 +67,7 @@ let syntax_tree_list_in_tex tree_list =
   @param tree The tree to check.
   @return [true] if the tree is a success tree, [false] otherwise.
 *)
-let is_a_success_tree tree =
+let is_a_success_result (tree, token) =
 	match tree with
 	| Empty | Error _ -> false
 	| _ -> true
@@ -80,11 +80,13 @@ let is_a_success_tree tree =
 
   @param tree_list The list of syntax trees to be processed.
 *)
-let get_results tree_list =
-	let filtered_list = List.filter is_a_success_tree tree_list in
+let get_results result_list =
+	let (tree_list, token_list) = Utility.disjoin_in_2_lists result_list in
+	let filtered_list = List.filter is_a_success_result result_list in
+	let (filtered_tree_list, filtered_token_list) = Utility.disjoin_in_2_lists filtered_list in
 	match filtered_list with
 	| [] -> syntax_tree_list_in_tex tree_list; print_string "Not a correct sentence\n"
-	| h :: t -> syntax_tree_list_in_tex filtered_list; print_string "Correct sentence\n"
+	| _ -> syntax_tree_list_in_tex filtered_tree_list; print_string "Corrected sentence :\n"; List.iter (fun x -> print_string (Token.get_word x); print_newline ()) filtered_token_list
 
 (* Represente the sentence which will be itterated over with indice being the index of where is the correction actually *)
 type item =
@@ -109,12 +111,12 @@ let pass sentence =
   @param sentence The sentence to analyze.
   @return A syntax tree list of possible correction of the sentence or the syntax tree of the sentence if it's correct
 *)
-let rec get_syntax_tree sentence :syntax_tree list =
+let rec get_syntax_tree sentence =
 	if sentence.indice > sentence.length then
-		[Error Empty_sentence]
+		[(Error Empty_sentence, Token.Token (Word_classe.GV, ("", [])))]
 	else
-		let verbal_group_tree_list = List.map fst (get_verbal_group sentence) in
-		verbal_group_tree_list
+		let verbal_group_list = get_verbal_group sentence in
+		verbal_group_list
 
 (** [get_verbal_group sentence] parses a sentence to extract the verbal group.
   *
@@ -145,12 +147,6 @@ and get_verbal_group sentence =
       | ((Error e, token), _)::t | (_, (Error e, token))::t -> aux t ((Error e, token)::result)
       | ((subject_tree, subject_token), (verb_tree, verb_token))::t 
         ->	aux t ((Correction.correct_verbal_group subject_tree subject_token verb_tree verb_token) @ result)
-					(* let (success, informations, error) = Checkings.check_verbal_group subject_token verb_token in 
-            let token = Token.Token ( Word_classe.GV, ((Token.get_word subject_token) ^ " " ^ (Token.get_word verb_token), informations) ) in
-            if success then
-              aux t ((Node (Word_classe.GV, informations, [subject_tree; verb_tree]), token)::result)
-            else
-              aux t ((Error error, token)::result) *)
     in
     aux combination []
   in
@@ -203,6 +199,8 @@ and get_subject s =
           | _ -> failwith "get_subject : wrong tree, waiting for a Pronom_sujet"
         ) pronoun_subject_list
       end
+		| Word_classe.Verbe
+			-> [(Empty, Token.Token (Word_classe.Sujet, ("", [])))]
 		| _ -> [Error (Missing (Word_classe.Sujet, Token.get_word s.t_a.(s.indice))), (Token.Token (Word_classe.Sujet, (Token.get_word s.t_a.(s.indice), []))) ]
 		end
 
@@ -236,16 +234,7 @@ and get_nominal_group s =
 			| ((Error e, token), _, _, _)::t | (_, (Error e, token), _, _)::t | (_, _, (Error e, token), _)::t | (_, _, _, (Error e, token))::t
 				-> aux t ((Error e, token)::result)
 			| ((det_tree, det_token), (adj_tree, adj_token), (noun_tree, noun_token), (adj_tree_2, adj_token_2))::t
-				->  let (success, informations, error) = Checkings.check_nominal_group det_token adj_token noun_token adj_token_2 in
-						let token = Token.Token ( Word_classe.GN, ((Token.get_word det_token) ^ " " ^ (Token.get_word adj_token) ^ " " ^ (Token.get_word noun_token) ^ " " ^ (Token.get_word adj_token_2), informations) ) in
-						if success then
-							match adj_tree, adj_tree_2 with
-							| Node (Word_classe.Adjectif, [], [Leaf ""]), Node (Word_classe.Adjectif, [], [Leaf ""]) -> aux t ((Node (Word_classe.GN, informations, [det_tree; noun_tree]), token)::result)
-							| Node (Word_classe.Adjectif, [], [Leaf ""]), _ -> aux t ((Node (Word_classe.GN, informations, [det_tree; noun_tree; adj_tree_2]), token)::result)
-							| _, Node (Word_classe.Adjectif, [], [Leaf ""]) -> aux t ((Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree]), token)::result)
-							| _ -> aux t ((Node (Word_classe.GN, informations, [det_tree; adj_tree; noun_tree; adj_tree_2]), token)::result)
-						else
-							aux t ((Error error, token)::result)
+				->  aux t ((Correction.correct_nominal_group det_tree det_token adj_tree adj_token noun_tree noun_token adj_tree_2 adj_token_2) @ result)
 		in
 		aux combination []
 	in
@@ -400,7 +389,7 @@ and get_adjectifs s =
 *)
 and get_verb s =
 	if s.indice >= s.length then
-		[(Error Empty_sentence, Token.Token (Word_classe.Verbe, ("", [])))]
+		[(Empty, Token.Token (Word_classe.Verbe, ("", [])))]
 	else
 		begin
 		let token = s.t_a.(s.indice) in
@@ -448,6 +437,7 @@ and get_pronom_sujet s =
 *)
 let string_to_item s =
 	let token_list = Token.sentence_to_token_list s |> Token.all_possibility in
+	(* Token.print_token_list_list token_list; print_newline (); *)
 	let rec aux l =
 		match l with
 		| [] -> []

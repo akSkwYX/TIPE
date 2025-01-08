@@ -18,6 +18,9 @@ module Main = Dune__exe__Main
 (** @canonical Dune__exe.Syntax_tree *)
 module Syntax_tree = Dune__exe__Syntax_tree
 
+(** @canonical Dune__exe.Test *)
+module Test = Dune__exe__Test
+
 (** @canonical Dune__exe.Token *)
 module Token = Dune__exe__Token
 

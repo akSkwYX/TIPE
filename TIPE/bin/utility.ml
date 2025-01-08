@@ -1,13 +1,19 @@
 let ( @. ) = Fun.compose
 
-let word_without_first_char word =
-	String.sub word 1 (String.length word - 1)
+let split_string string i =
+  (String.sub string 0 i, String.sub string i (String.length string - i))
 
-let word_without_last_char word =
-	String.sub word 0 (String.length word - 1)
+let string_without_first_char string =
+	String.sub string 1 (String.length string - 1)
+
+let string_without_last_char string =
+	String.sub string 0 (String.length string - 1)
 
 let string_without_x_last_char string x =
 	String.sub string 0 (String.length string - x)
+
+let string_delete_i_char string i =
+  String.sub string 0 i ^ String.sub string (i + 1) (String.length string - i - 1)
 
 let char_list_of_string string =
 	string |> String.to_seq |> List.of_seq
@@ -70,6 +76,21 @@ let rec join_2_lists list1 list2 =
   match list1 with
   | [] -> []
   | x::xs -> (pair_with_all x list2) @ (join_2_lists xs list2)
+
+(** 
+  Recursively disjoins a list of pairs into two separate lists.
+
+  @param list A list of pairs [(x1, y1); (x2, y2); ...; (xn, yn)]
+  @return A tuple of two lists: the first list contains all the first elements of the pairs [x1; x2; ...; xn], 
+          and the second list contains all the second elements of the pairs [y1; y2; ...; yn].
+
+  Example:
+  disjoin_2_lists [(1, 'a'); (2, 'b'); (3, 'c')] = ([1; 2; 3], ['a'; 'b'; 'c'])
+*)
+let rec disjoin_in_2_lists list =
+  match list with
+  | [] -> ([], [])
+  | (x, y)::xs -> let (l1, l2) = disjoin_in_2_lists xs in (x::l1, y::l2)
 
 (**
   [join_3_lists list1 list2 list3] returns a list of 3-tuple where each element of [list1], [list2], [list3] are joined together.

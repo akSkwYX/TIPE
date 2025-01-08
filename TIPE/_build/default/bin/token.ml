@@ -186,6 +186,19 @@ let get_word_classe token =
   The function expects the verb information to be a list of strings with specific elements in a specific order.
   If the verb information ends with "Y", "P", or "Q", an empty list is returned.
   Otherwise, the last element of the verb information list is split by commas and returned as a list of strings.
+
+  Y : infinitif
+  P : participe passé
+  Q : participe présent
+
+  Sp : subjonctif présent
+  Sq : subjonctif imparfait
+  Ip : présent simple
+  Iq : imparfait
+  Is : passé simple
+  If : futur simple
+  e : impératif
+  K : conditionnel
 *)
 let get_verb_person ( token:token ) :string list =
   match token with
@@ -194,13 +207,18 @@ let get_verb_person ( token:token ) :string list =
       match verb_informations with
       | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Y" :: []
       | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "P" :: []
-      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: _
         -> []
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: auxiliaire :: gender :: number :: []
+        -> []
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "e" :: person :: []
+        -> []
+      | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: "Q" :: auxiliaire :: gender :: number :: person :: []
+        -> (String.split_on_char ',' person)
       | rad_verb :: intransitif :: transitif_direct :: transitif_indirect :: pronominal :: impersonnel :: auxiliaire_etre :: auxiliaire_avoir :: temps :: person :: []
         -> (String.split_on_char ',' person)
-      | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+      | l -> (Utility.print_string_list verb_informations; print_newline (); failwith "token.get_verb_person (1) : Doesn't receive a correct Verb")
     end
-  | _ -> failwith "get_verb_person : Doesn't receive a correct Verb"
+  | _ -> failwith "get_verb_person (2) : Doesn't receive a correct Verb"
 
 (** 
   Converts a sentence (string) into a list of words.
@@ -250,6 +268,7 @@ let sentence_to_list s =
 	in
 	aux (List.rev (Utility.char_list_of_string s) ) []
 
+
 let get_token_from_informations word informations =
   match informations with
   | (rad_det::"D"::complementary_information) -> Token ( Word_classe.Determinant, (word, rad_det::complementary_information) )
@@ -273,6 +292,66 @@ let get_token_from_informations_list word informations =
   in
   match_information informations [] word
 
+(*Misspelled correction *)
+
+let azerty_keyboard = [|
+  (0, 0); (2, 4); (2, 2); (1, 2); (0, 2); (1, 3); (1, 4); (1, 5); (0, 7); (1, 6); (1, 7); (1, 8); (1, 9); (2, 5);
+  (0, 8); (0, 9); (1, 0); (0, 3); (1, 1); (0, 4); (0, 6); (2, 3); (2, 0); (2, 1); (0, 5); (0, 1)
+|]
+
+let qwerty_keyboard = [|
+  (1, 0); (2, 4); (2, 2); (1, 2); (0, 2); (1, 3); (1, 4); (1, 5); (0, 7); (1, 6); (1, 7); (1, 8); (2, 6); (2, 5);
+  (0, 8); (0, 9); (0, 0); (0, 3); (1, 1); (0, 4); (0, 6); (2, 3); (0, 1); (2, 1); (0, 5); (2, 0)
+|]
+
+let distance_between_key keyboard key_1 key_2 =
+  max (abs (fst keyboard.(int_of_char key_1 - 97) - fst keyboard.(int_of_char key_2 - 97))) (abs (snd keyboard.(int_of_char key_1 - 97) - snd keyboard.(int_of_char key_2 - 97)))
+
+let alphabet = ['a'; 'b'; 'c'; 'd'; 'e'; 'f'; 'g'; 'h'; 'i'; 'j'; 'k'; 'l'; 'm'; 'n'; 'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u'; 'v'; 'w'; 'x'; 'y'; 'z']
+
+let split l =
+  let rec aux l l1 l2 =
+    match l with
+    | [] -> (l1, l2)
+    | h :: t -> aux t (h :: l2) l1
+  in
+  aux l [] []
+
+let merge l1 l2 =
+  let rec aux l1 l2 res =
+    match l1, l2 with
+    | [], l2 -> res @ l2
+    | l1, [] -> res @ l1
+    | ((_, distance_1, _) as h1) :: t1, ((_, distance_2, _) as h2) :: t2 when distance_1 < distance_2 -> aux l1 t2 (h2 :: res)
+    | h1 :: t1, h2 :: t2 -> aux t1 l2 (h1 :: res)
+  in
+  aux l1 l2 []
+
+let rec merge_filter_sort l =
+  match l with
+  | [] -> []
+  | [(word, distance, [])] -> let (success, informations) = Trie.trie_search Dictionnary.dictionnary word in
+           if success then [(word, distance, get_token_from_informations_list word informations)] else []
+  | [x] -> [x]
+  | _ -> let (l1, l2) = split l in
+         merge (merge_filter_sort l1) (merge_filter_sort l2)
+
+let get_correction_possibility_for_word word =
+  let insertion string i = List.map (fun x -> let (fst_part, snd_part) = Utility.split_string string (i+1) in (fst_part ^ (Char.escaped x) ^ snd_part, 2, [])) alphabet in
+  let substitution string i = List.map (fun x -> (Utility.replace_char_in_string string i x, distance_between_key azerty_keyboard x (string.[i]), [])) alphabet in
+  let deletion string i = (Utility.string_delete_i_char string i, 2, []) in
+  let rec aux string i res =
+    if i = -1 then 
+      res
+    else 
+      let possible_change = (insertion string i) @ (substitution string i) @ [deletion string i] in
+      aux string (i - 1) (possible_change @ res)
+  in
+  match merge_filter_sort ( (insertion word (-1)) @ aux word (String.length word - 1) [] ) with
+  | [] -> []
+  | [(word, distance, token_list)] -> token_list
+  | (word_1, distance_1, token_list_1) :: (word_2, distance_2, token_list_2) :: [] -> token_list_1 @ token_list_2
+  | (word_1, distance_1, token_list_1) :: (word_2, distance_2, token_list_2) :: (word_3, distance_3, token_list_3) :: t -> token_list_1 @ token_list_2 @ token_list_3
 
 (** 
   [sentence_to_token_list s] converts a sentence [s] into a list of token lists.
@@ -288,40 +367,6 @@ let get_token_from_informations_list word informations =
   - The final result is a reversed list of token lists representing the sentence.
 *)
 let sentence_to_token_list (s:string) :token list list =
-  
-	let rec get_correction_possibility_for_word (word:string) (nbr_test:int) :token list =
-    if nbr_test > 2 then
-      []
-    else
-      begin
-      let rec index_loop possibility index test_word =
-        if index = String.length word then
-          match possibility with
-          | [] -> List.fold_left (fun acc x -> (get_correction_possibility_for_word x (nbr_test+1)) @ acc) [] test_word
-          | _ -> Utility.list_list_to_list (List.map (fun (word, informations) -> get_token_from_informations_list word informations) possibility)
-        else
-          let rec letter_loop possibility letter test_word =
-            match letter with
-            | '{' -> (possibility, test_word)
-            | _ ->
-              if String.get word index = letter then
-                letter_loop possibility (Char.chr (Char.code letter + 1)) test_word
-              else
-                begin
-                  let modified_word = Utility.replace_char_in_string word index letter in
-                  let (is_word, information) = Trie.trie_search Dictionnary.dictionnary modified_word in
-                  if is_word then
-                    letter_loop ((modified_word, information) :: possibility) (Char.chr (Char.code letter + 1)) (modified_word::test_word)
-                  else
-                    letter_loop possibility (Char.chr (Char.code letter + 1)) (modified_word::test_word)
-                end
-          in
-          let (possibility_letter_loop, test_word_letter_loop) = letter_loop possibility 'a' test_word in
-          index_loop (possibility_letter_loop) (index + 1) (test_word_letter_loop) 
-      in
-      index_loop [] 0 [word]
-      end
-	in
 	let rec aux (list_word:string list) (list_token:token list list) =
 		match list_word with
 		| [] -> list_token
@@ -333,14 +378,25 @@ let sentence_to_token_list (s:string) :token list list =
         aux t ((get_token_from_informations_list word information) :: list_token)
 			else
         begin
+          print_newline ();
           print_string ("Not a correct sentence : Unknown word " ^ word ^ "\nTrying to find correction\n");
-          let correction_possibilitys = get_correction_possibility_for_word word 0 in
-          print_string ("Possible correction found : "); print_int (List.length correction_possibilitys); print_newline ();
+          let correction_possibilitys = get_correction_possibility_for_word word in
+          print_string ("Possible correction found : "); List.iter (fun x -> print_string ((get_word x) ^ " - ")) correction_possibilitys; print_newline (); print_newline ();
           aux t (correction_possibilitys :: list_token)
         end
 	in
 	List.rev (aux (sentence_to_list s) [])
 
+
+let has_one_or_zero_noun l =
+  let rec aux l has_seen_noun =
+    match l with
+    | [] -> true
+    | Token (Word_classe.Nom, _) :: t when has_seen_noun -> false
+    | Token (Word_classe.Nom, _) :: t -> aux t true
+    | _ :: t -> aux t has_seen_noun
+  in
+  aux l false
 
 (** 
   [all_possibility l] generates all possible combinations of tokens from a list of lists of tokens.
@@ -370,4 +426,4 @@ let all_possibility (l:token list list) :token list list =
 			in
 			first_floor_course t (second_floor_course h)
 	in
-  List.map (List.rev) (first_floor_course l [[]])
+  List.filter has_one_or_zero_noun ( List.map (List.rev) (first_floor_course l [[]]) )

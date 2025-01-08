@@ -1,1 +1,1 @@
-bin/checkings.ml: Token Utility Word_classe
+bin/checkings.ml: List String Token Utility Word_classe

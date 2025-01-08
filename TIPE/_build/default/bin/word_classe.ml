@@ -25,5 +25,19 @@ let word_classe_to_string wc =
   | Adjectif -> "Adjectif"
   | Unknown -> "Unknown"
 
+let word_class_to_short_string wc =
+  match wc with
+  | S -> "S"
+  | GV -> "GV"
+  | GN -> "GN"
+  | MultipleAdj -> "As"
+  | Pronom_sujet -> "Os"
+  | Sujet -> "S"
+  | Verbe -> "V"
+  | Determinant -> "D"
+  | Nom -> "N"
+  | Adjectif -> "A"
+  | Unknown -> "U"
+
 let print_word_classe wc =
   print_string (word_classe_to_string wc)

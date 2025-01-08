@@ -14,8 +14,7 @@ let dictionnary_path = "dictionnarys/Dictionnary.txt"
   - A line in the dictionary file has a wrong format.
 *)
 let read_dictionnary file =
-	let aux (s:string list) :string list =
-    let do_print = ref false in
+	let aux s =
 		let rec aux2 current_string_list result =
 			match current_string_list with
 			| [] -> List.rev result
@@ -51,16 +50,16 @@ let read_dictionnary file =
 		in
 		match s with
 		| [] -> failwith "Dictionnary - read_dictionnary - aux : empty list"
-    | "travaille"::_::"V"::t -> do_print := true; aux2 s []
 		| _::_::"V"::t -> aux2 s []
 		| _ -> s
 	in
+
 	let file = open_in file in
-  (* Reads the file and return 2 trie, one where lines are inserted based on the first word and the other one on the second word*)
 	let rec read_lines (trie1, trie2) =
 		let line = In_channel.input_line file |> Option.map (String.split_on_char ',') |> Option.map aux in
 		match line with
 		| None -> (trie1, trie2)
+		| Some ("#"::_) -> read_lines (trie1, trie2)
 		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ), (Trie.trie_insert trie2 radical (word::information) ) )
 		| Some [] -> failwith "read_dictionnary : empty line"
     | Some _ -> failwith "read_dictionnary : wrong format"
