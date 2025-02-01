@@ -61,11 +61,10 @@ let syntax_tree_list_in_tex tree_list =
   @param tree The tree to check.
   @return [true] if the tree is a success tree, [false] otherwise.
 *)
-let is_a_success_result (tree, token) =
+let is_a_success_result (tree, token, token_list) =
 	match tree with
 	| Empty | Error _ -> false
 	| _ -> true
-
 
 (** [get_results tree_list] filters the given [tree_list] to only include 
   successful syntax trees and prints the results in TeX format. 
@@ -74,13 +73,22 @@ let is_a_success_result (tree, token) =
 
   @param tree_list The list of syntax trees to be processed.
 *)
-let get_results result_list =
-	let (tree_list, token_list) = Utility.disjoin_in_2_lists result_list in
+let get_results do_upgrade_dictionnary initial_sentence result_list =
+	let (tree_list, token_list, token_list_list) = Utility.disjoin_in_3_lists result_list in
 	let filtered_list = List.filter is_a_success_result result_list in
-	let (filtered_tree_list, filtered_token_list) = Utility.disjoin_in_2_lists filtered_list in
-	match filtered_list with
+	let (filtered_tree_list, filtered_token_list, filtered_token_list_list) = Utility.disjoin_in_3_lists filtered_list in
+  let filtered_distinct_tree_list = Syntax_tree.distinct filtered_tree_list in
+  let filtered_distinct_token_list, filtered_distinct_token_list_list = List.fold_left2 (fun (l1,l2) x y -> if List.mem x l1 then (l1,l2) else (x :: l1, y :: l2)) ([],[]) token_list token_list_list in
+  let filtered_distinct_list = Utility.join_3_lists filtered_distinct_tree_list filtered_distinct_token_list filtered_distinct_token_list_list in
+  if do_upgrade_dictionnary then
+    begin
+      let string_list = List.fold_left (fun acc x -> (List.fold_left (fun acc x -> Token.recompose x :: acc) acc x)) [] filtered_distinct_token_list_list in
+      Dictionnary.update_dictionnary string_list
+    end;
+	match filtered_distinct_list with
 	| [] -> syntax_tree_list_in_tex tree_list; print_string "Not a correct sentence\n"
-	| _ -> syntax_tree_list_in_tex (Syntax_tree.distinct filtered_tree_list); print_string "Corrected sentence :\n"; List.iter (fun x -> Token.print_token x; print_newline ()) (Token.distinct filtered_token_list)
+  | [x] -> if String.compare initial_sentence (Token.get_word @@ (fun (a, b, c) -> b) x) = 0 then syntax_tree_list_in_tex filtered_distinct_tree_list; print_string "\nSentence is correct"
+	| _ -> syntax_tree_list_in_tex filtered_distinct_tree_list; print_string "\nCorrected sentence :\n"; List.iter (fun x -> Token.print_token x; print_newline ()) filtered_distinct_token_list
 
 (* Represente the sentence which will be itterated over with indice being the index of where is the correction actually *)
 type item =
@@ -107,10 +115,10 @@ let pass sentence =
 *)
 let rec get_syntax_tree sentence =
 	if sentence.indice > sentence.length then
-		[(Error Empty_sentence, Token.Token (Word_classe.GV, ("", [])))]
+		[(Error Empty_sentence, Token.Token (Word_classe.GV, ("", [])), Array.to_list sentence.t_a)]
 	else
 		let verbal_group_list = get_verbal_group sentence in
-		verbal_group_list
+		List.map (fun (tree, token) -> (tree, token, Array.to_list sentence.t_a)) verbal_group_list
 
 (** [get_verbal_group sentence] parses a sentence to extract the verbal group.
   *
@@ -431,7 +439,6 @@ and get_pronom_sujet s =
 *)
 let string_to_item s =
 	let token_list = Token.sentence_to_token_list s |> Token.all_possibility in
-	(* Token.print_token_list_list token_list; print_newline (); *)
 	let rec aux l =
 		match l with
 		| [] -> []

@@ -97,8 +97,17 @@ let get_information token =
   | Token (Word_classe.Unknown, (s, l)) -> failwith "get_information : Unknown token declared as Token"
   | Unknown _ -> failwith "get_information : tring to get a information from a Unknown"
 
-  let distinct token_list =
-    List.fold_left (fun acc x -> if List.mem x acc then acc else x :: acc) [] token_list
+let distinct token_list =
+  List.fold_left (fun acc x -> if List.mem x acc then acc else x :: acc) [] token_list
+
+let recompose token =
+  match token with
+  | Token (Word_classe.Determinant, (s, rad::l)) -> s ^ "," ^ rad ^ ",D," ^ (String.concat "," l)
+  | Token (Word_classe.Nom, (s, rad::l)) -> s ^ "," ^ rad ^ ",N," ^ (String.concat "," l)
+  | Token (Word_classe.Adjectif, (s, rad::l)) -> s ^ "," ^ rad ^ ",A," ^ (String.concat "," l)
+  | Token (Word_classe.Verbe, (s, rad::l)) -> s ^ "," ^ rad ^ ",V," ^ (String.concat "," l)
+  | Token (Word_classe.Pronom_sujet, (s, rad::l)) -> s ^ "," ^ rad ^ ",Os," ^ (String.concat "," l)
+  | _ -> failwith "token.ml :: recompose : not a correct token"
 
 (** [get_gender token] returns the gender associated with the given [token].
   * The function matches the [token] against different word classes and extracts
@@ -283,11 +292,11 @@ let get_token_from_informations_list word informations =
   let rec match_information i possibility word =
     match i with
     | [] -> possibility
-    | (rad_det::"D"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Determinant, (word, rad_det::complementary_information) ) :: possibility) word
-    | (rad_noun::"N"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Nom, (word, rad_noun::complementary_information) ) :: possibility) word
-    | (rad_adj::"A"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Adjectif, (word, rad_adj::complementary_information) ) :: possibility) word
-    | (rad_verb::"V"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Verbe, (word, rad_verb::complementary_information) ) :: possibility) word
-    | (rad_subj_pronoun::"Os"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Pronom_sujet, (word, rad_subj_pronoun::complementary_information) ) :: possibility) word
+    | (frequency, rad_det::"D"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Determinant, (word, rad_det::complementary_information) ) :: possibility) word
+    | (frequency, rad_noun::"N"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Nom, (word, rad_noun::complementary_information) ) :: possibility) word
+    | (frequency, rad_adj::"A"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Adjectif, (word, rad_adj::complementary_information) ) :: possibility) word
+    | (frequency, rad_verb::"V"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Verbe, (word, rad_verb::complementary_information) ) :: possibility) word
+    | (frequency, rad_subj_pronoun::"Os"::complementary_information) :: tl -> match_information tl (Token ( Word_classe.Pronom_sujet, (word, rad_subj_pronoun::complementary_information) ) :: possibility) word
     | _ when possibility = [] -> [Unknown "Unknown"]
     | _ -> failwith "get_token_from_informaations_list :: match_information : wrong information"
   in
@@ -331,8 +340,12 @@ let merge l1 l2 =
 let rec merge_filter_sort l =
   match l with
   | [] -> []
-  | [(word, distance, [])] -> let (success, informations) = Trie.trie_search Dictionnary.dictionnary word in
-           if success then [(word, distance, get_token_from_informations_list word informations)] else []
+  | [(word, distance, [])] 
+    -> let (success, informations) = Trie.trie_search Dictionnary.dictionnary word in
+       if success then
+        [(word, distance, get_token_from_informations_list word informations)] 
+      else 
+        []
   | [x] -> [x]
   | _ -> let (l1, l2) = split l in
          merge (merge_filter_sort l1) (merge_filter_sort l2)

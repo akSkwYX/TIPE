@@ -1,1 +1,1 @@
-bin/grammar.ml: Array Checkings Correction List Printf Syntax_tree Sys Token Utility Word_classe
+bin/grammar.ml: Array Checkings Correction Dictionnary List Printf String Syntax_tree Sys Token Utility Word_classe

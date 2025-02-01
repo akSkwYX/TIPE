@@ -90,8 +90,8 @@ let seek_word word_token =
       let rec get_correction_token_list potential_correction res =
         match potential_correction with
         | [] -> res
-        | (word :: word_class :: complementary_informations) :: t when word_class = seek_word_class -> get_correction_token_list t ((Token.get_token_from_informations word (rad_word :: seek_word_class :: complementary_informations)) :: res)
-        | ( (word :: word_class :: complementary_informations) as h) ::t -> get_correction_token_list t res
+        | (frequency, word :: word_class :: complementary_informations) :: t when word_class = seek_word_class -> get_correction_token_list t ((Token.get_token_from_informations word (rad_word :: seek_word_class :: complementary_informations)) :: res)
+        | ( (frequency, word :: word_class :: complementary_informations) as h) ::t -> get_correction_token_list t res
         | _ -> failwith "seek_word : invalid token"
       in
       get_correction_token_list potential_correction []

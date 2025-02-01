@@ -1,4 +1,4 @@
-let dictionnary_path = "dictionnarys/dictionnary.txt"
+let dictionnary_path = "dictionnarys/linux_dictionnary.txt"
 
 (** 
   Reads a dictionary file and returns two tries: one where lines are inserted based on the first word and the other one on the second word.
@@ -50,7 +50,7 @@ let read_dictionnary file =
 		in
 		match s with
 		| [] -> failwith "Dictionnary - read_dictionnary - aux : empty list"
-		| _::_::"V"::t -> aux2 s []
+		| _::_::_::"V"::t -> aux2 s []
 		| _ -> s
 	in
 
@@ -60,10 +60,46 @@ let read_dictionnary file =
 		match line with
 		| None -> (trie1, trie2)
 		| Some ("#"::_) -> read_lines (trie1, trie2)
-		| Some (word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) ), (Trie.trie_insert trie2 radical (word::information) ) )
+		| Some (frequency::word::radical::information) -> read_lines ( (Trie.trie_insert trie1 word (radical::information) (int_of_string frequency)), (Trie.trie_insert trie2 radical (word::information) (int_of_string frequency)) )
 		| Some [] -> failwith "read_dictionnary : empty line"
     | Some _ -> failwith "read_dictionnary : wrong format"
 	in
 	read_lines (Trie.trie_create, Trie.trie_create)
+
+let update_dictionnary string_list =
+  let file_to_read = In_channel.open_bin dictionnary_path in
+	let rec get_list_line_to_change res i file_content =
+		let line = In_channel.input_line file_to_read in
+		match line with
+    | None -> In_channel.close file_to_read; (res, file_content)
+    | Some s ->
+      begin
+        if List.exists ((=) (Utility.string_without_x_first_char 2 s)) string_list then
+					begin
+						let k = String.index s ',' in
+          	get_list_line_to_change ((int_of_string (String.sub s 0 k), i) :: res) (i+1) (s::file_content)
+					end
+				else
+          get_list_line_to_change res (i+1) (s::file_content)
+      end
+  in
+  let (line_to_change, file_content) = get_list_line_to_change [] 0 [] in
+  let file_to_write = Out_channel.open_bin dictionnary_path in
+  let rec rewrite_file i line_to_change file_content =
+    match file_content with
+    | [] -> Out_channel.close file_to_write
+    | h :: t ->
+      let freq = List.fold_left (fun acc (freq, x) -> if x = i then freq else acc) (-1) line_to_change in
+      if freq = -1 then
+        begin
+          Out_channel.output_string file_to_write (h ^ "\n"); rewrite_file (i+1) line_to_change t
+        end
+      else
+        begin
+          let s = string_of_int (freq + 1) ^ (Utility.string_without_x_first_char (String.length @@ string_of_int (freq + 1)) h) ^ "\n" in
+          Out_channel.seek file_to_write Int64.zero; Out_channel.output_string file_to_write s; rewrite_file (i+1) line_to_change t
+        end
+  in
+  rewrite_file 0 line_to_change file_content
 
 let dictionnary, rad_dictionnary = read_dictionnary dictionnary_path

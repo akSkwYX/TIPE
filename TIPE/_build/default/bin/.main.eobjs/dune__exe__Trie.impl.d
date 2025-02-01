@@ -1,1 +1,1 @@
-bin/trie.ml: String Utility
+bin/trie.ml: List String Utility

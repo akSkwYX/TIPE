@@ -8,6 +8,9 @@ let split_string string i =
 let string_without_first_char string =
 	String.sub string 1 (String.length string - 1)
 
+let string_without_x_first_char x string =
+  String.sub string x (String.length string - x)
+
 let string_without_last_char string =
 	String.sub string 0 (String.length string - 1)
 
@@ -118,6 +121,14 @@ let join_3_lists list1 list2 list3 =
     | x::xs -> (List.concat (List.map (fun y -> pair_with_all x y list3) l2)) @ (combine_two_lists xs l2)
   in
   combine_two_lists list1 list2
+
+let disjoin_in_3_lists list =
+  let rec disjoin_in_3_lists_aux list =
+    match list with
+    | [] -> ([], [], [])
+    | (x, y, z)::xs -> let (l1, l2, l3) = disjoin_in_3_lists_aux xs in (x::l1, y::l2, z::l3)
+  in
+  disjoin_in_3_lists_aux list
 
 (**
   [join_4_lists list1 list2 list3 list4] returns a list of 4-tuple where each element of [list1], [list2], [list3], [list4] are joined together.

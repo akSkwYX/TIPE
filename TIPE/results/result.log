@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2024.11.27)  8 JAN 2025 08:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Debian) (preloaded format=pdflatex 2024.11.27)  26 JAN 2025 11:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -380,20 +380,24 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
+Overfull \hbox (48.97418pt too wide) in paragraph at lines 8--9
+ [] 
+ []
+
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (results//result.aux) ) 
 Here is how much of TeX's memory you used:
- 11469 strings out of 481239
- 237311 string characters out of 5920376
- 443376 words of memory out of 5000000
- 26566 multiletter control sequences out of 15000+600000
+ 11541 strings out of 481239
+ 239292 string characters out of 5920376
+ 447376 words of memory out of 5000000
+ 26638 multiletter control sequences out of 15000+600000
  532338 words of font info for 24 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 60i,8n,60p,403b,779s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,16n,60p,444b,1611s stack positions out of 5000i,500n,10000p,200000b,80000s
 </u
 sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
-Output written on results//result.pdf (1 page, 13779 bytes).
+Output written on results//result.pdf (1 page, 17494 bytes).
 PDF statistics:
  15 PDF objects out of 1000 (max. 8388607)
  10 compressed objects within 1 object stream

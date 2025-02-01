@@ -35,10 +35,8 @@ let compile_tex file_name folder_path =
 
 let () = init_tex "results/result.tex"
 
-let test = In_channel.input_line In_channel.stdin 
-					 |> Utility.string_of_option
-					 |> Grammar.string_to_syntax_tree_list
-					 |> Grammar.get_results
+let s = Utility.string_of_option @@ In_channel.input_line In_channel.stdin
+let test = Grammar.get_results true s @@ Grammar.string_to_syntax_tree_list s
 
 let () = end_tex "results/result.tex"
 let _ = compile_tex "result.tex" "results/"
