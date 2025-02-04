@@ -26,30 +26,16 @@ L'objectif de ce TIPE est de transformer des phrases incorrectes en phrases corr
 
 ## Bibliograhie commentée :
 
-La correction orthographique et syntaxique des phrases s'appuie sur la théorie des langages formels et trouve des applications concrètes dans le traitement automatique des langues (TAL). Ce projet adopte une approche fondée sur des grammaires formelles pour traiter un modèle réduit de français.
-
-Le travail débute par la modélisation des structures syntaxiques à l’aide des grammaires non-contextuelles, telles que décrites en détail par Hopcroft et Ullman [1]. Ces grammaires définissent un ensemble de règles précises pour décrire des phrases simples. Les règles ainsi établies sont exploitées par l'analyseur syntaxique afin de transformer la phrase en un arbre syntaxique, facilitant la vérification et la correction.
-
-Par ailleurs, pour déterminer quels mots peuvent être utilisés, le projet nécessite le stockage d’un dictionnaire. À cet effet, une structure de données efficace, le Trie, illustrée par Fredkin [2], est utilisée pour vérifier rapidement l’appartenance d’un mot à un dictionnaire donné, optimisant ainsi les recherches lexicales.
-
-Dans un contexte pratique, l’utilisation d’un correcteur grammatical open source comme Grammalecte [3] permet de mettre en lumière les problématiques inhérentes à la correction grammaticale, notamment la gestion des accords, la détection des erreurs syntaxiques et la cohérence entre les attentes de l’utilisateur et les suggestions proposées.
-
-Enfin, la sémantique, qui ne peut être traitée par une simple grammaire, est partiellement abordée par des méthodes complémentaires. D'une part, la distance de Levenshtein [4] permet de mesurer la similarité entre deux mots afin de privilégier des corrections fondées sur la proximité lexicale, notamment pour corriger les fautes de frappe. D'autre part, l'utilisation d'un dictionnaire personnalisé à l'utilisateur offre la possibilité d'adapter les suggestions de correction aux habitudes linguistiques spécifiques de celui-ci.
-
-
-
 La correction orthographique et syntaxique de phrases repose sur la théorie des langages formels. Elle trouve également des applications pratiques dans le traitement automatique des langues (TAL). Ce projet s’inscrit dans ce domaine en adoptant une approche basée sur des grammaires formelles pour traiter un modèle réduit de français.
-
 Le point de départ est la modélisation des structures syntaxiques à l'aide des grammaires non-contextuels, une classe de grammaires formelles étudiée en détail dans des ouvrages de référence comme celui de Hopcroft et Ullman [1]. Ces grammaires permettent de définir un ensemble de règles précises pour décrire les phrases simples.
 
 Ces règles sont ensuite utilisées par l'analyseur syntaxique pour transformer la phrase en un arbre syntaxique, permettant de vérifier la correction de la phrase et facilitant sa correction.
 
 Cependant, avant de définire les règles qui régissent les interractions entres les mots il faut savoir qu'elles sont les mots qui peuvent être utilisé. Pour cela il faut donc stocker le dictionnair. Ainsi, le projet s'appuie sur une structure de données appelée Trie, particulièrement efficace pour vérifier rapidement si un mot appartient à un dictionnaire donné[2]. Cette structure optimise les recherches lexicales, ce qui est crucial pour traiter des phrases de manière efficace.
 
-Dans un contexte pratique, Grammalecte, un correcteur grammatical open source est bien utile puisqu'il permet de mettre en lumière des problèmatiques lié à la correction grammaticale comme la gestion des accords, la détection des erreurs syntaxiques et le problème majeur de la correction de phrases française, la cohérence entre ce qu'attend l'utilisateur et les suggestions [3].
+Dans un contexte pratique, l'utilisation de Grammalecte, un correcteur grammatical open source, met en lumière les problématiques liées à la correction grammaticale, l'analyse de la sémantique et la cohérence entre les attentes de l'utilisateur et les suggestions proposées [3]. En effet, la sémantique ne peut être entièrement capturée par une simple grammaire. Par exemple, la phrase « Le social chat entier éradique » présente une incohérence sémantique. Pour pallier ce manque, des méthodes telles que l'analyse par graphes de dépendance syntaxique ou l'utilisation de modèles de langage préentraînés peuvent être envisagées, bien que ces approches ne soient pas traitées dans ce TIPE.
 
-En effet, la sémantique ne peut pas être analysée par une simple grammaire. Plusieurs méthode peuvent alors être appliquée pour tenter de diminuer la probabilité d'incohérence entre les attentes de l'utilisateur et les suggestions de corrections, la distance de Levenshtein permet de calculer la distance entre 2 mots afin de privilégier des mots proches lors de la correction de fautes de frappes [4]. De plus, l'utilisation d'un dictionnaire personnel à l'utilisateur permet d'orienter les propositions en fonction des habitudes de celui-ci.
-
+Le principal enjeu étudié réside dans la cohérence entre ce qu'attend l'utilisateur et les suggestions offertes par le programme. Étant donné que la sémantique échappe à une analyse purement grammaticale, il est nécessaire de recourir à d'autres méthodes pour maximiser cette cohérence. Par exemple, la distance de Levenshtein [4] permet de mesurer la similarité entre deux mots afin de privilégier des corrections basées sur la proximité lexicale lors de la correction de fautes de frappe. Par ailleurs, l'utilisation d'un dictionnaire personnalisé à l'utilisateur permet d'orienter les propositions en fonction des habitudes linguistiques spécifiques de celui-ci.
 
 
 ## Problématique retenue :
