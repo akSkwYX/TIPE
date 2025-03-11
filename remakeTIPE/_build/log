@@ -1,0 +1,16 @@
+# dune exec test
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /home/skwyx/.cache/dune/db
+# Workspace root: /home/skwyx/Cours/TIPE/remakeTIPE
+# Auto-detected concurrency: 2
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/skwyx/.nix-profile/bin/ocamlc.opt -config > /tmp/dune_388867_output

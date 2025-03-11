@@ -1,0 +1,12 @@
+(executable
+ (public_name main)
+ (name main)
+ (modes byte exe)
+ (flags (:standard -g -w -26-27-32-39))
+)
+(executable
+ (name test)
+ (public_name test)
+ (modes byte exe)
+ (flags (:standard -g -w -26-27-32-39))
+)
