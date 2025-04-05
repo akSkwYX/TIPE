@@ -10,12 +10,14 @@ let get_root tags =
 
 let get_gender_default tags =
   match tags with
-  | _ :: _ :: _ :: gender :: _ -> gender
+  | _ :: _ :: _ :: gender :: _ :: [] -> gender
+  | gender :: _ :: [] -> gender
   | _ -> failwith "tags.ml/get_gender_default : tags not match format [frequency; root; wc; gender; ... ]"
 
 let get_number_default tags =
   match tags with
-  | _ :: _ :: _ :: _ :: number :: _ -> number 
+  | _ :: _ :: _ :: _ :: number :: [] -> number 
+  | _ :: number :: [] -> number
   | _ -> failwith "tags.ml/get_number_default : tags not match format [frequency; root; wc; gender; number; ... ]"
 
 let get_gender_nominal_group tags =
@@ -36,7 +38,7 @@ let get_person_nominal_group tags =
   | "i" -> ["3s"; "3p"]
   | _ -> failwith "tags.ml/get_person_nominal_group : nominal_group number not match"
 
-let get_person_personnal_pronoun_subject tags =
+let get_person_personal_pronoun_subject tags =
   match tags with
   | frequency :: root :: wc :: person :: gender :: number :: [] -> person
   | _ -> failwith "tags.ml/get_person_personnal_pronoun_subject : personnal_pronoun_subject tags not match format [frequency; root; wc; person; gender; number]"

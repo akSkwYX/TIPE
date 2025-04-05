@@ -16,7 +16,7 @@ let print_syntax_tree tree =
       print_string (String.make (depth * 2) ' '); Token.print_token token; print_newline ();
     | Error message ->
       print_string (String.make (depth * 2) ' '); print_endline message
-    | Empty -> ()
+    | Empty -> print_newline ()
   in
   print_syntax_tree_aux tree 0
 
@@ -35,27 +35,27 @@ let st_get_tags syntax_tree =
   | Empty -> []
 
 let st_print_tex file syntax_tree =
-  let () = Printf.fprintf file "\\begin{center}\n\\begin{tikzpicture}\n" in
+  let () = Printf.fprintf file "\\begin{tikzpicture}\n" in
   let rec aux syntax_tree =
     match syntax_tree with
     | Empty -> Printf.fprintf file "child{node{Empty}}\n"
     | Error s -> Printf.fprintf file "child{node{%s}}\n" s
     | Leaf token -> Printf.fprintf file "child{node{%s}}\n" (Token.get_word token)
     | Node (token, children) ->
-      Printf.fprintf file "child{node{%s \\\\ %s}\n" (Token.get_word token) (String.concat ", " (Token.get_tags token));
+      Printf.fprintf file "child{ node{%s : %s \\\\ %s}\n" (Token.get_word_class token) (Token.get_word token) (Token.format_tags token);
       List.iter aux children;
       Printf.fprintf file "}\n"
   in
   match syntax_tree with
-  | Empty -> Printf.fprintf file "\\node{Empty}\n \\end{tikzpicture}\n\\end{center}\n"
-  | Error s -> Printf.fprintf file "\\node{%s}\n \\end{tikzpicture}\n\\end{center}\n" s
-  | Leaf token -> Printf.fprintf file "\\node{%s}\n \\end{tikzpicture}\n\\end{center}\n" (Token.get_word token)
+  | Empty -> Printf.fprintf file "\\node{Empty};\n \\end{tikzpicture}\n\n"
+  | Error s -> Printf.fprintf file "\\node{%s};\n \\end{tikzpicture}\n\n" s
+  | Leaf token -> Printf.fprintf file "\\node{%s};\n \\end{tikzpicture}\n\n" (Token.get_word token)
   | Node (token, children) ->
     Printf.fprintf file
-      "\\node{node{%s \\\\ %s}[sibling distance=4cm, level distance = 3cm, align=center]\n"
-      (Token.get_word token) (String.concat ", " (Token.get_tags token));
+      "\\node{%s : %s \\\\ %s }[sibling distance=4cm, level distance = 3cm, align=center]\n"
+      (Token.get_word_class token) (Token.get_word token) (Token.format_tags token);
     List.iter aux children;
-    Printf.fprintf file "\\end{tikzpicture}\n\\end{center}\n\n"
+    Printf.fprintf file ";\\end{tikzpicture}\n\n"
 
 let print_syntax_tree_list syntax_tree_list =
   let file = open_out "results/syntax_tree.tex" in
@@ -63,4 +63,4 @@ let print_syntax_tree_list syntax_tree_list =
   List.iter (st_print_tex file) syntax_tree_list;
   let () = Printf.fprintf file "\\end{document}\n" in
   close_out file;
-  Sys.command "pdflatex -output-directory=results results/syntax_tree.tex > results/output.log"
+  Sys.command "pdflatex -interaction=nonstopmode -output-directory=results results/syntax_tree.tex > results/output.log"

@@ -33,12 +33,11 @@ let rec iterate_parse token_list_array match_fun precedent_result new_result =
 *)
 let rec parse token_list_array =
   let solution_list = parse_verbal_group token_list_array [([], 0)] in
-  List.map (
+  List.filter_map (
     fun (syntax_tree_list, index) ->
       match syntax_tree_list with
-      | [] -> Empty
-      | [Node (token, _)] -> Node (SENTENCE ((get_word token), []), syntax_tree_list)
-      | _ -> Error "Unmerged syntax tree"
+      | [Node (token, _)] -> Some (Node (SENTENCE ((get_word token), []), syntax_tree_list))
+      | _ -> None
   ) solution_list
 
 and parse_verbal_group token_list_array result =
@@ -96,10 +95,12 @@ and parse_nominal_group token_list_array result =
   let result_parsing_noun = parse_noun token_list_array result_parsing_adjective in
   let result_parsing_adjective = parse_adjectives token_list_array result_parsing_noun in
   List.map (
-    fun (syntax_tree_list, index) ->
-      match syntax_tree_list with
+    fun (syntax_tree_list, index) -> 
+    match syntax_tree_list with
       | [determiner; adjective1; noun; adjective2] -> 
-        (Corrections.correct_nominal_group determiner adjective1 noun adjective2, index)
+        let correc = (Corrections.correct_nominal_group determiner adjective1 noun adjective2) in
+        let () = List.iter Syntax_tree.print_syntax_tree correc in
+        correc, index (*TO REMOVE*)
       | _ -> ([Error "Verbal group parsing get other than 4 syntax tree"], index)
   ) result_parsing_adjective
 
@@ -145,6 +146,9 @@ and parse_adjectives token_list_array result =
         | Node (ADJECTIVE (word, tags), children) :: [Empty] ->
           (complete_adjective_parsing @ [res @ [Node (ADJECTIVE (word, tags), children @ [Empty])] , index],
            uncomplete_adjective_parsing)
+        | Node (ADJECTIVE (word, tags), [children]) as tree :: [] ->
+          (complete_adjective_parsing,
+           uncomplete_adjective_parsing @ [res @ [tree], index])
         | [Empty] ->
           (complete_adjective_parsing @ [res @ [Node (ADJECTIVE ("", []), [Empty])], index], uncomplete_adjective_parsing)
         | h :: t -> aux2 t (res @ [h])
@@ -165,3 +169,7 @@ and parse_noun token_list_array result =
     | _ -> []
   in
   iterate_parse token_list_array match_fun result []
+
+
+let parse_sentence (s:string) =
+  parse (Array.of_list (Token.sentence_to_token_list_list s))

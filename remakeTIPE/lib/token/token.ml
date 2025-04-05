@@ -10,6 +10,7 @@ type token =
   | PERSONAL_PRONOUN_SUBJECT of string * string list
   | EPSILON
   | UNKNOWN of string
+  | TEMP of string * string list (* should not appear in any case in the final result *)
 
 let get_word token =
   match token with
@@ -24,6 +25,7 @@ let get_word token =
   | PERSONAL_PRONOUN_SUBJECT (word, _) -> word
   | EPSILON -> ""
   | UNKNOWN (word) -> word
+  | TEMP (word, _) -> word
 
 let get_tags token =
   match token with
@@ -38,6 +40,7 @@ let get_tags token =
   | PERSONAL_PRONOUN_SUBJECT (_, tags) -> tags
   | EPSILON -> []
   | UNKNOWN _ -> []
+  | TEMP (_, tags) -> tags
 
 let get_word_class token =
   match token with
@@ -52,6 +55,25 @@ let get_word_class token =
   | PERSONAL_PRONOUN_SUBJECT _ -> "Os"
   | EPSILON -> "epsilon"
   | UNKNOWN _ -> "unknown"
+  | TEMP _ -> "temp"
+
+let create word_class word tags =
+  match word_class with
+  | "S" -> SENTENCE (word, tags)
+  | "VG" -> VERBAL_GROUP (word, tags)
+  | "NG" -> NOMINAL_GROUP (word, tags)
+  | "Su" -> SUBJECT (word, tags)
+  | "V" -> VERB (word, tags)
+  | "N" -> NOUN (word, tags)
+  | "A" -> ADJECTIVE (word, tags)
+  | "D" -> DETERMINER (word, tags)
+  | "Os" -> PERSONAL_PRONOUN_SUBJECT (word, tags)
+  | "epsilon" -> EPSILON
+  | "temp" -> TEMP (word, tags)
+  | _ -> UNKNOWN word
+
+let format_tags token =
+  List.fold_left (fun acc tag -> match tag with | "_" -> acc ^ ", \\_" | s -> acc ^ ", " ^ s) "" (get_tags token)
 
 (** Print a token *)
 let print_token token =

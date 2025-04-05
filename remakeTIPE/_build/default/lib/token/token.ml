@@ -53,6 +53,23 @@ let get_word_class token =
   | EPSILON -> "epsilon"
   | UNKNOWN _ -> "unknown"
 
+let create word_class word tags =
+  match word_class with
+  | "S" -> SENTENCE (word, tags)
+  | "VG" -> VERBAL_GROUP (word, tags)
+  | "NG" -> NOMINAL_GROUP (word, tags)
+  | "Su" -> SUBJECT (word, tags)
+  | "V" -> VERB (word, tags)
+  | "N" -> NOUN (word, tags)
+  | "A" -> ADJECTIVE (word, tags)
+  | "D" -> DETERMINER (word, tags)
+  | "Os" -> PERSONAL_PRONOUN_SUBJECT (word, tags)
+  | "epsilon" -> EPSILON
+  | _ -> UNKNOWN word
+
+let format_tags token =
+  List.fold_left (fun acc tag -> match tag with | "_" -> acc ^ ", \\_" | s -> acc ^ ", " ^ s) "" (get_tags token)
+
 (** Print a token *)
 let print_token token =
   Printf.printf "%s : %s : %s\n" (get_word_class token) (get_word token) (String.concat ", " (get_tags token))
