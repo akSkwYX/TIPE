@@ -55,9 +55,9 @@ let check_determiner_noun determiner noun =
     let number_determiner = Tags.get_number_default tags_determiner in
     let gender_noun = Tags.get_gender_default tags_noun in
     let number_noun = Tags.get_number_default tags_noun in
-    ( check_gender gender_determiner gender_noun, check_number number_determiner number_noun )
+    [ check_gender gender_determiner gender_noun; check_number number_determiner number_noun ]
     end
-  | _ -> ("", "") 
+  | _ -> [ ""; "" ] 
 
 let check_adjective_noun adjective noun =
   match adjective, noun with
@@ -67,19 +67,6 @@ let check_adjective_noun adjective noun =
     let gender_noun = Tags.get_gender_default tags_noun in
     let number_adjective = Tags.get_number_default tags_adjective in
     let number_noun = Tags.get_number_default tags_noun in
-    ( check_gender gender_adjective gender_noun, check_number number_adjective number_noun )
+    [ check_gender gender_adjective gender_noun; check_number number_adjective number_noun ]
     end
-  | _ -> ("", "")
-
-let check_nominal_group determiner adjective1 noun adjective2 =
-  (* gender determiner noun and number determiner noun *)
-  let (gdn, ndn)= check_determiner_noun determiner noun in
-  match adjective1, adjective2 with
-  | Node (ADJECTIVE ("", []), _), Node (ADJECTIVE ("", []), _) -> [ gdn; ndn ]
-  | Node (ADJECTIVE ("", []), _), adjective | adjective, Node (ADJECTIVE ("", []), _) ->
-    let (gan, nan) = check_adjective_noun adjective noun in
-    [ check_gender gdn gan; check_number ndn nan ]
-  | _ ->
-    let (ga1n, na1n) = check_adjective_noun adjective1 noun in
-    let (ga2n, na2n) = check_adjective_noun adjective2 noun in
-    [ check_gender (check_gender gdn ga1n) ga2n; check_number (check_number ndn na1n) na2n ]
+  | _ -> [ ""; "" ]

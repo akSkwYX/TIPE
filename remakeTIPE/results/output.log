@@ -166,6 +166,25 @@ text/base/mkii/supp-pdf.mkii
 (/nix/store/sc5p4q3ajvk3586nnrj1iw87698zpgwl-texlive-2024-env-texmfdist/tex/lat
 ex/epstopdf-pkg/epstopdf-base.sty
 (/nix/store/sc5p4q3ajvk3586nnrj1iw87698zpgwl-texlive-2024-env-texmfdist/tex/lat
-ex/latexconfig/epstopdf-sys.cfg)) (results/syntax_tree.aux) )
-No pages of output.
+ex/latexconfig/epstopdf-sys.cfg))
+
+! LaTeX Error: Something's wrong--perhaps a missing \item.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.6 \node{S : la petite  chatte joue \\  }
+                                          [sibling distance=4cm, level dista...
+
+
+Overfull \hbox (68.84917pt too wide) in paragraph at lines 31--32
+ [] 
+
+[1{/nix/store/5dm6aqic0wy847ly9l1ag6h5v0rf9d7h-texlive-2024-env/share/texmf-var
+/fonts/map/pdftex/updmap/pdftex.map}] (results/syntax_tree.aux) )
+(see the transcript file for additional information)</nix/store/sc5p4q3ajvk3586
+nnrj1iw87698zpgwl-texlive-2024-env-texmfdist/fonts/type1/public/amsfonts/cm/cmr
+10.pfb>
+Output written on results/syntax_tree.pdf (1 page, 18459 bytes).
 Transcript written on results/syntax_tree.log.

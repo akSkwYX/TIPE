@@ -10,5 +10,5 @@
  (public_name test)
  (modes byte exe)
  (flags (:standard -g -w -26-27-32-39))
- (libraries grammar token syntax_tree)
+ (libraries corrections grammar token syntax_tree utility)
 )

@@ -6,6 +6,15 @@ type syntax_tree =
 
 let new_syntax_tree = Empty
 
+let is_equal t1 t2 =
+  match t1, t2 with
+  | Node (token1, _), Node (token2, _) ->
+    Token.is_equal token1 token2
+  | Leaf token1, Leaf token2 -> Token.is_equal token1 token2
+  | Error s1, Error s2 -> s1 = s2
+  | Empty, Empty -> true
+  | _ -> false
+
 let print_syntax_tree tree =
   let rec print_syntax_tree_aux tree depth =
     match tree with
@@ -16,7 +25,8 @@ let print_syntax_tree tree =
       print_string (String.make (depth * 2) ' '); Token.print_token token; print_newline ();
     | Error message ->
       print_string (String.make (depth * 2) ' '); print_endline message
-    | Empty -> print_newline ()
+    | Empty ->
+      print_string (String.make (depth * 2) ' '); print_endline "Empty"
   in
   print_syntax_tree_aux tree 0
 
@@ -59,8 +69,24 @@ let st_print_tex file syntax_tree =
 
 let print_syntax_tree_list syntax_tree_list =
   let file = open_out "results/syntax_tree.tex" in
-  let () = Printf.fprintf file "\\documentclass{article}\n\\usepackage{tikz}\n\\begin{document}\n" in
+  let () = Printf.fprintf file "\\documentclass{article}\n\\usepackage{tikz}\n\\begin{document}\n\\begin{center}\n" in
   List.iter (st_print_tex file) syntax_tree_list;
+  let () = Printf.fprintf file "\\end{center}\n\\end{document}\n" in
+  close_out file;
+  Sys.command "pdflatex -interaction=nonstopmode -output-directory=results results/syntax_tree.tex > results/output.log"
+
+let prepare_result_file =
+  let file = open_out "results/syntax_tree.tex" in
+  let () = Printf.fprintf file "\\documentclass{article}\n\\usepackage{tikz}\n\\begin{document}\n" in
+  close_out file
+
+let end_result_file =
+  let file = open_out_gen [Open_append] 0o666 "results/syntax_tree.tex" in
   let () = Printf.fprintf file "\\end{document}\n" in
   close_out file;
   Sys.command "pdflatex -interaction=nonstopmode -output-directory=results results/syntax_tree.tex > results/output.log"
+
+let print_syntax_tree_list_add syntax_tree_list =
+  let file = open_out_gen [Open_creat; Open_text; Open_append] 0o666 "results/syntax_tree.tex" in
+  List.iter (st_print_tex file) syntax_tree_list;
+  close_out file

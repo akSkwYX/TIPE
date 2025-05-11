@@ -10,6 +10,32 @@ type token =
   | PERSONAL_PRONOUN_SUBJECT of string * string list
   | EPSILON
   | UNKNOWN of string
+  | TEMP of string * string list (* should not appear in any case in the final result *)
+
+let is_equal t1 t2 =
+  match t1, t2 with
+  | SENTENCE (word1, tags1), SENTENCE (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | VERBAL_GROUP (word1, tags1), VERBAL_GROUP (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | NOMINAL_GROUP (word1, tags1), NOMINAL_GROUP (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | SUBJECT (word1, tags1), SUBJECT (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | VERB (word1, tags1), VERB (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | NOUN (word1, tags1), NOUN (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | ADJECTIVE (word1, tags1), ADJECTIVE (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | DETERMINER (word1, tags1), DETERMINER (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | PERSONAL_PRONOUN_SUBJECT (word1, tags1), PERSONAL_PRONOUN_SUBJECT (word2, tags2) ->
+    word1 = word2 && Tags.is_equal tags1 tags2
+  | EPSILON, EPSILON -> true
+  | UNKNOWN _, UNKNOWN _ -> true
+  | TEMP _, TEMP _ -> true
+  | _ -> false
 
 let get_word token =
   match token with
@@ -24,6 +50,7 @@ let get_word token =
   | PERSONAL_PRONOUN_SUBJECT (word, _) -> word
   | EPSILON -> ""
   | UNKNOWN (word) -> word
+  | TEMP (word, _) -> word
 
 let get_tags token =
   match token with
@@ -38,6 +65,7 @@ let get_tags token =
   | PERSONAL_PRONOUN_SUBJECT (_, tags) -> tags
   | EPSILON -> []
   | UNKNOWN _ -> []
+  | TEMP (_, tags) -> tags
 
 let get_word_class token =
   match token with
@@ -52,6 +80,7 @@ let get_word_class token =
   | PERSONAL_PRONOUN_SUBJECT _ -> "Os"
   | EPSILON -> "epsilon"
   | UNKNOWN _ -> "unknown"
+  | TEMP _ -> "temp"
 
 let create word_class word tags =
   match word_class with
@@ -65,6 +94,7 @@ let create word_class word tags =
   | "D" -> DETERMINER (word, tags)
   | "Os" -> PERSONAL_PRONOUN_SUBJECT (word, tags)
   | "epsilon" -> EPSILON
+  | "temp" -> TEMP (word, tags)
   | _ -> UNKNOWN word
 
 let format_tags token =
@@ -74,20 +104,6 @@ let format_tags token =
 let print_token token =
   Printf.printf "%s : %s : %s\n" (get_word_class token) (get_word token) (String.concat ", " (get_tags token))
 
-(**
-  Split a sentence into a list of words on spaces and apostrophes.
-
-  Iterating on all character of string, keeping in the acc the list of already
-  seen word and the word which is currently being iterate.
-  When encounter a " " or "\'" add the word to the list in the acc and reset
-  the current word
-*)
-let sentence_to_string_list s =
-  String.fold_left (fun (res, word) c -> match c with
-    | ' ' -> (word :: res, "")
-    | '\'' -> ((word ^ "\'") :: res, "")
-    | _ -> (res, word ^ (String.make 1 c))
-  ) ([], "") s |> (fun (res, word) -> word :: res)
 
 (**
   Convert a word and its tags into a token.
@@ -108,18 +124,7 @@ let word_tags_to_token word tags =
   NB : It's a list of token because a word can have multiple sense so 
   multiple tags so multiple token.
 *)
-let string_to_token_list s =
-  let tags_list = Dictionary.find Dictionary.dictionary s in
-  let rec make_tokens tags_list token_list =
-    match tags_list with
-    | [] -> token_list
-    | h :: t -> make_tokens t (word_tags_to_token s h :: token_list)
-  in
-  make_tokens tags_list []
-
-(**
-  Make a list of token list (each word have multiple token) from
-  a string (sentence).
-*)
-let sentence_to_token_list_list s =
-  s |> sentence_to_string_list |> List.rev_map string_to_token_list
+let rec make_tokens_from_tags_list word token_list tags_list  =
+  match tags_list with
+  | [] -> token_list
+  | h :: t -> make_tokens_from_tags_list word (word_tags_to_token word h :: token_list) t

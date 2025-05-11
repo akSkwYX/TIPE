@@ -1,5 +1,5 @@
 (library
 (name grammar)
-(libraries syntax_tree corrections)
+(libraries syntax_tree corrections lexing)
 (flags (:standard -g -w -26-27-32-39))
 )

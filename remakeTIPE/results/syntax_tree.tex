@@ -1,4 +1,34 @@
 \documentclass{article}
 \usepackage{tikz}
 \begin{document}
+\begin{center}
+\begin{tikzpicture}
+\node{S : la petite  chatte joue \\  }[sibling distance=4cm, level distance = 3cm, align=center]
+child{ node{VG : la petite  chatte joue \\ , 3s}
+child{ node{Su : la petite  chatte \\ , f, s}
+child{ node{NG : la petite  chatte \\ , f, s}
+child{ node{D : la \\ , 0, le, D, f, s}
+child{node{la}}
+}
+child{ node{A : petite \\ , 0, petit, A, f, s}
+child{ node{A : petite \\ , 0, petit, A, f, s}
+child{node{petite}}
+}
+child{node{Empty}}
+}
+child{ node{N : chatte \\ , 0, chat, N, f, s}
+child{node{chatte}}
+}
+child{ node{A :  \\ }
+child{node{Empty}}
+}
+}
+}
+child{ node{V : joue \\ , 0, jouer, V, i, t, n, q, \_, \_, a, Ip, Sp, 1s, 3s}
+child{node{joue}}
+}
+}
+;\end{tikzpicture}
+
+\end{center}
 \end{document}

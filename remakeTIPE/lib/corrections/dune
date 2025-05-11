@@ -1,5 +1,5 @@
 (library
 (name corrections)
-(libraries syntax_tree checkings dictionary)
+(libraries syntax_tree checkings dictionary utility)
 (flags (:standard -g -w -26-27-32-39))
 )

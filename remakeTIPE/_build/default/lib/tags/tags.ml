@@ -1,7 +1,15 @@
-let get_word_class tag =
-  match tag with
+let is_equal t1 t2 =
+  List.for_all2 String.equal t1 t2
+
+let get_word_class tags =
+  match tags with
   | _ :: _ :: wc :: _ -> wc
   | _ -> "U"
+
+let get_word tags =
+  match tags with
+  | _ :: word :: _ -> word
+  | _ -> failwith "tags.ml/get_word : tags not match format [frequency; root; wc; ...]"
 
 let get_root tags =
   match tags with
@@ -12,13 +20,13 @@ let get_gender_default tags =
   match tags with
   | _ :: _ :: _ :: gender :: _ :: [] -> gender
   | gender :: _ :: [] -> gender
-  | _ -> failwith "tags.ml/get_gender_default : tags not match format [frequency; root; wc; gender; ... ]"
+  | _ -> failwith "tags.ml/get_gender_default : tags not match format [frequency; root; wc; gender; ... ] or [gender; number]"
 
 let get_number_default tags =
   match tags with
   | _ :: _ :: _ :: _ :: number :: [] -> number 
   | _ :: number :: [] -> number
-  | _ -> failwith "tags.ml/get_number_default : tags not match format [frequency; root; wc; gender; number; ... ]"
+  | _ -> failwith "tags.ml/get_number_default : tags not match format [frequency; root; wc; gender; number; ... ] or [gender; number]"
 
 let get_gender_nominal_group tags =
   match tags with
@@ -61,3 +69,8 @@ let is_person string =
 
 let get_person_verb tags =
   List.filter is_person tags
+
+let replace_word tags root_word =
+  match tags with
+  | f :: w :: tl -> f :: root_word :: tl
+  | _ -> failwith "tags.ml/replace_root : tags not match format [frequency; root; ...]"
