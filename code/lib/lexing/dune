@@ -1,0 +1,5 @@
+(library
+(name lexing)
+(libraries dictionary token corrections)
+(flags (:standard -g -w -26-27-32-39))
+)

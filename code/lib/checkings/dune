@@ -1,0 +1,5 @@
+(library
+(name checkings)
+(libraries syntax_tree)
+(flags (:standard -g -w -26-27-32-39))
+)
