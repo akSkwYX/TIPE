@@ -27,6 +27,11 @@ let rec iterate_parse token_list_array match_fun precedent_result new_result =
   match precedent_result with
   | [] -> new_result
   | (syntax_tree_list, index) :: tl ->
+    begin
+    let error = Syntax_tree.contains_error syntax_tree_list in
+    if error <> [] then iterate_parse token_list_array match_fun tl ((error, index) :: new_result) else
+    if index >= Array.length token_list_array then
+      iterate_parse token_list_array match_fun tl ((syntax_tree_list @ [Empty], index) :: new_result) else
     let token_list = token_list_array.(index) in
     let rec iterate_token_list token_list result_solution =
       match token_list with
@@ -48,6 +53,7 @@ let rec iterate_parse token_list_array match_fun precedent_result new_result =
              ) new_result result_parsing
            in
            iterate_parse token_list_array match_fun tl next_new_result
+    end
 
 (**
   Parse the sentence and return a list of possible syntax tree.
@@ -56,28 +62,28 @@ let rec iterate_parse token_list_array match_fun precedent_result new_result =
   the next token to parse.
 *)
 let rec parse token_list_array =
-  let solution_list = parse_verbal_group token_list_array [([], 0)] in
+  let solution_list = parse_sentence token_list_array [([], 0)] in
   let sentence_length = Array.length token_list_array in
   List.filter_map (
     fun (syntax_tree_list, index) ->
       match syntax_tree_list with
-      | [Node (token, _)] -> if index >= sentence_length then
-                               Some (Node (SENTENCE ((get_word token), []), syntax_tree_list))
-                             else
-                               None
+      | [Node (token, _) as tree] -> if index >= sentence_length then
+                                       Some tree
+                                     else
+                                       None
       | _ -> None
   ) solution_list
 
-and parse_verbal_group token_list_array result =
+and parse_sentence token_list_array result =
   let result_parsing_subject = parse_subject token_list_array result in
-  let result_parsing_verb = parse_verb token_list_array result_parsing_subject in
+  let result_parsing_verbal_group = parse_verbal_group token_list_array result_parsing_subject in
   List.fold_left ( 
     fun acc (syntax_tree_list, index) ->
       match syntax_tree_list with
-      | [subject; verb] -> 
-      List.map (fun x -> ([x], index)) (Corrections.correct_verbal_group subject verb) @ acc
-      | _ -> ([Error "Verbal group parsing get other than two syntax tree"], index) :: acc
-  ) [] result_parsing_verb
+      | [subject; verbal_group] -> 
+        List.map (fun x -> ([x], index)) (Corrections.correct_sentence subject verbal_group) @ acc
+      | _ -> ([Error "Sentence parsing get other than two syntax tree"], index) :: acc
+  ) [] result_parsing_verbal_group
 
 and parse_subject token_list_array result =
   let match_fun token syntax_tree_list index =
@@ -100,12 +106,114 @@ and parse_subject token_list_array result =
   in
   iterate_parse token_list_array match_fun result [] 
 
+
+and parse_verbal_group token_list_array result =
+  let result_parsing_pronoun = parse_pronoun token_list_array result in
+  let result_parsing_verb = parse_verb token_list_array result_parsing_pronoun in
+  let result_parsing_complement = parse_complement token_list_array result_parsing_verb in
+  List.fold_left (
+    fun acc (syntax_tree_list, index) ->
+      match syntax_tree_list with
+      | [subject; pronoun; verb; complement] ->
+        List.map (fun x -> ([subject; x], index)) (Corrections.correct_verbal_group pronoun verb complement) @ acc
+      | _ -> ([Error "Verbal group parsing get other than four syntax tree"], index) :: acc
+  ) [] result_parsing_complement
+
+and parse_pronoun token_list_array result =
+  let match_fun token syntax_tree_list index =
+    match token with
+    | PRE_VERB_PRONOUN _ ->
+      [(syntax_tree_list @ [Node (token, [Leaf token])] , index + 1)]
+    | _ -> [syntax_tree_list @ [Empty], index]
+  in
+  iterate_parse token_list_array match_fun result []
+
 and parse_verb token_list_array result =
   let match_fun token syntax_tree_list index =
     match token with
-    | VERB _ ->
-      [(syntax_tree_list @ [Node (token, [Leaf token])] , index + 1)]
+    | VERB (word, tags) ->
+        if Checkings.is_auxiliary token then
+          let next_token_list = token_list_array.(index + 1) in
+          (syntax_tree_list @ [Node (token, [Leaf token])] , index + 1) ::
+          List.fold_left (
+            fun acc possibility_token ->
+              match possibility_token with
+              | VERB (main_verb, main_tags) ->
+                let res = Corrections.correct_auxiliary_verb (Node (token, [Leaf token]))
+                                                             (Node (possibility_token, [Leaf possibility_token]))
+                in
+                (syntax_tree_list @ res, index + 2) :: acc
+              | _ -> acc
+          ) [] next_token_list
+        else
+          [(syntax_tree_list @ [Node (token, [Leaf token])] , index + 1)]
     | _ -> []
+  in
+  iterate_parse token_list_array match_fun result []
+
+and parse_complement token_list_array result =
+  let match_fun token syntax_tree_list index =
+    match token with
+    | PREPOSITION (w, t) ->
+      (*TODO : CC + COS*)
+      begin
+      if Checkings.is_preposition_coi token then
+        List.fold_left (
+          fun acc (syntax_tree_list, index) ->
+            match syntax_tree_list with
+            | [subject; pronoun; verb; preposition; coi] ->
+              List.map (fun x -> ([subject; pronoun; verb] @ [x], index))
+                       (Corrections.correct_coi preposition coi)
+              @ acc
+            | _ -> failwith "grammar.ml/parse_complement : coi parsing result in more than one syntax tree"
+          ) [] (parse_coi token_list_array (parse_preposition token_list_array result))
+      else
+        failwith "grammar.ml/parse_complement : not implemented yet"
+      end
+    | _ ->
+      List.fold_left (
+        fun acc (syntax_tree_list, index) ->
+          match syntax_tree_list with
+          | [subject; pronoun; verb; cod] -> List.map (fun stl -> ([subject; pronoun; verb] @ [ stl ], index)) 
+                                                      (Corrections.correct_cod cod)
+                                             @ acc
+          | _ -> failwith "grammar.ml/parse_complement : cod parsing result in more than one syntax tree"
+      ) [] (parse_cod token_list_array result)
+  in
+  iterate_parse token_list_array match_fun result []
+
+and parse_preposition token_list_array result =
+  let match_fun token syntax_tree_list index =
+    match token with
+    | PREPOSITION (w, t) ->
+      [(syntax_tree_list @ [Node (token, [Leaf token])] , index + 1)]
+    | _ -> [([Error "Trying to parse a preposition but got something else"], index)]
+  in
+  iterate_parse token_list_array match_fun result []
+
+and parse_cod token_list_array result =
+  let match_fun token syntax_tree_list index =
+    match token with
+    | DETERMINER _ | NOUN _ | ADJECTIVE _ ->
+      let gn = parse_nominal_group token_list_array [([], index)] in
+      List.map (fun (gn, index_gn) -> 
+        match gn with
+        | [Node (NOMINAL_GROUP (word, tags) as token, children)] ->
+          (syntax_tree_list @ [Node (COD (word, []), gn)] , index_gn)
+        | _ -> failwith "grammar.ml/parse_cod : receive more than one syntax tree from parse_nominal_group"
+      ) gn
+    | VERB (word, tags)
+    | PROPER_NOUN (word, tags) ->
+      [(syntax_tree_list @ [Node ((COD (word, [])), [Node (token, [Leaf token])])] , index + 1)]
+    | _ -> []
+  in
+  iterate_parse token_list_array match_fun result []
+
+and parse_coi token_list_array result =
+  let match_fun token syntax_tree_list index =
+    List.map (fun (gn, index_gn) ->
+      (syntax_tree_list @ gn, index_gn)
+    ) ( parse_nominal_group token_list_array [([], index)] )
   in
   iterate_parse token_list_array match_fun result []
 
@@ -123,13 +231,13 @@ and parse_nominal_group token_list_array result =
   let result_parsing_adjective = parse_adjectives token_list_array result_parsing_determiner in
   let result_parsing_noun = parse_noun token_list_array result_parsing_adjective in
   let result_parsing_adjective = parse_adjectives token_list_array result_parsing_noun in
-  List.map (
-    fun (syntax_tree_list, index) -> 
+  List.fold_left (
+    fun acc (syntax_tree_list, index) -> 
     match syntax_tree_list with
       | [determiner; adjective1; noun; adjective2] -> 
-        (Corrections.correct_nominal_group determiner adjective1 noun adjective2, index)
-      | _ -> ([Error "Nominal group parsing get other than 4 syntax tree"], index)
-  ) result_parsing_adjective
+        List.map (fun x -> ([x], index)) (Corrections.correct_nominal_group determiner adjective1 noun adjective2) @ acc
+      | _ -> ([Error "Nominal group parsing get other than 4 syntax tree"], index) :: acc
+  ) [] result_parsing_adjective
 
 and parse_determiner token_list_array result =
   let match_fun token syntax_tree_list index =
@@ -198,5 +306,5 @@ and parse_noun token_list_array result =
   iterate_parse token_list_array match_fun result []
 
 
-let parse_sentence (s:string) =
+let parse_sentence_from_string (s:string) =
   parse (Array.of_list (Lexing.sentence_to_token_list_list s))

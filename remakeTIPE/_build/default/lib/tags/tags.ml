@@ -48,7 +48,17 @@ let get_person_nominal_group tags =
 
 let get_person_personal_pronoun_subject tags =
   match tags with
-  | frequency :: root :: wc :: person :: gender :: number :: [] -> person
+  | frequency :: root :: wc :: person :: gender :: number :: [] ->
+    begin
+    match person, number with
+    | "O1", "s" -> "1s"
+    | "O1", "p" -> "1p"
+    | "O2", "s" -> "2s"
+    | "O2", "p" -> "2p"
+    | "O3", "s" -> "3s"
+    | "O3", "p" -> "3p"
+    | _ -> failwith "tags.ml/get_person_personal_pronoun_subject : personnal_pronoun_subject person and number not match"
+    end
   | _ -> failwith "tags.ml/get_person_personnal_pronoun_subject : personnal_pronoun_subject tags not match format [frequency; root; wc; person; gender; number]"
 
 let get_gender_personnal_pronoun_subject tags =
@@ -69,6 +79,47 @@ let is_person string =
 
 let get_person_verb tags =
   List.filter is_person tags
+
+let is_infinitive tags =
+  List.exists ((=) "Y") tags
+
+let is_past_participle tags =
+  List.exists ((=) "Q") tags
+
+let get_auxiliary_type tags =
+  let rec aux l =
+    match l with
+    | [] -> failwith "tags.ml/get_auxiliary_type : tags are not tags of a past participle"
+    | "Q" :: "a" :: _ -> "avoir"
+    | "Q" :: _ -> "être"
+    | _ :: tl -> aux tl
+  in
+  aux tags
+
+let get_gender_past_participle tags =
+  let rec aux l =
+    match l with
+    | [] -> failwith "tags.ml/get_gender_past_participle : tags don't match format [...; \"Q\"; (\"a\"); gender; number; ...]"
+    | "Q" :: "a" :: gender :: _ -> gender
+    | "Q" :: gender :: _ -> gender
+    | _ :: tl -> aux tl
+  in
+  aux tags
+
+let get_number_past_participle tags =
+  let rec aux l =
+    match l with
+    | [] -> failwith "tags.ml/get_number_past_participle : tags don't match format [...; \"Q\"; (\"a\"); gender; number; ...]"
+    | "Q" :: "a" :: gender :: number :: _ -> number 
+    | "Q" :: gender :: number :: _ -> number
+    | _ :: tl -> aux tl
+  in
+  aux tags
+
+let merge_auxiliary_past_participle auxiliary_tags past_participle_tags =
+  match past_participle_tags with
+  | frequency :: root :: wc :: tl -> tl @ (get_person_verb auxiliary_tags)
+  | _ -> failwith "tags.ml/merge_auxiliary_past_participle : past_participle_tags don't match format [frequency; root; wc; ...]"
 
 let replace_word tags root_word =
   match tags with

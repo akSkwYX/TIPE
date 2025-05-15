@@ -4,6 +4,18 @@ let string_of_option = function
   | Some s -> s
   | None -> ""
 
+let join_2 f l1 l2 =
+  List.rev (
+    List.fold_left (
+      fun res x ->
+        List.fold_left (
+          fun res2 y ->
+            f x y :: res2
+        ) res l2
+    ) [] l1
+  )
+
+(*TODO : probably don't working well*)
 let join_3 f l1 l2 l3 =
   List.fold_left (
     fun res x ->

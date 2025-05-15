@@ -15,6 +15,12 @@ let is_equal t1 t2 =
   | Empty, Empty -> true
   | _ -> false
 
+let rec contains_error tree_list =
+  match tree_list with
+  | [] -> []
+  | Error s :: _ -> [Error s]
+  | _ :: t -> contains_error t
+
 let print_syntax_tree tree =
   let rec print_syntax_tree_aux tree depth =
     match tree with
@@ -41,37 +47,59 @@ let st_get_tags syntax_tree =
   match syntax_tree with
   | Node (token, _) -> Token.get_tags token
   | Leaf token -> Token.get_tags token
-  | Error _ -> []
+  | Error _ -> failwith "syntax_tree.ml/st_get_tags : trying to get tags from an Error"
   | Empty -> []
 
+let get_token syntax_tree =
+  match syntax_tree with
+  | Node (token, _) -> token
+  | Leaf token -> token
+  | Error s -> print_endline s; failwith "syntax_tree.ml/get_token : trying to get token from an Error"
+  | Empty -> failwith "syntax_tree.ml/get_token : trying to get token from an Empty"
+
 let st_print_tex file syntax_tree =
-  let () = Printf.fprintf file "\\begin{tikzpicture}\n" in
+  let () = Printf.fprintf file "\\begin{tikzpicture}[scale=0.5]\n" in
   let rec aux syntax_tree =
     match syntax_tree with
-    | Empty -> Printf.fprintf file "child{node{Empty}}\n"
-    | Error s -> Printf.fprintf file "child{node{%s}}\n" s
-    | Leaf token -> Printf.fprintf file "child{node{%s}}\n" (Token.get_word token)
+    | Empty -> Printf.fprintf file "[.{Empty} ]"
+    | Error s -> Printf.fprintf file "[.{%s} ]" s
+    | Leaf token -> Printf.fprintf file "[.{%s} ]" (Token.get_word token)
     | Node (token, children) ->
-      Printf.fprintf file "child{ node{%s : %s \\\\ %s}\n" (Token.get_word_class token) (Token.get_word token) (Token.format_tags token);
+      Printf.fprintf file "[.{%s : %s \\\\ %s}\n" (Token.get_word_class token) (Token.get_word token) (Token.format_tags token);
       List.iter aux children;
-      Printf.fprintf file "}\n"
+      Printf.fprintf file " ]\n"
   in
   match syntax_tree with
-  | Empty -> Printf.fprintf file "\\node{Empty};\n \\end{tikzpicture}\n\n"
-  | Error s -> Printf.fprintf file "\\node{%s};\n \\end{tikzpicture}\n\n" s
-  | Leaf token -> Printf.fprintf file "\\node{%s};\n \\end{tikzpicture}\n\n" (Token.get_word token)
+  | Empty -> Printf.fprintf file "\\Tree [.{Empty} ]\n\\end{tikzpicture}\n"
+  | Error s -> Printf.fprintf file "\\Tree [.{%s} ]\n\\end{tikzpicture}\n" s
+  | Leaf token -> Printf.fprintf file "\\Tree [.{%s} ]\n\\end{tikzpicture}\n" (Token.get_word token)
   | Node (token, children) ->
     Printf.fprintf file
-      "\\node{%s : %s \\\\ %s }[sibling distance=4cm, level distance = 3cm, align=center]\n"
+      "\\Tree [.{%s : %s \\\\ %s }\n"
       (Token.get_word_class token) (Token.get_word token) (Token.format_tags token);
     List.iter aux children;
-    Printf.fprintf file ";\\end{tikzpicture}\n\n"
+    Printf.fprintf file " ]\n\\end{tikzpicture}\n\n"
 
 let print_syntax_tree_list syntax_tree_list =
   let file = open_out "results/syntax_tree.tex" in
-  let () = Printf.fprintf file "\\documentclass{article}\n\\usepackage{tikz}\n\\begin{document}\n\\begin{center}\n" in
+  let () = Printf.fprintf file 
+"\\documentclass[landscape]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage[T1]{fontenc}
+
+\\usepackage[margin=1in]{geometry}
+\\usepackage{tikz-qtree}
+\\usetikzlibrary{trees}
+\\begin{document}
+\\tikzset{font=\\small,
+edge from parent fork down,
+level distance=1.75cm,
+every tree node/.style={align=center}
+}
+
+\\centering" in
   List.iter (st_print_tex file) syntax_tree_list;
-  let () = Printf.fprintf file "\\end{center}\n\\end{document}\n" in
+  let () = Printf.fprintf file "\n\\end{document}\n" in
   close_out file;
   Sys.command "pdflatex -interaction=nonstopmode -output-directory=results results/syntax_tree.tex > results/output.log"
 
