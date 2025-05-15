@@ -1,9 +1,0 @@
-lib: [
-  "_build/install/default/lib/remakeTIPE/META"
-  "_build/install/default/lib/remakeTIPE/dune-package"
-  "_build/install/default/lib/remakeTIPE/opam"
-]
-bin: [
-  "_build/install/default/bin/main"
-  "_build/install/default/bin/test"
-]

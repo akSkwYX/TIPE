@@ -1,26 +1,26 @@
-(lang dune 3.16)
+(lang dune 3.17)
 
-(name TIPE)
+(name remakeTIPE)
 
 (generate_opam_files true)
 
 (source
- (github akSkwYX/TIPE))
+ (github username/reponame))
 
-(authors "SkwYX")
+(authors "Author Name <author@example.com>")
 
-(maintainers "SkwYX")
+(maintainers "Maintainer Name <maintainer@example.com>")
 
 (license LICENSE)
 
 (documentation https://url/to/documentation)
 
 (package
- (name TIPE)
- (synopsis "TIPE about detection and correction of grammatical errors in french sentences")
- (description "TIPE about detection and correction of grammatical errors in french sentences")
- (depends ocaml dune)
+ (name remakeTIPE)
+ (synopsis "A short synopsis")
+ (description "A longer description")
+ (depends ocaml)
  (tags
-  (topics "to describe" your project)))
+  ("add topics" "to describe" your project)))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

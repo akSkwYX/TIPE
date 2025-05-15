@@ -1,5 +1,0 @@
-(library
-(name tags)
-(libraries )
-(flags (:standard -g -w -26-27-32-39))
-)
