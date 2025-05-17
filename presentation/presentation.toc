@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{Objectif}{4}{0}{1}
+\beamer@sectionintoc {2}{Présentation de l'algorithme}{5}{0}{2}
+\beamer@subsectionintoc {2}{1}{Stockage des données}{6}{0}{2}
+\beamer@subsectionintoc {2}{2}{Analyse lexicale}{8}{0}{2}
+\beamer@subsectionintoc {2}{3}{Analyse syntaxique}{10}{0}{2}

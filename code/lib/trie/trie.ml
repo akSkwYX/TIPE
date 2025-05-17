@@ -75,3 +75,16 @@ let rec search trie word =
       []
     else
       search_child children word
+
+let rec size trie =
+  match trie with
+  | Leaf _ -> 1
+  | Root children 
+  | Node (_, children) -> List.fold_left (fun acc (_,trie) -> acc + (size trie)) 1 children
+
+let height trie =
+  let rec aux acc trie =
+    match trie with
+    | Leaf s -> (1,s)
+    | Root children
+    | Node (_, children) -> 1 + (List.fold_left (fun acc (_, trie) -> max acc (aux trie)) 0 children)

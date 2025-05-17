@@ -1,0 +1,21 @@
+\frametitle{Définition des structures}
+
+    \begin{lstlisting}[
+        language=C
+    ]
+struct cell
+{
+    float T; // --------------- en degre Celsius
+    char* type; // ------------ type de la cellule (airExt, airInt, wall, window, door)
+    coord co; // -------------- coordonnees de la cellule
+    float CTherVol; // -------- Capacite thermique volumique en J.K-1.m-3
+    float lambda; // ---------- Conductivite thermique en W.K-1.m-1
+    float surface; // --------- Surface en m2
+    float epaisseur; // ------- Epaisseur en m
+    float lambda_iso_ext; // -- Conductivite thermique de l'isolant exterieur en W.K-1.m-1
+    float lambda_iso_int; // -- Conductivite thermique de l'isolant interieur en W.K-1.m-1
+    float epaisseur_iso_ext; // Epaisseur de l'isolant exterieur en m
+    float epaisseur_iso_int; // Epaisseur de l'isolant interieur en m
+};
+    \end{lstlisting}
+
