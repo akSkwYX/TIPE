@@ -82,9 +82,16 @@ let rec size trie =
   | Root children 
   | Node (_, children) -> List.fold_left (fun acc (_,trie) -> acc + (size trie)) 1 children
 
-let height trie =
-  let rec aux acc trie =
-    match trie with
-    | Leaf s -> (1,s)
-    | Root children
-    | Node (_, children) -> 1 + (List.fold_left (fun acc (_, trie) -> max acc (aux trie)) 0 children)
+let rec height trie =
+  match trie with
+  | Leaf _ -> ("", 1)
+  | Root children
+  | Node (_, children) ->
+    begin
+    List.fold_left (
+      fun (str_acc, height_acc) (char, trie) ->
+        let (str_child, height_child) = height trie in
+        if height_child  > height_acc then (String.make 1 char ^ str_child, 1 + height_child)
+        else (str_acc, height_acc)
+    ) ("", 0) children
+    end

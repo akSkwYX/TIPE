@@ -34,6 +34,7 @@
 \lstset{style=mystyle}
 
 \renewcommand{\t}{\text}
+\newcommand{\ra}{\longrightarrow}
 
 \usetheme{Boadilla}
 \usecolortheme{seahorse}
@@ -90,8 +91,8 @@ every tree node/.style={align=center}
 \subsection{Stockage des données}
 \begin{frame}
    \frametitle{Stockage des données - Trie}
-   Trie ?\\
-   Structure de donnée qui prend avantage de la similitude entre les clés
+   \Large{Trie ?}\\
+   \Large{Structure de donnée qui prend avantage de la similitude entre les clés}
 \end{frame}
 
 \begin{frame}
@@ -121,7 +122,7 @@ every tree node/.style={align=center}
 
 \subsection{Analyse lexicale}
 \begin{frame}
-   \frametitle{Analyse lexicale}
+   \frametitle{Analyse lexicale (Lexing)}
    \begin{algorithm}[H]
       \caption{Analyse lexicale}
       \begin{algorithmic}
@@ -137,20 +138,21 @@ every tree node/.style={align=center}
 \begin{frame}
    \frametitle{Exemple}
    le petit chat rouge joue\bigbreak
-   \begin{tabular}{c c c c c c c}
-      [D : le, &, [A : petit, &, [N : chat] &, [A : rouge, &, [V : joue, \\
-       ~ Ov : le] & ~ ~ N : petit] & & ~ ~ N : rouge] & ~ ~ V : joue]
-   \end{tabular}
+   [[D : le, Ov : le],
+    [A : petit, N : petit],
+    [N : chat],
+    [A : rouge, N : rouge],
+    [V : joue, V : joue]]
    \bigbreak
    Complexité ?\\
    O(n * s)\\
-   n : nombre de mots dans la phrase
+   n : nombre de mots dans la phrase\\
    s : taille du mot le plus long de la phrase
 \end{frame}
 
 \subsection{Analyse syntaxique}
 \begin{frame}
-   \frametitle{Analyse syntaxique}
+   \frametitle{Analyse syntaxique (Parsing)}
    \begin{algorithm}[H]
       \caption{Analyse syntaxique}
       \begin{algorithmic}
@@ -158,6 +160,190 @@ every tree node/.style={align=center}
          \Ensure Arbre syntaxique - syntax\_tree list
       \end{algorithmic}
    \end{algorithm}
+   \bigbreak
+   LR parser, LL parser
+\end{frame}
+
+\subsubsection{Grammaire}
+\begin{frame}
+   \frametitle{Définition}
+   Quadruplet $(V, T, \Sigma, S)$
+   \begin{itemize}
+      \item $V$ Ensemble de symboles non terminaux
+      \item $T$ Ensemble de symboles terminaux
+      \item $\Sigma$ Alphabet
+      \item $S$ Symbole de départ
+   \end{itemize}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Exemple}
+   $$3 + 2 + 12$$
+   \begin{minipage}{.45\textwidth}
+      \begin{tabular}{rcl}
+         S & $\longrightarrow$ & N~+~S | N\\
+         N & $\longrightarrow$ & [$0$-$9$]~N~|~$\varepsilon$\\
+      \end{tabular}
+   \end{minipage}
+   \hspace{.05\textwidth}
+   \begin{minipage}{.45\textwidth}
+      \begin{tikzpicture}[scale = 0.5]
+      \Tree [.{}
+               [.N
+                  [.3 ]
+                  [.N 
+                     [.{$\varepsilon$} ] ] ]
+               [.+ ]
+               [.S
+                  [.N 
+                     [.2 ]
+                     [.N 
+                        [.{$\varepsilon$} ] ] ]
+                  [.S 
+                     [.N 
+                        [.1 ]
+                        [.N 
+                           [.2 ]
+                           [.N 
+                              [.{$\varepsilon$} ] ] ] ] ] ]
+      ]
+      \end{tikzpicture}
+   \end{minipage}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Grammaire du français (restrictive)}
+   \begin{tabular}{lcl|lcl}
+      S & \ra & S_u~V_g & V_g & \ra & P~V~C \\
+      S_u & \ra & N_g | P_{ps} & P & \ra & Pronom \\
+      N_g & \ra & D~A~N~A & V & \ra & verbe | A_V \\
+      P_{ps} & \ra & Pronom personnel sujet & A_V & \ra & Auxiliaire~~Verbe \\
+      D & \ra & Déterminant & C & \ra & C_{OD} | C_{OI} \\
+      A & \ra & Adjectif~A | $\varepsilon$ & C_{OD} & \ra & N_g | V \\
+      N & \ra & Nom & C_{OI} & \ra & P_r~N_g \\
+      & & & P_r & \ra & Pronom
+   \end{tabular}
+\end{frame}
+
+\subsection{Vérification \&\& Correction}
+\begin{frame}
+   \frametitle{Vérification \&\& Correction}
+   \begin{algorithm}[H]
+      \caption{Vérification \&\& Correction}
+      \begin{algorithmic}
+         \Require Arbre syntaxique d'un élément - syntax\_tree list
+         \Ensure Arbre syntaxique de l'élément corrigé - syntax\_tree list
+      \end{algorithmic}
+   \end{algorithm}\bigbreak
+   Exemple : Le petite chat rouge boit du lait\medbreak
+   \begin{tikzpicture}[scale=0.8]
+   \Tree [.{D : le \\ 0, le, D, m, s}
+   [.{le} ] ]
+   \end{tikzpicture}
+   \begin{tikzpicture}[scale=0.8]
+   \Tree [.{A : petite \\ 0, petit, A, f, s}
+   [.{A : petite \\ 0, petit, A, f, s}
+   [.{petite} ] ]
+   [.{Empty} ] ]
+   \end{tikzpicture}
+   \begin{tikzpicture}[scale=0.8]
+   \Tree [.{N : chat \\ 0, chat, N, m, s}
+   [.{chat} ] ]
+   \end{tikzpicture}
+   \begin{tikzpicture}[scale=0.8]
+   \Tree [.{A : rouge \\ 0, rouge, A, e, s}
+   [.{A : rouge \\ 0, rouge, A, e, s}
+   [.{rouge} ] ]
+   [.{Empty} ] ]
+   \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Vérification \&\& Correction}
+   \centering
+   \begin{tikzpicture}[scale = 0.7]  
+   \Tree [.{NG : le petit chat rouge \\ , m, s}
+      [.{D : le \\ , 0, le, D, m, s}
+      [.{le} ] ]
+      [.{A : petit \\ , 0, petit, A, m, s}
+      [.{A : petit \\ , 0, petit, A, m, s}
+      [.{petit} ] ]
+      [.{Empty} ] ]
+      [.{N : chat \\ , 0, chat, N, m, s}
+      [.{chat} ] ]
+      [.{A : rouge \\ , 0, rouge, A, e, s}
+      [.{A : rouge \\ , 0, rouge, A, e, s}
+      [.{rouge} ] ]
+      [.{Empty} ] ]
+       ]
+   \end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+   \frametitle{Vérification \&\& Correction}
+   \centering
+   \begin{tikzpicture}[scale = 0.5]
+   \Tree [.{S : le petit chat rouge boit du  lait  \\  }
+      [.{Su : le petit chat rouge \\ , m, s}
+      [.{NG : le petit chat rouge \\ , m, s}
+      [.{D : le \\ , 0, le, D, m, s}
+      [.{le} ] ]
+      [.{A : petit \\ , 0, petit, A, m, s}
+      [.{A : petit \\ , 0, petit, A, m, s}
+      [.{petit} ] ]
+      [.{Empty} ] ]
+      [.{N : chat \\ , 0, chat, N, m, s}
+      [.{chat} ] ]
+      [.{A : rouge \\ , 0, rouge, A, e, s}
+      [.{A : rouge \\ , 0, rouge, A, e, s}
+      [.{rouge} ] ]
+      [.{Empty} ] ]
+      ]
+      ]
+      [.{VG : boit du  lait  \\ }
+      [.{Empty} ][.{V : boit \\ , 0, boire, V, i, t, \_, x, \_, \_, a, Ip, 3s}
+      [.{boit} ] ]
+      [.{COD : du  lait  \\ }
+      [.{NG : du  lait  \\ , m, s}
+      [.{D : du \\ , 0, du, D, m, s}
+      [.{du} ] ]
+      [.{A :  \\ }
+      [.{Empty} ] ]
+      [.{N : lait \\ , 0, lait, N, m, s}
+      [.{lait} ] ]
+      [.{A :  \\ }
+      [.{Empty} ] ]
+      ]
+      ]
+      ]
+   ]
+   \end{tikzpicture}
+\end{frame}
+
+\section{Gestion des résultats}
+\begin{frame}
+   \frametitle{Gestion des résultats}
+   Problème : Trop de corrections possible \\
+   Exemple :\\
+   le petite chat rouges boits du lait $\ra$ 35 corrections possibles\\
+\end{frame}
+
+\begin{frame}
+   \frametitle{Distance de Levenshtein}
+   Distance entre deux chaîne de caractères
+   $$
+   \t{lev}(a,b) = \begin{cases} \max(|a|,|b|) & \t{si} \min(|a|,|b|) = 0 \\
+                                \t{lev}(a-1, b-1) & \t{si} a[0] = b[0] \\
+                                1 + \min \begin{cases} \t{lev}(a-1,b) \\ \t{lev}(a, b-1) \\ \t{lev}(a-1, b-1) \end{cases} & \t{sinon}
+                  \end{cases}
+   $$
+   Complexité : O((n+1)*(m+1))
+\end{frame}
+
+\begin{frame}
+   \frametitle{Autres possibilités}
+   Nombre de correction\\
+   Tri du dictionnaire par fréquence d'utilisation\\
 \end{frame}
 
 \begin{frame}[fragile]

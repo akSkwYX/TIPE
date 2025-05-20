@@ -49,7 +49,7 @@ let correction_ort word =
         fun acc x ->
           let word1 = beg_word ^ x ^ end_word in
           let tags_list1 = Dictionary.find dict word1 in
-          let word2 = beg_word ^ x ^ String.make 1 c ^ end_word in
+          let word2 = beg_word ^ String.make 1 c ^ x ^ end_word in
           let tags_list2 = Dictionary.find dict word2 in
           match tags_list1, tags_list2 with
           | [], [] -> acc
@@ -61,7 +61,14 @@ let correction_ort word =
       , next_end_word
       )
   ) ([], "", String.sub word 1 (String.length word - 1)) word in
-  res
+  List.fold_left (
+    fun acc x ->
+      let word_to_try = x ^ word in
+      let tags_list = Dictionary.find dict word_to_try in
+      match tags_list with
+      | [] -> acc
+      | _ -> Token.make_tokens_from_tags_list word_to_try acc tags_list
+  ) res char_for_replace
 
 let correction checkings_fun construct_tree_fun to_correct =
   let to_correct_token =

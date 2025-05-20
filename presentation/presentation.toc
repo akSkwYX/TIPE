@@ -3,3 +3,5 @@
 \beamer@subsectionintoc {2}{1}{Stockage des données}{6}{0}{2}
 \beamer@subsectionintoc {2}{2}{Analyse lexicale}{8}{0}{2}
 \beamer@subsectionintoc {2}{3}{Analyse syntaxique}{10}{0}{2}
+\beamer@subsubsectionintoc {2}{3}{1}{Grammaire}{11}{0}{2}
+\beamer@subsectionintoc {2}{4}{Vérification \&\& Correction}{14}{0}{2}
