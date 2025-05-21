@@ -1,7 +1,9 @@
 \beamer@sectionintoc {1}{Objectif}{4}{0}{1}
 \beamer@sectionintoc {2}{Présentation de l'algorithme}{5}{0}{2}
 \beamer@subsectionintoc {2}{1}{Stockage des données}{6}{0}{2}
-\beamer@subsectionintoc {2}{2}{Analyse lexicale}{8}{0}{2}
-\beamer@subsectionintoc {2}{3}{Analyse syntaxique}{10}{0}{2}
-\beamer@subsubsectionintoc {2}{3}{1}{Grammaire}{11}{0}{2}
-\beamer@subsectionintoc {2}{4}{Vérification \&\& Correction}{14}{0}{2}
+\beamer@subsectionintoc {2}{2}{Analyse lexicale}{7}{0}{2}
+\beamer@subsectionintoc {2}{3}{Analyse syntaxique}{9}{0}{2}
+\beamer@subsubsectionintoc {2}{3}{1}{Grammaire}{10}{0}{2}
+\beamer@subsectionintoc {2}{4}{Vérification \&\& Correction}{13}{0}{2}
+\beamer@sectionintoc {3}{Gestion des résultats}{16}{0}{3}
+\beamer@sectionintoc {4}{Annexe}{20}{0}{4}

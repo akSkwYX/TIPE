@@ -18,35 +18,49 @@
 \headcommand {\beamer@subsectionentry {0}{2}{1}{6}{Stockage des données}}
 \headcommand {\slideentry {2}{1}{1}{6/6}{Stockage des données}{0}}
 \headcommand {\beamer@framepages {6}{6}}
-\headcommand {\slideentry {2}{1}{2}{7/7}{Stockage des données}{0}}
+\headcommand {\beamer@subsectionpages {6}{6}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{Analyse lexicale}}
+\headcommand {\slideentry {2}{2}{1}{7/7}{Analyse lexicale}{0}}
 \headcommand {\beamer@framepages {7}{7}}
-\headcommand {\beamer@subsectionpages {6}{7}}
-\headcommand {\beamer@subsectionentry {0}{2}{2}{8}{Analyse lexicale}}
-\headcommand {\slideentry {2}{2}{1}{8/8}{Analyse lexicale}{0}}
+\headcommand {\slideentry {2}{2}{2}{8/8}{Analyse lexicale}{0}}
 \headcommand {\beamer@framepages {8}{8}}
-\headcommand {\slideentry {2}{2}{2}{9/9}{Analyse lexicale}{0}}
+\headcommand {\beamer@subsectionpages {7}{8}}
+\headcommand {\beamer@subsectionentry {0}{2}{3}{9}{Analyse syntaxique}}
+\headcommand {\slideentry {2}{3}{1}{9/9}{Analyse syntaxique}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\beamer@subsectionpages {8}{9}}
-\headcommand {\beamer@subsectionentry {0}{2}{3}{10}{Analyse syntaxique}}
-\headcommand {\slideentry {2}{3}{1}{10/10}{Analyse syntaxique}{0}}
+\headcommand {\beamer@subsubsectionentry {0}{2}{3}{1}{10}{Grammaire}}
+\headcommand {\slideentry {2}{3}{2}{10/10}{Analyse syntaxique}{0}}
 \headcommand {\beamer@framepages {10}{10}}
-\headcommand {\beamer@subsubsectionentry {0}{2}{3}{1}{11}{Grammaire}}
-\headcommand {\slideentry {2}{3}{2}{11/11}{Analyse syntaxique}{0}}
+\headcommand {\slideentry {2}{3}{3}{11/11}{Analyse syntaxique}{0}}
 \headcommand {\beamer@framepages {11}{11}}
-\headcommand {\slideentry {2}{3}{3}{12/12}{Analyse syntaxique}{0}}
+\headcommand {\slideentry {2}{3}{4}{12/12}{Analyse syntaxique}{0}}
 \headcommand {\beamer@framepages {12}{12}}
-\headcommand {\slideentry {2}{3}{4}{13/13}{Analyse syntaxique}{0}}
+\headcommand {\beamer@subsectionpages {9}{12}}
+\headcommand {\beamer@subsectionentry {0}{2}{4}{13}{Vérification \&\& Correction}}
+\headcommand {\slideentry {2}{4}{1}{13/13}{Vérification \&\& Correction}{0}}
 \headcommand {\beamer@framepages {13}{13}}
-\headcommand {\beamer@subsectionpages {10}{13}}
-\headcommand {\beamer@subsectionentry {0}{2}{4}{14}{Vérification \&\& Correction}}
-\headcommand {\slideentry {2}{4}{1}{14/14}{Vérification \&\& Correction}{0}}
+\headcommand {\slideentry {2}{4}{2}{14/14}{Vérification \&\& Correction}{0}}
 \headcommand {\beamer@framepages {14}{14}}
-\headcommand {\slideentry {2}{4}{2}{15/15}{Vérification \&\& Correction}{0}}
+\headcommand {\slideentry {2}{4}{3}{15/15}{Vérification \&\& Correction}{0}}
 \headcommand {\beamer@framepages {15}{15}}
-\headcommand {\slideentry {2}{4}{3}{16/16}{Vérification \&\& Correction}{0}}
+\headcommand {\beamer@sectionpages {5}{15}}
+\headcommand {\beamer@subsectionpages {13}{15}}
+\headcommand {\sectionentry {3}{Gestion des résultats}{16}{Gestion des résultats}{0}}
+\headcommand {\slideentry {3}{0}{1}{16/16}{}{0}}
 \headcommand {\beamer@framepages {16}{16}}
-\headcommand {\beamer@partpages {1}{16}}
-\headcommand {\beamer@subsectionpages {14}{16}}
-\headcommand {\beamer@sectionpages {5}{16}}
-\headcommand {\beamer@documentpages {16}}
-\headcommand {\gdef \inserttotalframenumber {16}}
+\headcommand {\slideentry {3}{0}{2}{17/17}{}{0}}
+\headcommand {\beamer@framepages {17}{17}}
+\headcommand {\slideentry {3}{0}{3}{18/18}{}{0}}
+\headcommand {\beamer@framepages {18}{18}}
+\headcommand {\slideentry {3}{0}{4}{19/19}{}{0}}
+\headcommand {\beamer@framepages {19}{19}}
+\headcommand {\beamer@sectionpages {16}{19}}
+\headcommand {\beamer@subsectionpages {16}{19}}
+\headcommand {\sectionentry {4}{Annexe}{20}{Annexe}{0}}
+\headcommand {\slideentry {4}{0}{1}{20/20}{}{0}}
+\headcommand {\beamer@framepages {20}{20}}
+\headcommand {\beamer@partpages {1}{20}}
+\headcommand {\beamer@subsectionpages {20}{20}}
+\headcommand {\beamer@sectionpages {20}{20}}
+\headcommand {\beamer@documentpages {20}}
+\headcommand {\gdef \inserttotalframenumber {20}}

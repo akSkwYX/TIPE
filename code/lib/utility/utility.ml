@@ -4,6 +4,12 @@ let string_of_option = function
   | Some s -> s
   | None -> ""
 
+let string_without_x_first_char x s =
+  String.sub s x (String.length s - x)
+
+let count f l =
+  List.fold_left ( fun acc x -> if f x then acc+1 else acc) 0 l
+
 let join_2 f l1 l2 =
   List.rev (
     List.fold_left (

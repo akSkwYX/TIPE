@@ -203,20 +203,27 @@ let check_adjectives adjective1 adjective2 =
     end
   | _ -> [ ""; "" ]
 
-let check_determiner_noun determiner noun =
+let check_determiner_noun determiner adjective1 noun =
   match determiner, noun with
   | Node (DETERMINER (wdet, tags_determiner), _), Node (NOUN (wnoun, tags_noun), _) ->
     begin
-    if can_be_elison wdet && (is_begining_by_vowel (Tags.get_root tags_noun) || is_begining_by_silent_h (Tags.get_root tags_noun)) then
-      [""; ""]
-    else if is_elison wdet && not (is_begining_by_vowel (Tags.get_root tags_noun) || is_begining_by_silent_h (Tags.get_root tags_noun)) then
-      [""; ""]
-    else
+    match adjective1 with
+    | Empty
+    | Node (ADJECTIVE _, [Empty]) ->
+      if not (check_elison wdet (Tags.get_root tags_noun) ) then [""; ""] else
       let gender_determiner = Tags.get_gender_default tags_determiner in
       let number_determiner = Tags.get_number_default tags_determiner in
       let gender_noun = Tags.get_gender_default tags_noun in
       let number_noun = Tags.get_number_default tags_noun in
       [ check_gender gender_determiner gender_noun; check_number number_determiner number_noun ]
+    | Node (ADJECTIVE _, _) ->
+      if not (check_elison wdet (Tags.get_root (Token.get_tags @@ Syntax_tree.get_first_token adjective1) ) ) then [""; ""] else
+      let gender_determiner = Tags.get_gender_default tags_determiner in
+      let number_determiner = Tags.get_number_default tags_determiner in
+      let gender_noun = Tags.get_gender_default tags_noun in
+      let number_noun = Tags.get_number_default tags_noun in
+      [ check_gender gender_determiner gender_noun; check_number number_determiner number_noun ]
+    | _ -> failwith "checkings.ml/check_determiner_noun : adjective isn't a node of a tree nor empty"
     end
   | _ -> [ ""; "" ] 
 

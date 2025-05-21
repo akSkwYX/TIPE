@@ -35,9 +35,9 @@ let is_equal t1 t2 =
   | ADJECTIVE (word1, tags1), ADJECTIVE (word2, tags2)
   | DETERMINER (word1, tags1), DETERMINER (word2, tags2)
   | PERSONAL_PRONOUN_SUBJECT (word1, tags1), PERSONAL_PRONOUN_SUBJECT (word2, tags2) ->
-    word1 = word2 && Tags.is_equal tags1 tags2
+    String.equal word1 word2 && Tags.is_equal tags1 tags2
   | EPSILON, EPSILON -> true
-  | UNKNOWN w1, UNKNOWN w2 -> w1 = w2
+  | UNKNOWN w1, UNKNOWN w2 -> String.equal w1 w2
   | _ -> false
 
 let get_word token =
@@ -131,6 +131,13 @@ let format_tags token =
 let print_token token =
   Printf.printf "%s : %s : %s\n" (get_word_class token) (get_word token) (String.concat ", " (get_tags token))
 
+let token_to_line token =
+  match get_tags token with
+  | frequency :: rad_word :: tags -> String.concat "," (frequency :: (get_word token) :: rad_word :: tags)
+  | _ -> failwith "token.ml/token_to_line : Fail"
+
+let frequencyDistance t1 t2 =
+  abs (Tags.get_frequency (get_tags t1) - Tags.get_frequency (get_tags t2))
 
 (**
   Convert a word and its tags into a token.

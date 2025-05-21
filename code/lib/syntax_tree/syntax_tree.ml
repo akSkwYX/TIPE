@@ -11,7 +11,7 @@ let is_equal t1 t2 =
   | Node (token1, _), Node (token2, _) ->
     Token.is_equal token1 token2
   | Leaf token1, Leaf token2 -> Token.is_equal token1 token2
-  | Error s1, Error s2 -> s1 = s2
+  | Error s1, Error s2 -> String.equal s1 s2
   | Empty, Empty -> true
   | _ -> false
 
@@ -56,6 +56,19 @@ let get_token syntax_tree =
   | Leaf token -> token
   | Error s -> print_endline s; failwith "syntax_tree.ml/get_token : trying to get token from an Error"
   | Empty -> failwith "syntax_tree.ml/get_token : trying to get token from an Empty"
+
+let rec get_token_list syntax_tree =
+  match syntax_tree with
+  | Leaf token -> [token]
+  | Node (_, children) -> List.fold_left (fun acc child -> acc @ (get_token_list child)) [] children
+  | Error _ | Empty -> []
+
+let rec get_first_token syntax_tree =
+  match syntax_tree with
+  | Leaf token -> token
+  | Node (token, [Empty]) -> token
+  | Node (_, children) -> get_first_token (List.hd children)
+  | Error _ | Empty -> failwith "syntax_tree.ml/get_first_token : trying to get token from Empty tree or Error tree"
 
 let st_print_tex file syntax_tree =
   let () = Printf.fprintf file "\\begin{tikzpicture}[scale=0.5]\n" in

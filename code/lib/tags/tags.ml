@@ -6,6 +6,11 @@ let get_word_class tags =
   | _ :: _ :: wc :: _ -> wc
   | _ -> "U"
 
+let get_frequency tags =
+  match tags with
+  | frequency :: root :: tl -> int_of_string frequency
+  | _ -> failwith "tags.ml/get_frequency : tags don't match format [frequency; root; ...]"
+
 let get_word tags =
   match tags with
   | _ :: word :: _ -> word

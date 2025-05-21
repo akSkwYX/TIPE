@@ -2,10 +2,7 @@ open Syntax_tree
 open Token
 
 let is_equal_result (t_l1, i1) (t_l2, i2) =
-  if i1 = i2 then
-    List.for_all2 Syntax_tree.is_equal t_l1 t_l2
-  else
-    false
+  List.for_all2 Syntax_tree.is_equal t_l1 t_l2
 
 (**
   @param token_list_array  @type 'a list array
@@ -31,7 +28,13 @@ let rec iterate_parse token_list_array match_fun precedent_result new_result =
     let error = Syntax_tree.contains_error syntax_tree_list in
     if error <> [] then iterate_parse token_list_array match_fun tl ((error, index) :: new_result) else
     if index >= Array.length token_list_array then
-      iterate_parse token_list_array match_fun tl ((syntax_tree_list @ [Empty], index) :: new_result) else
+      begin
+      if List.exists (is_equal_result (syntax_tree_list @ [Empty], index)) new_result then
+        iterate_parse token_list_array match_fun tl new_result
+      else
+        iterate_parse token_list_array match_fun tl ((syntax_tree_list @ [Empty], index) :: new_result)
+      end
+    else
     let token_list = token_list_array.(index) in
     let rec iterate_token_list token_list result_solution =
       match token_list with

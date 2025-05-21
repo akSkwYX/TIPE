@@ -207,9 +207,9 @@ let correct_sentence subject verbal_group =
   | _ -> failwith "corrections.ml/correct_sentence : subject isn't a subject or verbal_group isn't a verbal group"
 
 
-let correct_determiner determiner noun =
+let correct_determiner determiner adjective1 noun =
   let checkings_fun token =
-    match Checkings.check_determiner_noun (Node (token, [Leaf token])) noun with
+    match Checkings.check_determiner_noun (Node (token, [Leaf token])) adjective1 noun with
     | [""; ""] | [_; ""] | [""; _] -> []
     | [x; y] -> [x; y]
     | _ -> failwith "corrections.ml/correct_determiner : check_determiner_noun returned unexpected result"
@@ -280,10 +280,9 @@ let rec correct_adjectives_noun adjective noun =
 
 
 (*TODO : Replace current tags with tags from checkings.check_nominal_group*)
-(*TODO : Change how the merge of tree is done*)
 
 let correct_nominal_group determiner adjective1 noun adjective2 =
-  let res_determiner = correct_determiner determiner noun in
+  let res_determiner = correct_determiner determiner adjective1 noun in
   let res_adjective1 = correct_adjectives_noun adjective1 noun in
   let res_adjective2 = correct_adjectives_noun adjective2 noun in
   let wnoun = Syntax_tree.st_get_word noun in

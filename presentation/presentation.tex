@@ -5,6 +5,7 @@
 \usepackage{algpseudocode}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage[normalem]{ulem}
 \usepackage{tikz-qtree}
 \usetikzlibrary{trees}
 
@@ -91,12 +92,7 @@ every tree node/.style={align=center}
 \subsection{Stockage des données}
 \begin{frame}
    \frametitle{Stockage des données - Trie}
-   \Large{Trie ?}\\
-   \Large{Structure de donnée qui prend avantage de la similitude entre les clés}
-\end{frame}
-
-\begin{frame}
-   \frametitle{Exemple}
+   Structure de donnée qui prend avantage de la similitude entre les clés\\
    \begin{center}
    je - joue - jouer - mire - jouais\\
    \end{center}
@@ -171,7 +167,8 @@ every tree node/.style={align=center}
    \begin{itemize}
       \item $V$ Ensemble de symboles non terminaux
       \item $T$ Ensemble de symboles terminaux
-      \item $\Sigma$ Alphabet
+      \item $R$ Ensemble de règles de production de la forme :
+                $$X \ra \alpha , ~~ X \in V , ~~ \alpha \in (V \cup T)$$
       \item $S$ Symbole de départ
    \end{itemize}
 \end{frame}
@@ -214,14 +211,14 @@ every tree node/.style={align=center}
 \begin{frame}
    \frametitle{Grammaire du français (restrictive)}
    \begin{tabular}{lcl|lcl}
-      S & \ra & S_u~V_g & V_g & \ra & P~V~C \\
-      S_u & \ra & N_g | P_{ps} & P & \ra & Pronom \\
-      N_g & \ra & D~A~N~A & V & \ra & verbe | A_V \\
-      P_{ps} & \ra & Pronom personnel sujet & A_V & \ra & Auxiliaire~~Verbe \\
-      D & \ra & Déterminant & C & \ra & C_{OD} | C_{OI} \\
-      A & \ra & Adjectif~A | $\varepsilon$ & C_{OD} & \ra & N_g | V \\
-      N & \ra & Nom & C_{OI} & \ra & P_r~N_g \\
-      & & & P_r & \ra & Pronom
+      S & $\ra$ & S_u~V_g & V_g & $\ra$ & P~V~C \\
+      S_u & $\ra$ & N_g | P_{ps} & P & $\ra$ & Pronom \\
+      N_g & $\ra$ & D~A~N~A & V & $\ra$ & verbe | A_V \\
+      P_{ps} & $\ra$ & Pronom personnel sujet & A_V & $\ra$ & Auxiliaire~~Verbe \\
+      D & $\ra$ & Déterminant & C & $\ra$ & C_{OD} | C_{OI} \\
+      A & $\ra$ & Adjectif~A | $\varepsilon$ & C_{OD} & $\ra$ & N_g | V \\
+      N & $\ra$ & Nom & C_{OI} & $\ra$ & P_r~N_g \\
+      & & & P_r & $\ra$ & Pronom
    \end{tabular}
 \end{frame}
 
@@ -235,6 +232,7 @@ every tree node/.style={align=center}
          \Ensure Arbre syntaxique de l'élément corrigé - syntax\_tree list
       \end{algorithmic}
    \end{algorithm}\bigbreak
+   2 types d'erreurs : Erreur syntaxique et Fautes de frappe\\
    Exemple : Le petite chat rouge boit du lait\medbreak
    \begin{tikzpicture}[scale=0.8]
    \Tree [.{D : le \\ 0, le, D, m, s}
@@ -275,14 +273,14 @@ every tree node/.style={align=center}
       [.{A : rouge \\ , 0, rouge, A, e, s}
       [.{rouge} ] ]
       [.{Empty} ] ]
-       ]
+   ]
    \end{tikzpicture}
 \end{frame}
 
 \begin{frame}
    \frametitle{Vérification \&\& Correction}
    \centering
-   \begin{tikzpicture}[scale = 0.5]
+   \begin{tikzpicture}[scale = 0.4]
    \Tree [.{S : le petit chat rouge boit du  lait  \\  }
       [.{Su : le petit chat rouge \\ , m, s}
       [.{NG : le petit chat rouge \\ , m, s}
@@ -325,7 +323,7 @@ every tree node/.style={align=center}
    \frametitle{Gestion des résultats}
    Problème : Trop de corrections possible \\
    Exemple :\\
-   le petite chat rouges boits du lait $\ra$ 35 corrections possibles\\
+   la petit chat roug bois du lait $\ra$ 28 corrections possibles\\
 \end{frame}
 
 \begin{frame}
@@ -337,37 +335,48 @@ every tree node/.style={align=center}
                                 1 + \min \begin{cases} \t{lev}(a-1,b) \\ \t{lev}(a, b-1) \\ \t{lev}(a-1, b-1) \end{cases} & \t{sinon}
                   \end{cases}
    $$
-   Complexité : O((n+1)*(m+1))
+   Complexité : O((n+1)*(m+1))\medbreak
+   Autre possibilités :\\
+   Nombre de correction
 \end{frame}
 
 \begin{frame}
-   \frametitle{Autres possibilités}
-   Nombre de correction\\
-   Tri du dictionnaire par fréquence d'utilisation\\
+   \frametitle{Fréquence d'utilisation}
+   Ajout d'une fréquence d'utilisation des mots au dictionnaire\\
+   Dictionnaire adapté à l'utilisateur\bigbreak
+   Résultats :\medbreak
+   Le jeune grçon rames\bigbreak
+   \begin{tabular}{ll}
+      Distance de levenshtein : &le jeune garçon rame\\
+      Fréquence Eschyle : &le jeune garçon ramerait\\
+      Fréquence Usuelle : &le jeune garçon rame\\
+      Reverso : &le jeune garçon ramène
+   \end{tabular}\bigbreak
+   Reverso : \guillemotleft Le correcteur français le plus précis au monde \guillemotright
 \end{frame}
 
-\begin{frame}[fragile]
-    \frametitle{Définition des structures}
+\begin{frame}
+   \frametitle{Fin}
+   \centering
+   \Huge{\sout{Mairci pour vottre attanssion}}\medbreak
+   \Huge{Merci pour votre attention}
+\end{frame}
 
-    \begin{lstlisting}[
-        language=C
-    ]
-struct cell
-{
-    float T; // --------------- en degre Celsius
-    char* type; // ------------ type de la cellule (airExt, airInt, wall, window, door)
-    coord co; // -------------- coordonnees de la cellule
-    float CTherVol; // -------- Capacite thermique volumique en J.K-1.m-3
-    float lambda; // ---------- Conductivite thermique en W.K-1.m-1
-    float surface; // --------- Surface en m2
-    float epaisseur; // ------- Epaisseur en m
-    float lambda_iso_ext; // -- Conductivite thermique de l'isolant exterieur en W.K-1.m-1
-    float lambda_iso_int; // -- Conductivite thermique de l'isolant interieur en W.K-1.m-1
-    float epaisseur_iso_ext; // Epaisseur de l'isolant exterieur en m
-    float epaisseur_iso_int; // Epaisseur de l'isolant interieur en m
-};
-    \end{lstlisting}
+\section{Annexe}
 
+\begin{frame}
+   \frametitle{Dictionnaire}
+   0,de,de,D,e,i\\
+   0,du,du,D,m,s\\
+   0,la,le,D,f,s\\
+   0,un,un,D,m,s\\
+   0,sont,être,V,i,\_,\_,\_,\_,\_,a,Ip,3p\\
+   0,être,être,V,i,\_,\_,\_,\_,\_,a,Y\\
+   0,ont,avoir,V,i,t,\_,\_,\_,\_,a,Ip,3p\\
+   0,été,être,V,i,\_,\_,\_,\_,\_,a,Q,e,i,\\
+   0,la,la,N,m,i\\
+   0,est,est,N,m,s\\
+   0,a,a,N,m,i\\
 \end{frame}
 
 \end{document}
