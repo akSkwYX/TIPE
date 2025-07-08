@@ -1,26 +1,25 @@
 (lang dune 3.17)
 
-(name remakeTIPE)
+(name TIPE)
 
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github akSkwYX/TIPE))
 
-(authors "Author Name <author@example.com>")
+(authors "SkwYX akskwyx@gmail.com")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "SkwYX akskwyx@gmail.com")
 
 (license LICENSE)
 
 (documentation https://url/to/documentation)
 
 (package
- (name remakeTIPE)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (name TIPE)
+ (synopsis "My second year of prepa TIPE project")
+ (description "This is a project made for my TIPE.
+It's project which intend to correct french phrase.")
  (depends ocaml)
  (tags
-  ("add topics" "to describe" your project)))
-
-; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
+  ("Lexing" "Parsing" "French" "Correction")))

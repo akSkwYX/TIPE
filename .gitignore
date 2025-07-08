@@ -1,1 +1,8 @@
 code/_build
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
