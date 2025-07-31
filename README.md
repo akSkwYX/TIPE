@@ -17,7 +17,6 @@ A prototype tool to automatically correct simple French sentences by combining f
 * [Project Structure](#project-structure)
 * [Architecture Overview](#architecture-overview)
 * [Bibliography](#bibliography)
-* [License](#license)
 
 ---
 
@@ -147,14 +146,11 @@ dune exec main -- "Le petite chat roug bois du lait"
 
 ## Bibliography
 
-1. Hopcroft, J. E. & Ullman, J. D.
-   *Introduction to Automata Theory, Languages, and Computation*.
-
-2. Fredkin, E.
+1. Fredkin, E.
    “Trie Memory.” *Commun. ACM* 3, no. 9 (1960): 490–499.
 
-3. Grammalecte.
+2. Grammalecte.
    *Open‑source French grammar checker*. [https://github.com/Pofilo/grammalecte](https://github.com/Pofilo/grammalecte)
 
-4. Levenshtein, V. I.
+3. Levenshtein, V. I.
    “Binary codes capable of correcting deletions, insertions, and reversals.” (1966).
