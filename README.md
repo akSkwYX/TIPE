@@ -1,6 +1,6 @@
 # French Sentence Correction TIPE
 
-A prototype tool to automatically correct simple French sentences by combining formal‑grammar parsing with lexicon‑based techniques. Built as a TIPE (Travail d’Initiative Personnelle Encadrée) project in theoretical computer science, it demonstrates core concepts in lexing, parsing, data structures and error‑correction algorithms.
+A prototype tool to automatically correct simple French sentences by combining formal‑grammar parsing with lexicon‑based techniques. Built as a TIPE (Travail d’Initiative Personnelle Encadrée) project.
 
 ---
 
@@ -14,8 +14,6 @@ A prototype tool to automatically correct simple French sentences by combining f
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Usage](#usage)
-* [Project Structure](#project-structure)
-* [Architecture Overview](#architecture-overview)
 * [Bibliography](#bibliography)
 
 ---
@@ -94,53 +92,6 @@ dune exec main -- "Le petite chat roug bois du lait"
 # Sample output:
 # Le petit chat rouge boit du lait
 ```
-
----
-
-## Project Structure
-
-```.
-|-- bin/
-|   \`-- corrector.ml        # Main executable
-|-- lib/
-|   |-- lexer.ml            # Lexical analysis
-|   |-- parser.ml           # Grammar parser
-|   |-- tree.ml             # Syntax tree definitions
-|   \`-- corrector.ml        # Verification & correction logic
-|-- data/
-|   |-- french_grammar.cfg  # Grammar rules
-|   |-- dictionary.trie     # Serialized Trie of allowed words
-|   \`-- frequency.json      # Word-frequency data
-|-- test/
-|   \`-- test_corrector.ml   # Unit tests
-|-- mcot.md                 # Project summary and bibliographic comments
-|-- presentation.tex        # TIPE presentation slides
-\`-- dune-project
-```
-
----
-
-## Architecture Overview
-
-1. **Lexing**
-
-   * Reads an input string and produces a list of possible token sequences
-   * Handles multiple grammatical classes for ambiguous words
-
-2. **Parsing**
-
-   * Uses an LL/LR parser to build syntax trees from tokens
-   * Grammar defined as a quadruple \$(V, T, R, S)\$ over a restricted French subset
-
-3. **Verification & Correction**
-
-   * Traverses the syntax tree to detect syntactic violations
-   * Applies Levenshtein distance to suggest typographical fixes
-   * Ranks results using user‑specific frequency weights
-
-4. **Data Storage**
-
-   * Dictionary stored in a memory‑optimized Trie (height ~ 39, size ~ 983 809 entries)
 
 ---
 
